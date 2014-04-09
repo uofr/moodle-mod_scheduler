@@ -1,9 +1,9 @@
-<?PHP 
+<?PHP
 
 /**
  * Main file of the scheduler package.
  * It lists all the instances of scheduler in a particular course.
- * 
+ *
  * @package    mod
  * @subpackage scheduler
  * @copyright  2011 Henning Bostelmann and others (see README.txt)
@@ -21,7 +21,7 @@ if (!$course = $DB->get_record('course', array('id' => $id))) {
 $PAGE->set_url('/mod/scheduler/index.php', array('id'=>$id));
 $PAGE->set_pagelayout('incourse');
 
-$coursecontext = get_context_instance(CONTEXT_COURSE, $id);
+$coursecontext = context_course::instance($id);
 require_login($course->id);
 
 add_to_log($course->id, 'scheduler', 'view all', "index.php?id=$course->id", '');
@@ -33,10 +33,11 @@ $strscheduler  = get_string('modulename', 'scheduler');
 
 /// Print the header
 
-$navlinks = array();
-$navlinks[] = array('name' => $strscheduler, 'link' => '', 'type' => 'title');    
-$navigation = build_navigation($navlinks);
-print_header_simple($strschedulers, '', $navigation, '', '', true, '', navmenu($course));
+$title = $course->shortname . ': ' . $strschedulers;
+$PAGE->set_title($title);
+$PAGE->set_heading($course->fullname);
+echo $OUTPUT->header($course);
+
 
 /// Get all the appropriate data
 
@@ -44,7 +45,7 @@ if (!$schedulers = get_all_instances_in_course('scheduler', $course)) {
     print_error('noschedulers', 'scheduler', "../../course/view.php?id=$course->id");
 }
 
-/// Print the list of instances 
+/// Print the list of instances
 
 $timenow = time();
 $strname  = get_string('name');
@@ -65,13 +66,10 @@ if ($course->format == 'weeks') {
 }
 
 foreach ($schedulers as $scheduler) {
-    if (!$scheduler->visible) {
-        //Show dimmed if the mod is hidden
-        $link = "<a class=\"dimmed\" href=\"view.php?id={$scheduler->coursemodule}\">$scheduler->name</a>";
-    } else {
-        //Show normal if the mod is visible
-        $link = "<a href=\"view.php?id={$scheduler->coursemodule}\">$scheduler->name</a>";
-    }
+    $url = new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->coursemodule));
+    //Show dimmed if the mod is hidden
+    $attr = $scheduler->visible ? null : array('class' => 'dimmed');
+    $link = html_writer::link($url, $scheduler->name, $attr);
     if ($scheduler->visible or has_capability('moodle/course:viewhiddenactivities', $coursecontext)) {
         if ($course->format == 'weeks' or $course->format == 'topics') {
             $table->data[] = array ($scheduler->section, $link);
@@ -87,4 +85,3 @@ echo html_writer::table($table);
 
 echo $OUTPUT->footer($course);
 
-?>

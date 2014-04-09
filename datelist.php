@@ -2,7 +2,7 @@
 
 /**
  * Shows a sortable list of appointments
- * 
+ *
  * @package    mod
  * @subpackage scheduler
  * @copyright  2011 Henning Bostelmann and others (see README.txt)
@@ -18,8 +18,9 @@ if (has_capability('mod/scheduler:canseeotherteachersbooking', $context)) {
     $teacherid = optional_param('teacherid', $USER->id, PARAM_INT);
     $select = " teacherid = $teacherid ";
     $tutor =  $DB->get_record('user', array('id' => $teacherid));
-    $teachers = scheduler_get_attendants ($cm->id); // BUGFIX 
-    
+    $teachers = scheduler_get_attendants ($cm->id);
+
+    $teachermenu = array();
     foreach($teachers as $teacher){
         $teachermenu[$teacher->id] = fullname($teacher);
     }
@@ -29,7 +30,7 @@ if (has_capability('mod/scheduler:canseeotherteachersbooking', $context)) {
         <input type="hidden" name="what" value="datelist" />
         <?php echo html_writer::select($teachermenu, 'teacherid', $teacherid); ?>
         <input type="submit" value="Go" />
-        </form>      
+        </form>
         <hr />
         <?php
 }
@@ -40,13 +41,13 @@ else{
 /// getting date list
 
 $sql = "
-    SELECT 
+    SELECT
     a.id AS id,
     u1.id AS studentid,
     u1.email AS studentmail,
-    u1.lastname AS studentlastname, 
+    u1.lastname AS studentlastname,
     u1.firstname AS studentfirstname,
-    u1.department AS studentdepartment, 
+    u1.department AS studentdepartment,
     a.appointmentnote,
     a.grade,
     sc.name,
@@ -54,13 +55,13 @@ $sql = "
     c.shortname as courseshort,
     c.id as courseid,
     u2.email,
-    u2.lastname, 
-    u2.firstname, 
+    u2.lastname,
+    u2.firstname,
     s.id as sid,
-    s.starttime, 
-    s.duration, 
-    s.appointmentlocation, 
-    s.notes 
+    s.starttime,
+    s.duration,
+    s.appointmentlocation,
+    s.notes
     FROM
     {course} c,
     {scheduler} sc,
@@ -100,61 +101,61 @@ $numrecords = $DB->count_records_sql($sqlcount, array($teacherid));
 $limit = 30;
 
 if ($numrecords){
-    
+
     /// make table result
-    
+
     $coursestr = get_string('course','scheduler');
     $schedulerstr = get_string('scheduler','scheduler');
     $whenstr = get_string('when','scheduler');
-    $wherestr = get_string('where','scheduler'); 
+    $wherestr = get_string('where','scheduler');
     $whostr = get_string('who','scheduler');
     $wherefromstr = get_string('department','scheduler');
     $whatstr = get_string('what','scheduler');
     $whatresultedstr = get_string('whatresulted','scheduler');
     $whathappenedstr = get_string('whathappened','scheduler');
-    
-    
+
+
     $tablecolumns = array('courseshort', 'schedulerid', 'starttime', 'appointmentlocation', 'student', 'department', 'notes', 'grade', 'appointmentnote');
-    $tableheaders = array("<b>$coursestr</b>", "<b>$schedulerstr</b>", "<b>$whenstr</b>", "<b>$wherestr</b>", "<b>$whostr</b>", "<b>$wherefromstr</b>", "<b>$whatstr</b>", "<b>$whatresultedstr</b>", "<b>$whathappenedstr</b>");
-    
+    $tableheaders = array("<strong>$coursestr</strong>", "<strong>$schedulerstr</strong>", "<strong>$whenstr</strong>", "<strong>$wherestr</strong>", "<strong>$whostr</strong>", "<strong>$wherefromstr</strong>", "<strong>$whatstr</strong>", "<strong>$whatresultedstr</strong>", "<strong>$whathappenedstr</strong>");
+
     $table = new flexible_table('mod-scheduler-datelist');
     $table->define_columns($tablecolumns);
     $table->define_headers($tableheaders);
-    
+
     $table->define_baseurl($CFG->wwwroot.'/mod/scheduler/view.php?what=datelist&amp;id='.$cm->id);
-    
+
     $table->sortable(true, 'when'); //sorted by date by default
     $table->collapsible(true);
     $table->initialbars(true);
-    
+
     // allow column hiding
     $table->column_suppress('course');
     $table->column_suppress('starttime');
-    
+
     $table->set_attribute('cellspacing', '0');
     $table->set_attribute('id', 'dates');
     $table->set_attribute('class', 'datelist');
     $table->set_attribute('width', '100%');
-    
+
     $table->column_class('course', 'datelist_course');
     $table->column_class('scheduler', 'datelist_scheduler');
     $table->column_class('starttime', 'timelabel');
-    
+
     $table->setup();
-    
+
     /// get extra query parameters from flexible_table behaviour
     $where = $table->get_sql_where();
     $sort = $table->get_sql_sort();
     $table->pagesize($limit, count($numrecords));
-    
-    
+
+
     if (!empty($sort)){
         $sql .= " ORDER BY $sort";
     }
-    
+
     $results = $DB->get_records_sql($sql, array($teacherid));
 
-    
+
     // display implements a "same value don't appear again" filter
     $coursemem = '';
     $schedulermem = '';
@@ -175,19 +176,18 @@ if ($numrecords){
         $dataset = array(
             $coursedata,
             $schedulerdata,
-            $whendata, 
-            $row->appointmentlocation, 
-            $whodata, 
-            $row->studentdepartment, 
-            $whatdata, 
-            $row->grade, 
+            $whendata,
+            $row->appointmentlocation,
+            $whodata,
+            $row->studentdepartment,
+            $whatdata,
+            $row->grade,
             $row->appointmentnote);
-        $table->add_data($dataset);		
+        $table->add_data($dataset);
     }
     $table->print_html();
-    print_continue($CFG->wwwroot."/mod/scheduler/view.php?id=".$cm->id.'&amp;page='.$page);
+    echo $OUTPUT->continue_button($CFG->wwwroot."/mod/scheduler/view.php?id=".$cm->id.'&amp;page='.$page);
 }
 else{
     notice(get_string('noresults', 'scheduler'), $CFG->wwwroot."/mod/scheduler/view.php?id=".$cm->id);
 }
-?>
