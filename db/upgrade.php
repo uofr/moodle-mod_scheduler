@@ -1,12 +1,11 @@
 <?php
 
 function xmldb_scheduler_upgrade($oldversion=0) {
-/// This function does anything necessary to upgrade
-/// older versions to match current functionality
+    // This function does anything necessary to upgrade older versions to match current functionality.
 
     global $CFG, $DB;
 
-	$dbman = $DB->get_manager();
+    $dbman = $DB->get_manager();
 
     $result = true;
 
@@ -20,7 +19,7 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         $dbman->rename_field($table, $introfield, 'intro', false);
 
         $formatfield = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED,
-                XMLDB_NOTNULL, null, '0', 'intro');
+            XMLDB_NOTNULL, null, '0', 'intro');
 
         if (!$dbman->field_exists($table, $formatfield)) {
             $dbman->add_field($table, $formatfield);
@@ -29,7 +28,7 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         // conditionally migrate to html format in intro
         if ($CFG->texteditors !== 'textarea') {
             $rs = $DB->get_recordset('scheduler', array('introformat' => FORMAT_MOODLE),
-                    '', 'id, intro, introformat');
+                '', 'id, intro, introformat');
             foreach ($rs as $q) {
                 $q->intro       = text_to_html($q->intro, false, false, true);
                 $q->introformat = FORMAT_HTML;
@@ -50,15 +49,14 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         // Define fields notesformat and appointmentnote in respective tables
         $table = new xmldb_table('scheduler_slots');
         $formatfield = new xmldb_field('notesformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED,
-                        XMLDB_NOTNULL, null, '0', 'notes');
+            XMLDB_NOTNULL, null, '0', 'notes');
         if (!$dbman->field_exists($table, $formatfield)) {
             $dbman->add_field($table, $formatfield);
         }
 
-
         $table = new xmldb_table('scheduler_appointment');
         $formatfield = new xmldb_field('appointmentnoteformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED,
-                        XMLDB_NOTNULL, null, '0', 'appointmentnote');
+            XMLDB_NOTNULL, null, '0', 'appointmentnote');
         if (!$dbman->field_exists($table, $formatfield)) {
             $dbman->add_field($table, $formatfield);
         }
@@ -76,7 +74,7 @@ function xmldb_scheduler_upgrade($oldversion=0) {
 
     /* ******************* 2.7 upgrade line ********************** */
 
-    if ($oldversion < 2014032300) {
+    if ($oldversion < 2014071300) {
 
         // Define field teacher to be dropped from scheduler.
         $table = new xmldb_table('scheduler');
@@ -91,12 +89,36 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         $table = new xmldb_table('scheduler');
         $field = new xmldb_field('maxbookings', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '1', 'schedulermode');
 
+
         // Conditionally launch add field maxbookings.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-		// Define index schedulerid-teacherid (not unique) to be added to scheduler_slots.
+        // Define field guardtime to be added to scheduler.
+        $table = new xmldb_table('scheduler');
+        $field = new xmldb_field('guardtime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'maxbookings');
+
+        // Conditionally launch add field guardtime.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Changing length of field staffrolename on table scheduler to (255).
+        $table = new xmldb_table('scheduler');
+        $field = new xmldb_field('staffrolename', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'allownotifications');
+
+        // Launch change of precision for field staffrolename.
+        $dbman->change_field_precision($table, $field);
+
+        // Changing length of field appointmentlocation on table scheduler_slots to (255).
+        $table = new xmldb_table('scheduler_slots');
+        $field = new xmldb_field('appointmentlocation', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'teacherid');
+
+        // Launch change of precision for field appointmentlocation.
+        $dbman->change_field_precision($table, $field);
+
+        // Define index schedulerid-teacherid (not unique) to be added to scheduler_slots.
         $table = new xmldb_table('scheduler_slots');
         $index = new xmldb_index('schedulerid-teacherid', XMLDB_INDEX_NOTUNIQUE, array('schedulerid', 'teacherid'));
 
@@ -123,11 +145,13 @@ function xmldb_scheduler_upgrade($oldversion=0) {
             $dbman->add_index($table, $index);
         }
 
-        // savepoint reached
-        upgrade_mod_savepoint(true, 2014032300, 'scheduler');
+        // Convert old calendar events.
+        $sql = 'UPDATE {event} SET modulename = ? WHERE eventtype LIKE ? OR eventtype LIKE ?';
+        $DB->execute($sql, array('scheduler', 'SSsup:%', 'SSstu:%'));
+
+        // Savepoint reached.
+        upgrade_mod_savepoint(true, 2014071300, 'scheduler');
     }
 
     return true;
 }
-
-?>
