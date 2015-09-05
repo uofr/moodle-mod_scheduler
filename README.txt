@@ -58,6 +58,26 @@ With further contributions taken from:
 
 === Release notes ===
 
+--- Upcoming version in development ---
+
+Intended for Moodle 2.9 and later.
+
+Feature changes:
+
+The handling of "group mode" in Scheduler has changed. The feature of "booking
+entire groups into a slot" is now controlled by a setting "Booking in groups" 
+at the level of each scheduler. The setting "Group mode" in "Common module 
+settings" is now used in line with usual Moodle conventions - setting it to,
+e.g., "Separate groups" will mean that students can only book slots with 
+teachers in the same group. The old "Group mode" settings are automatically
+migrated to "Booking in groups" and the "Group mode" set to "None".
+If you have used group scheduling in previous versions, please check your data
+after migration.
+
+The student view has been redesigned. Bookable appointments are now displayed 
+in pages of 25, and student select a slot by clicking a button "Book slot"
+rather then selecting with a radio button and clicking "Save choice".  
+
 --- Version 2.7 ---
 
 Intended for Moodle 2.7 and later. 
