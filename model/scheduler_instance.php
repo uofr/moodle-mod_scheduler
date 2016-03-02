@@ -483,16 +483,17 @@ class scheduler_instance extends mvc_record_model {
     }
 
     /**
-     * retrieves slots available to a student
+     * Retrieves the slots available to a student.
+     *
      * Note: this does not check for scheduling conflicts.
+     * It does however check for group restrictions if group mode is enabled.
      *
      * @param int $studentid
      * @param boolean $includebooked include slots that were booked by this student (but not yet attended)
-     * @param array $groupids restrict choice to these groups. This takes effect only if the scheduler is in VISIBLEGROUPS or SEPARATEGROUPS mode.
      * @uses $CFG
      * @uses $DB
      */
-    public function get_slots_available_to_student($studentid, $includebooked = false, $groupids = null) {
+    public function get_slots_available_to_student($studentid, $includebooked = false) {
         global $CFG, $DB;
 
         $params = array();
@@ -502,17 +503,19 @@ class scheduler_instance extends mvc_record_model {
         $subcond = '(s.exclusivity = 0 OR s.exclusivity > '.$this->appointment_count_query().')'
             . ' AND NOT ('.$this->student_in_slot_condition($params, $studentid, false, false).')';
         if ($this->cm->groupmode != NOGROUPS) {
-            if (!$groupids) {
-                $groups = groups_get_activity_allowed_groups($this->cm, $studentid);
+            $groups = groups_get_all_groups($this->cm->course, $studentid, $this->cm->groupingid);
+            if ($groups) {
                 $groupids = array();
                 foreach ($groups as $group) {
                     $groupids[] = $group->id;
                 }
+                list($sqlin, $paramsin) = $DB->get_in_or_equal($groupids, SQL_PARAMS_NAMED);
+                $subquery = "SELECT 1 FROM {groups_members} gm WHERE gm.userid = s.teacherid AND gm.groupid $sqlin";
+                $subcond .= " AND EXISTS ($subquery)";
+                $params = array_merge($params, $paramsin);
+            } else {
+                $subcond .= " AND FALSE";
             }
-            list($sqlin, $paramsin) = $DB->get_in_or_equal($groupids, SQL_PARAMS_NAMED);
-            $subquery = "SELECT 1 FROM {groups_members} gm WHERE gm.userid = s.teacherid AND gm.groupid $sqlin";
-            $subcond .= " AND EXISTS ($subquery)";
-            $params = array_merge($params, $paramsin);
         }
         if ($includebooked) {
             $subcond = '('.$subcond.') OR ('.$this->student_in_slot_condition($params, $studentid, false, true).')';
@@ -565,6 +568,11 @@ class scheduler_instance extends mvc_record_model {
 
     public function get_slots_for_teacher($teacherid, $groupid = 0, $limitfrom = '', $limitnum = '') {
         list($where, $params) = $this->slots_for_teacher_cond($teacherid, $groupid, false);
+        return $this->fetch_slots($where, '', $params, $limitfrom, $limitnum, 's.starttime ASC');
+    }
+
+    public function get_slots_for_group($groupid, $limitfrom = '', $limitnum = '') {
+        list($where, $params) = $this->slots_for_teacher_cond(0, $groupid, false);
         return $this->fetch_slots($where, '', $params, $limitfrom, $limitnum, 's.starttime ASC');
     }
 
@@ -654,6 +662,12 @@ class scheduler_instance extends mvc_record_model {
      */
     public function get_possible_attendees($groups = '') {
         // TODO does this need to go to the controller?
+
+        // If full group objects are given, reduce the array to only group ids.
+        if (is_array($groups) && is_object(array_values($groups)[0])) {
+            $groups = array_keys($groups);
+        }
+
         $attendees = get_users_by_capability($this->get_context(), 'mod/scheduler:appoint', '',
             'lastname, firstname', '', '', $groups, '', false, false, false);
 
@@ -665,15 +679,15 @@ class scheduler_instance extends mvc_record_model {
     }
 
     /**
-     * Get a list of students that can still make an appointment
+     * Get a list of students that can still make an appointment.
      *
-     * @param $groups - single group or array of groups - only return
-     *                  users who are in one of these group(s).
-     * @param int $cutoff - if the number of students in the course is more than this limit,
-     * 						the routine will return
-     *                      (this is for performance reasons)
+     * @param mixed $groups single group or array of groups - only return
+     *            users who are in one of these group(s).
+     * @param int $cutoff if the number of students in the course is more than this limit,
+     *            the routine will return the number of students rather than a list
+     *            (this is for performance reasons).
      * @return int|array of moodle user records; or integer 0 if there are no students in the course;
-     *                    or the number of students if there are too many students
+     *            or the number of students if there are too many students
      */
     public function get_students_for_scheduling($groups = '', $cutoff = 0) {
         $studs = $this->get_possible_attendees($groups);

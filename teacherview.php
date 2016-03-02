@@ -135,38 +135,48 @@ function scheduler_print_schedulebox(scheduler_instance $scheduler, $studentid, 
 
 // Load group restrictions.
 $groupmode = groups_get_activity_groupmode($cm);
-if ($groupmode && $subpage == 'allappointments') {
+$currentgroup = false;
+if ($groupmode) {
     $currentgroup = groups_get_activity_group($cm, true);
-    if ($currentgroup > 0) {
-        $usergroups = array(
-            $currentgroup
-        );
-        $groups = array($currentgroup => groups_get_group($currentgroup));
-    } else {
-        $usergroups = '';
-        $groups = groups_get_all_groups($COURSE->id, 0, 0);
-    }
-} else if ($groupmode) {
-    $currentgroup = 0;
-    $groups = groups_get_all_groups($COURSE->id, $USER->id, $cm->groupingid);
-    $usergroups = array_keys($groups);
-} else {
-    $currentgroup = 0; // Show all groups by default.
-    $usergroups = '';
-    $groups = groups_get_all_groups($COURSE->id, 0, 0);
 }
 
-// Find groups that we can schedule as such.
-if ($scheduler->is_group_scheduling_enabled()) {
-    $userfilter = $USER->id;
-    if (has_capability('moodle/site:accessallgroups', $context) || $groupmode == 0) {
-        $userfilter = 0;
+// All group arrays in the following are in the format used by groups_get_all_groups.
+// The special value '' (empty string) is used to signal "all groups" (no restrictions)
+
+// Find groups which the current teacher can see ($groupsicansee).
+$userfilter = $USER->id;
+if (has_capability('moodle/site:accessallgroups', $context)) {
+    $userfilter = 0;
+}
+$groupsicansee = '';
+if ($groupmode) {
+    if ($currentgroup) {
+        if ($userfilter && !groups_is_member($currentgroup, $userfilter)) {
+            $groupsicansee = array();
+        } else {
+            $cgobj = groups_get_group($currentgroup);
+            $groupsicansee = array($currentgroup => $cgobj);
+        }
+    } else if ($userfilter) {
+        $groupsicansee = groups_get_all_groups($COURSE->id, $userfilter, $cm->groupingid);
     }
-    $schedgroups = groups_get_all_groups($COURSE->id, $userfilter, $scheduler->bookingrouping);
+}
+
+// Find groups which the current teacher can schedule as a group ($groupsicanschedule).
+$groupsicanschedule = array();
+if ($scheduler->is_group_scheduling_enabled()) {
+    $groupsicanschedule = groups_get_all_groups($COURSE->id, $userfilter, $scheduler->bookingrouping);
+}
+
+// Find groups which can book an appointment with the current teacher ($groupsthatcanseeme).
+
+$groupsthatcanseeme = '';
+if ($groupmode) {
+    $groupsthatcanseeme = groups_get_all_groups($COURSE->id, $USER->id, $cm->groupingid);
 }
 
 if ($action != 'view') {
-    include_once($CFG->dirroot.'/mod/scheduler/slotforms.php');
+    require_once($CFG->dirroot.'/mod/scheduler/slotforms.php');
     include($CFG->dirroot.'/mod/scheduler/teacherview.controller.php');
 }
 
@@ -182,7 +192,7 @@ if ($action == 'addslot') {
         print_error('needteachers', 'scheduler', $returnurl);
     }
 
-    $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $usergroups);
+    $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee);
 
     if ($mform->is_cancelled()) {
         redirect($returnurl);
@@ -208,7 +218,7 @@ if ($action == 'updateslot') {
     $returnurl = new moodle_url('/mod/scheduler/view.php',
                     array('what' => 'view', 'id' => $cm->id, 'subpage' => $subpage, 'offset' => $offset));
 
-    $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $usergroups, array('slotid' => $slotid));
+    $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee, array('slotid' => $slotid));
     $mform->set_data($data);
 
     if ($mform->is_cancelled()) {
@@ -236,7 +246,7 @@ if ($action == 'addsession') {
         print_error('needteachers', 'scheduler', $returnurl);
     }
 
-    $mform = new scheduler_addsession_form($actionurl, $scheduler, $cm, $usergroups);
+    $mform = new scheduler_addsession_form($actionurl, $scheduler, $cm, $groupsicansee);
 
     if ($mform->is_cancelled()) {
         redirect($returnurl);
@@ -267,7 +277,7 @@ if ($action == 'schedule') {
         $data->studentid[$i] = $studentid;
         $i++;
 
-        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $usergroups, array('slotid' => $slotid, 'repeats' => $i));
+        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee, array('slotid' => $slotid, 'repeats' => $i));
         $mform->set_data($data);
 
         echo $output->heading(get_string('updatesingleslot', 'scheduler'), 2);
@@ -280,7 +290,7 @@ if ($action == 'schedule') {
         $actionurl = new moodle_url('/mod/scheduler/view.php', array('what' => 'addslot', 'id' => $cm->id));
         $returnurl = new moodle_url('/mod/scheduler/view.php', array('what' => 'view', 'id' => $cm->id));
 
-        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $usergroups);
+        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee);
 
         $data = array();
         $data['studentid'][0] = $studentid;
@@ -323,7 +333,7 @@ if ($action == 'schedulegroup') {
             $i++;
         }
 
-        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $usergroups,
+        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee,
                         array('slotid' => $slotid, 'repeats' => $i));
         $mform->set_data($data);
 
@@ -343,7 +353,7 @@ if ($action == 'schedulegroup') {
         }
         $data['exclusivity'] = $i;
 
-        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $usergroups, array('repeats' => $i));
+        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee, array('repeats' => $i));
         $mform->set_data($data);
 
         echo $output->heading(get_string('scheduleappointment', 'scheduler', $group->name));
@@ -385,8 +395,21 @@ if ($DB->count_records('scheduler_slots', array('schedulerid' => $scheduler->id)
 }
 
 echo $output->teacherview_tabs($scheduler, $taburl, $subpage, $inactive);
-if ($groupmode && $subpage == 'allappointments') {
-    groups_print_activity_menu($cm, $taburl);
+if ($groupmode) {
+    if ($subpage == 'allappointments') {
+        groups_print_activity_menu($cm, $taburl);
+    } else {
+        $a = new stdClass();
+        $a->groupmode = get_string($groupmode == VISIBLEGROUPS ? 'groupsvisible' : 'groupsseparate');
+        $groupnames = array();
+        foreach ($groupsthatcanseeme as $id => $group) {
+            $groupnames[] = $group->name;
+        }
+        $a->grouplist = implode(', ', $groupnames);
+        $messagekey = $groupsthatcanseeme ? 'groupmodeyourgroups' : 'groupmodeyourgroupsempty';
+        $message = get_string($messagekey, 'scheduler', $a);
+        echo html_writer::div($message, 'groupmodeyourgroups');
+    }
 }
 
 // Print intro.
@@ -496,8 +519,15 @@ if ($slots) {
 
 }
 
+$groupfilter = ($subpage == 'myappointments') ? $groupsthatcanseeme : $groupsicansee;
+$maxlistsize = get_config('mod_scheduler', 'maxstudentlistsize');
+$students = array();
+if ($groupfilter === '') {
+    $students = $scheduler->get_students_for_scheduling('', $maxlistsize);
+} else if (count($groupfilter) > 0) {
+    $students = $scheduler->get_students_for_scheduling(array_keys($groupfilter), $maxlistsize);
+}
 
-$students = $scheduler->get_students_for_scheduling($usergroups, get_config('mod_scheduler', 'maxstudentlistsize'));
 if ($students === 0) {
     $nostudentstr = get_string('noexistingstudents', 'scheduler');
     if ($COURSE->id == SITEID) {
@@ -516,7 +546,7 @@ if ($students === 0) {
         $maillist[] = trim($student->email);
     }
 
-    $mailto = 'mailto:'.s(implode($maillist, ', '));
+    $mailto = 'mailto:'.s(implode($maillist, ',%20'));
 
     $subject = get_string('invitation', 'scheduler'). ': ' . $scheduler->name;
     $body = $subject."\n\n";
@@ -591,14 +621,14 @@ if ($students === 0) {
         echo html_writer::start_div('schedulelist halfsize');
         echo $output->heading(get_string('schedulegroups', 'scheduler'), 3);
 
-        if (empty($schedgroups)) {
+        if (empty($groupsicanschedule)) {
             echo $output->notification(get_string('nogroups', 'scheduler'));
         } else {
             $grouptable = new scheduler_scheduling_list($scheduler, array());
             $grouptable->id = 'groupstoschedule';
 
             $groupcnt = 0;
-            foreach ($schedgroups as $group) {
+            foreach ($groupsicanschedule as $group) {
                 $members = groups_get_members($group->id, user_picture::fields('u'), 'u.lastname, u.firstname');
                 if (empty($members)) {
                     continue;
@@ -607,7 +637,7 @@ if ($students === 0) {
                 if (!scheduler_has_slot(implode(',', array_keys($members)), $scheduler, true, $scheduler->schedulermode == 'onetime')) {
 
                     $picture = print_group_picture($group, $course->id, false, true, true);
-                    $name = $groups[$group->id]->name;
+                    $name = $group->name;
                     $groupmembers = array();
                     foreach ($members as $member) {
                         $groupmembers[] = fullname($member);
@@ -634,6 +664,6 @@ if ($students === 0) {
     }
 
 } else {
-    echo $output->notification(get_string('nostudents', 'scheduler'));
+    echo $output->notification(get_string('noexistingstudents', 'scheduler'));
 }
 echo $output->footer();

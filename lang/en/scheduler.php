@@ -194,7 +194,9 @@ $string['group'] = 'group ';
 $string['groupbreakdown'] = 'By group size';
 $string['groupbookings'] = 'Booking in groups';
 $string['groupbookings_help'] = 'Allow students to book a slot for all members of their group.
-		(Note that this is separate from the "group mode" setting, which controls the slots a student can see.)';
+(Note that this is separate from the "group mode" setting, which controls the slots a student can see.)';
+$string['groupmodeyourgroups'] = 'Group mode: {$a->groupmode}. Only students in {$a->grouplist} can book appointments with you.';
+$string['groupmodeyourgroupsempty'] = 'Group mode: {$a->groupmode}. You are not member of any group, therefore students cannot book appointments with you.';
 $string['groupscheduling'] = 'Enable group scheduling';
 $string['groupscheduling_desc'] = 'Allow entire groups to be scheduled at once.
 (Apart from the global option, the setting "Booking in groups" must be enabled in the respective scheduler instance.)';
@@ -248,14 +250,14 @@ $string['negativerange'] = 'Range is negative. This can\'t be.';
 $string['never'] = 'Never';
 $string['newappointment'] = '{$a} : New appointment';
 $string['noappointments'] = 'No appointments';
-$string['noexistingstudents'] = 'No existing students';
+$string['noexistingstudents'] = 'No students available for scheduling';
 $string['nogroups'] = 'No group available for scheduling.';
 $string['noresults'] = 'No results. ';
 $string['noschedulers'] = 'There are no schedulers';
 $string['noslots'] = 'There are no appointment slots available.';
 $string['noslotsavailable'] = 'No slots are available for booking at this time.';
 $string['noslotsopennow'] = 'No slots are open for booking right now.';
-$string['nostudents'] = 'No students appointed';
+$string['nostudents'] = 'No students scheduled';
 $string['nostudenttobook'] = 'No student to book';
 $string['note'] = 'Grade';
 $string['noteacherforslot'] = 'No teacher for the slots';
@@ -443,7 +445,7 @@ by the student <a href="{$a->attendee_url}">{$a->attendee}</a> for the course:
 
 <p>{$a->course_short}: <a href="{$a->course_url}">{$a->course}</a></p>
 
-<p>using the scheduler titled "<em>{$a->module}</em>" on the website: <a href="{$a->site_url}">{$a->site}</a>.</p>';
+<p>using the scheduler titled "<em><a href="{$a->scheduler_url}">{$a->module}</a></em>" on the website: <a href="{$a->site_url}">{$a->site}</a>.</p>';
 
 $string['email_cancelled_subject'] = '{$a->course_short}: Appointment cancelled or moved by a student';
 
@@ -461,7 +463,7 @@ with the student <strong><a href="{$a->attendee_url}">{$a->attendee}</a></strong
 
 <p><strong>{$a->course_short} : <a href="{$a->course_url}">{$a->course}</a></strong></p>
 
-<p>in the scheduler titled "<em>{$a->module}</em>" on the website : <strong><a href="{$a->site_url}">{$a->site}</a></strong></p>
+<p>in the scheduler titled "<em><a href="{$a->scheduler_url}">{$a->module}</a></em>" on the website : <strong><a href="{$a->site_url}">{$a->site}</a></strong></p>
 
 <p><strong><span class="error">has been cancelled or moved</span></strong>.</p>';
 
@@ -495,6 +497,6 @@ with the {$a->staffrole} <strong><a href="{$a->attendant_url}">{$a->attendant}</
 
 <p><strong>{$a->course_short}: <a href="{$a->course_url}">{$a->course}</a></strong></p>
 
-<p>in the scheduler "<em>{$a->module}</em>" on the website: <strong><a href="{$a->site_url}">{$a->site}</a></strong></p>
+<p>in the scheduler "<em><a href="{$a->scheduler_url}">{$a->module}</a></em>" on the website: <strong><a href="{$a->site_url}">{$a->site}</a></strong></p>
 
 <p><strong><span class="error">has been cancelled</span></strong>. Please apply for a new slot.</p>';

@@ -941,27 +941,31 @@ class scheduler_pdf_canvas extends scheduler_cached_text_canvas {
 class scheduler_export {
 
     protected $canvas;
+    protected $studfilter = null;
 
     public function __construct(scheduler_canvas $canvas) {
         $this->canvas = $canvas;
     }
 
 
-    public function build(scheduler_instance $scheduler, array $fields, $mode, $userid, $includeempty, $pageperteacher) {
+    public function build(scheduler_instance $scheduler, array $fields, $mode, $userid, $groupid, $includeempty, $pageperteacher) {
+        if ($groupid) {
+            $this->studfilter = array_keys(groups_get_members($groupid, 'u.id'));
+        }
         $this->canvas->set_title(format_string($scheduler->name));
         if ($userid) {
-            $slots = $scheduler->get_slots_for_teacher($userid);
+            $slots = $scheduler->get_slots_for_teacher($userid, $groupid);
             $this->build_page($scheduler, $fields, $slots, $mode, $includeempty);
         } else if ($pageperteacher) {
             $teachers = $scheduler->get_teachers();
             foreach ($teachers as $teacher) {
-                $slots = $scheduler->get_slots_for_teacher($teacher->id);
+                $slots = $scheduler->get_slots_for_teacher($teacher->id, $groupid);
                 $title = fullname($teacher);
                 $this->canvas->start_page($title);
                 $this->build_page($scheduler, $fields, $slots, $mode, $includeempty);
             }
         } else {
-            $slots = $scheduler->get_all_slots();
+            $slots = $scheduler->get_slots_for_group($groupid);
             $this->build_page($scheduler, $fields, $slots, $mode, $includeempty);
         }
     }
@@ -983,7 +987,7 @@ class scheduler_export {
 
         // Output the data rows.
         foreach ($slots as $slot) {
-            $appts = $slot->get_appointments();
+            $appts = $slot->get_appointments($this->studfilter);
             if ($mode == 'appointmentsgrouped') {
                 if ($appts || $includeempty) {
                     $this->write_row_summary($row, $slot, $fields);
