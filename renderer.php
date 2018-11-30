@@ -20,6 +20,12 @@ require_once($CFG->dirroot . '/mod/assign/locallib.php');
  */
 class mod_scheduler_renderer extends plugin_renderer_base {
 
+    public function __construct($page = null, $target = null) {
+        if ($page) {
+            parent::__construct($page, $target);
+        }
+    }
+
     /**
      * Format a date in the current user's timezone.
      * @param int $date a timestamp
@@ -355,18 +361,6 @@ class mod_scheduler_renderer extends plugin_renderer_base {
         );
 
         return $this->tabtree($level1, $selected, $inactive);
-    }
-
-    /**
-     * Render an action message (such as "1 slot added").
-     *
-     * @param string $message the message
-     * @param string $type type of the message
-     * @return string the rendered message
-     */
-    public function action_message($message, $type = 'success') {
-        $classes = 'actionmessage '.$type;
-        return html_writer::div($message, $classes);
     }
 
     /**
