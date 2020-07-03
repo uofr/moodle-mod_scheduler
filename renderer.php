@@ -372,6 +372,11 @@ class mod_scheduler_renderer extends plugin_renderer_base {
     public function render_scheduler_slot_table(scheduler_slot_table $slottable) {
         $table = new html_table();
 
+        //ADDED
+        $this->page->requires->yui_module('moodle-mod_scheduler-studentattend',
+                        'M.mod_scheduler.studentattend.init', array($slottable->scheduler->cmid) );
+        //END OF ADDED
+
         if ($slottable->showslot) {
             $table->head  = array(get_string('date', 'scheduler'));
             $table->align = array('left');
@@ -392,6 +397,12 @@ class mod_scheduler_renderer extends plugin_renderer_base {
             $table->head[]  = get_string('location', 'scheduler');
             $table->align[] = 'left';
         }
+        //ADDED 
+        if ($slottable->studentattended) {
+            $table->head[]  = get_string('studentstableattend', 'scheduler');
+            $table->align[] = 'left';
+        }
+        //END OF ADDED
 
         $table->head[] = get_string('comments', 'scheduler');
         $table->align[] = 'left';
@@ -443,6 +454,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 $attendedpix = $this->pix_icon($iconid, get_string($iconhelp, 'scheduler'), 'mod_scheduler');
                 $rowdata[] = $attendedpix;
             }
+            
 
             if ($slottable->showslot) {
                 $rowdata[] = $this->user_profile_link($slottable->scheduler, $slot->teacher);
@@ -452,6 +464,11 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 $rowdata[] = format_string($slot->location);
             }
 
+            //ADDED 
+            if ($slottable->studentattended) {
+                $rowdata[] = $slot->attendcheck;
+            }
+            //END OF ADDED
             $notes = '';
             if ($slottable->showslot && isset($slot->slotnote)) {
                 $notes .= $this->format_notes($slot->slotnote, $slot->slotnoteformat,
@@ -483,10 +500,19 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                     $button = new single_button($buttonurl, get_string('viewbooking', 'scheduler'));
                     $actions .= $this->render($button);
                 }
-                if ($slot->cancancel) {
+                if ($slot->cancancel  && $slot->studentcancancel    ) { //ADDED AS CABABLILTIES TO CANCEL 
                     $buttonurl = new moodle_url($slottable->actionurl,
                                      array('what' => 'cancelbooking', 'slotid' => $slot->slotid));
                     $button = new single_button($buttonurl, get_string('cancelbooking', 'scheduler'));
+                    $actions .= $this->render($button);
+                }
+                
+                //ADDED STUDENT CAN RESCHEDULE Should add it as a capabiltiy
+                if ($slot->cancancel ){ //check if within right time slot
+
+                    $buttonurl = new moodle_url($slottable->actionurl,
+                                        array('what' => 'reschedule', 'slotid' => $slot->slotid, 'appointmentid' => $slot->appointmentid, 'teacherid'=>$slot->teacher->id));
+                    $button = new single_button($buttonurl, get_string('reschedule', 'scheduler'));
                     $actions .= $this->render($button);
                 }
                 $rowdata[] = $actions;
@@ -533,8 +559,12 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 $checkbox = '';
                 if ($studentlist->checkboxname) {
                     if ($editable) {
-                        $checkbox = html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, '',
-                                        array('class' => 'studentselect'));
+                    //ADDED
+                        if($studentlist->checkboxdisable)
+                            $checkbox = html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, '',array('class' => 'studentselect'));
+                        else
+                            $checkbox = html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, '',array('class' => 'studentselect', 'disabled'=>'disabled'));
+
                     } else {
                         $img = $student->checked ? 'ticked' : 'unticked';
                         $checkbox = $this->render(new pix_icon($img, '', 'scheduler', array('class' => 'statictickbox')));
@@ -593,6 +623,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
      */
     public function render_scheduler_slot_booker(scheduler_slot_booker $booker) {
 
+
         $table = new html_table();
         $table->head  = array( get_string('date', 'scheduler'), get_string('start', 'scheduler'),
                         get_string('end', 'scheduler'), get_string('location', 'scheduler'),
@@ -608,6 +639,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
         $canappoint = false;
 
         foreach ($booker->slots as $slot) {
+
 
             $rowdata = array();
 
@@ -695,6 +727,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
      * Render a slot manager.
      *
      * @param scheduler_slot_manager $slotman
+     * 
      * @return string
      */
     public function render_scheduler_slot_manager(scheduler_slot_manager $slotman) {
@@ -726,8 +759,12 @@ class mod_scheduler_renderer extends plugin_renderer_base {
 
             $rowdata = array();
 
-            $selectbox = html_writer::checkbox('selectedslot[]', $slot->slotid, false, '', array('class' => 'slotselect'));
-            $rowdata[] = $slot->editable ? $selectbox : '';
+            $selectbox="";
+            if($slot->canadd || $slot->candelete){
+                $selectbox = html_writer::checkbox('selectedslot[]', $slot->slotid, false, '', array('class' => 'slotselect'));
+            }
+                $rowdata[] = $slot->editable ? $selectbox : '';
+            
 
             $startdate = $this->userdate($slot->starttime);
             $starttime = $this->usertime($slot->starttime);
@@ -763,12 +800,16 @@ class mod_scheduler_renderer extends plugin_renderer_base {
             }
 
             $actions = '';
+
             if ($slot->editable) {
-                $url = new moodle_url($slotman->actionurl, array('what' => 'deleteslot', 'slotid' => $slot->slotid));
-                $confirmdelete = new confirm_action(get_string('confirmdelete-one', 'scheduler'));
-                $actions .= $this->action_icon($url, new pix_icon('t/delete', get_string('delete')), $confirmdelete);
+                if($slot->candelete){
+                    $url = new moodle_url($slotman->actionurl, array('what' => 'deleteslot', 'slotid' => $slot->slotid));
+                    $confirmdelete = new confirm_action(get_string('confirmdelete-one', 'scheduler'));
+                    $actions .= $this->action_icon($url, new pix_icon('t/delete', get_string('delete')), $confirmdelete);
+                }
 
                 $url = new moodle_url($slotman->actionurl, array('what' => 'updateslot', 'slotid' => $slot->slotid));
+
                 $actions .= $this->action_icon($url, new pix_icon('t/edit', get_string('edit')));
             }
 
@@ -806,7 +847,8 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 $actions .= $this->pix_icon($groupicon, get_string($groupalt, 'scheduler'));
             }
 
-            if ($slot->editable && $slot->isappointed) {
+            if ($slot->editable && $slot->isappointed && $slot->canrevoke) {
+
                 $url = new moodle_url($slotman->actionurl, array('what' => 'revokeall', 'slotid' => $slot->slotid));
                 $actions .= $this->action_icon($url, new pix_icon('s/no', get_string('revoke', 'scheduler')));
             }

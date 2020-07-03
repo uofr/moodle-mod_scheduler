@@ -36,6 +36,11 @@ class scheduler_slot_table implements renderable {
     /** @var bool whether to show the attended/not attended icons */
     public $showattended = false;
 
+    //ADDED 
+        /** @var bool whether to student the option to mark attendance */
+        public $studentattended = false;
+    //END OF ADDED
+
     /** @var bool whether to show action buttons (for cancelling) */
     public $showactions = true;
 
@@ -63,9 +68,11 @@ class scheduler_slot_table implements renderable {
      * @param bool $cancancel whether the use can canel the appointment
      * @param bool $canedit whether the use can edit the slot/appointment
      * @param bool $canview whether the use can view the appointment
+     * @param bool ADDDED $canattend whether the user can mark if appointment is attended
+     * @param bool ADDDED $studentcancancel whether the user can cancel an appointment 
      */
     public function add_slot(scheduler_slot $slotmodel, scheduler_appointment $appointmentmodel,
-                             $otherstudents, $cancancel = false, $canedit = false, $canview = false) {
+                             $otherstudents, $cancancel = false, $canedit = false, $canview = false,$canattend = false, $studentcancancel= false) {
         $slot = new stdClass();
         $slot->slotid = $slotmodel->id;
         if ($this->showstudent) {
@@ -79,6 +86,21 @@ class scheduler_slot_table implements renderable {
         $slot->slotnoteformat = $slotmodel->notesformat;
         $slot->teacher = $slotmodel->get_teacher();
         $slot->appointmentid = $appointmentmodel->id;
+        //ADDDED
+        $slot->attendcheck ="";
+         if($canattend){ //add markable checkbox
+           $slot->attendcheck = html_writer::checkbox($appointmentmodel->id, $appointmentmodel->id, $appointmentmodel->studentattend, '',
+           array('class' => 'studentattendselect'));
+           $this->studentattended = TRUE;
+         }
+         else{ //display a disable box to show if student marked or not
+            $slot->attendcheck = html_writer::checkbox($appointmentmodel->id, $appointmentmodel->id, $appointmentmodel->studentattend, '',
+            array('class' => 'studentattendselect', 'disabled' => 'disabled'));
+           $this->studentattended = TRUE;
+         }
+         $slot->studentcancancel = $studentcancancel;
+        //END of ADDED
+        
         if ($this->scheduler->uses_appointmentnotes()) {
             $slot->appointmentnote = $appointmentmodel->appointmentnote;
             $slot->appointmentnoteformat = $appointmentmodel->appointmentnoteformat;
@@ -251,6 +273,7 @@ class scheduler_slot_booker implements renderable {
         $slot->groupinfo = $groupinfo;
         $slot->teacher = $slotmodel->get_teacher();
         $slot->otherstudents = $otherstudents;
+       
 
         $this->slots[] = $slot;
     }
@@ -375,8 +398,11 @@ class scheduler_slot_manager implements renderable {
      * @param scheduler_slot $slotmodel the slot to be added
      * @param scheduler_student_list $students the list of students in the slot
      * @param bool $editable whether the slot is editable
+     * * @param bool $canadd
+     * @param bool $candelete
+     * @param bool $canrevoke
      */
-    public function add_slot(scheduler_slot $slotmodel, scheduler_student_list $students, $editable) {
+    public function add_slot(scheduler_slot $slotmodel, scheduler_student_list $students, $editable,$canadd, $candelete,$canrevoke) {
         $slot = new stdClass();
         $slot->slotid = $slotmodel->id;
         $slot->starttime = $slotmodel->starttime;
@@ -388,6 +414,9 @@ class scheduler_slot_manager implements renderable {
         $slot->isattended = $slotmodel->is_attended();
         $slot->isappointed = $slotmodel->get_appointment_count();
         $slot->exclusivity = $slotmodel->exclusivity;
+        $slot->canadd = $canadd;
+        $slot->candelete = $candelete;
+        $slot->canrevoke = $canrevoke;
 
         $this->slots[] = $slot;
     }

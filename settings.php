@@ -14,6 +14,15 @@ if ($ADMIN->fulltree) {
 
     require_once($CFG->dirroot.'/mod/scheduler/lib.php');
 
+
+//Add top menu page for imports
+    $tabmenu = scheduler_print_settings_tabs();
+
+    $settings->add(new admin_setting_heading('scheduler_header', '', $tabmenu));
+
+    $plugininfos = core_plugin_manager::instance()->get_plugins_of_type('local');
+
+
     $settings->add(new admin_setting_configcheckbox('mod_scheduler/allteachersgrading',
                      get_string('allteachersgrading', 'scheduler'),
                      get_string('allteachersgrading_desc', 'scheduler'),

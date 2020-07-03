@@ -68,6 +68,8 @@ class scheduler_editappointment_form extends moodleform {
         $scheduler = $this->appointment->get_scheduler();
 
         // Seen tickbox.
+
+        //CHANGE add if time is <=24 then show
         $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'));
 
         // Grade.

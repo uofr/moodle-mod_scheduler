@@ -24,11 +24,18 @@ $string['modulenameplural'] = 'Schedulers';
 $string['scheduler:addinstance'] = 'Add a new scheduler';
 $string['scheduler:appoint'] = 'Book slots';
 $string['scheduler:attend'] = 'Attend students';
+$string['scheduler:addzoom'] = 'Add zoom meeting generation feature';
+$string['scheduler:canadd'] = 'Can add new appointment slots';
+$string['scheduler:candelete'] = 'Can delete an appointment';
+$string['scheduler:canrevoke'] = 'Can revoke an appointment';
 $string['scheduler:canscheduletootherteachers'] = 'Schedule appointments for other staff members';
 $string['scheduler:canseeotherteachersbooking'] = 'See and browse other teachers booking';
 $string['scheduler:disengage'] = 'This capability is deprecated and does nothing';
 $string['scheduler:manage'] = 'Manage your slots and appointments';
+$string['scheduler:unlimitedediting'] = 'Unlimited editing can delete, add and fully edit appointments. Limited Editing only changes date and duration of appointment';
 $string['scheduler:manageallappointments'] = 'Manage all scheduler data';
+$string['scheduler:studentcancancel'] = 'Student can cancel appointment';
+$string['scheduler:studentcanmark'] = 'Student can mark their own attendence for appointment';
 $string['scheduler:viewslots'] = 'See slots that are open for booking (in student screen)';
 $string['scheduler:viewfullslots'] = 'See slots even if they are fully booked (in student screen)';
 $string['scheduler:seeotherstudentsbooking'] = 'See other students booked on the slot';
@@ -47,6 +54,7 @@ $string['event_slotdeleted'] = 'Scheduler slot deleted';
 $string['messageprovider:invitation'] = 'Invitation to book a slot';
 $string['messageprovider:bookingnotification'] = 'Notification when a booking is made or cancelled';
 $string['messageprovider:reminder'] = 'Reminder of an upcoming appointment';
+$string['messageprovider:reschedule'] = 'Send instructor a note for rescheduling appointment';
 
 /* ***** Search areas ***** */
 $string['search:activity'] = 'Scheduler - activity information';
@@ -94,6 +102,7 @@ $string['addsession'] = 'Add repeated slots';
 $string['addsingleslot'] = 'Add single slot';
 $string['addslot'] = 'You can add additional appointment slots at any time.';
 $string['addstudenttogroup'] = 'Add this student to appointment group';
+$string['addzoom'] = 'Create and add a zoom link directly to this meeting.';
 $string['allappointments'] = 'All appointments';
 $string['allononepage'] = 'All slots on one page';
 $string['allowgroup'] = 'Exclusive slot - click to change';
@@ -164,6 +173,7 @@ $string['contentformat_help'] = '<p>There are three basic choices for the export
     </dl>
     You can explore the effect of these options using the "Preview" button.</p>';
 $string['complete'] = 'Booked';
+$string['completed'] = ' Lessons have been completed.';
 $string['confirmbooking'] = "Confirm booking";
 $string['confirmdelete-all'] = 'This will delete <b>all</b> slots in this scheduler. Deletion cannot be undone. Continue anyway?';
 $string['confirmdelete-mine'] = 'This will delete all your slots in this scheduler. Deletion cannot be undone. Continue anyway?';
@@ -285,6 +295,7 @@ $string['mixindivgroup_desc'] = 'Where group scheduling is enabled, allow indivi
 $string['introduction'] = 'Introduction';
 $string['isnonexclusive'] = 'Non-exclusive';
 $string['landscape'] = 'Landscape';
+$string['left'] = ' Lessons are left.';
 $string['lengthbreakdown'] = 'By slot duration';
 $string['limited'] = 'Limited ({$a} left)';
 $string['location'] = 'Location';
@@ -368,6 +379,8 @@ $string['reminder'] = 'Reminder';
 $string['requireupload'] = 'File upload required';
 $string['resetslots'] = 'Delete scheduler slots';
 $string['resetappointments'] = 'Delete appointments and grades';
+$string['reschedule'] = 'Reschedule';
+$string['reschedulesent'] = 'A message has been sent to your instructor to change the date of your lessons';
 $string['revealteachernotes'] = 'Reveal teacher notes in privacy exports';
 $string['revealteachernotes_desc'] = 'If this option is selected, then confidential teacher notes (which are normally not visible to students)
 will be revealed to students in data export requests, i.e., via the privay API. You should decide based on individual usage of this field
@@ -419,6 +432,15 @@ $string['start'] = 'Start';
 $string['startpast'] = 'You can\'t start an empty appointment slot in the past';
 $string['statistics'] = 'Statistics';
 $string['student'] = 'Student';
+$string['studentcancancel'] = 'Allow students to cancel appointment';
+$string['studentcanmark'] = 'Allow students to record own attendance';
+$string['studentstableattend'] = 'Attended';
+$string['studentcanmark_desc'] = 'If checked, teachers will be able to allow students to mark their own attendance.';
+$string['studentcanmark_help'] = 'If checked students will be able to change their own attendance status for the session.';
+$string['studentcanmarksessiontime'] = 'Students record attendance during session time';
+$string['studentcanmarksessiontime_desc'] = 'If checked students can only record their attendance during the session.';
+$string['studentcanmarksessiontimeend'] = 'Session end (minutes)';
+$string['studentcanmarksessiontimeend_desc'] = 'If the session does not have an end time, how many minutes should the session be available for students to record their attendance.';
 $string['studentbreakdown'] = 'By student';
 $string['studentcomments'] = 'Student\'s message';
 $string['studentdetails'] = 'Student details';
@@ -493,6 +515,8 @@ $string['yourappointmentnote'] = 'Comments for your eyes';
 $string['yourslotnotes'] = 'Comments on the meeting';
 $string['yourstudentnote'] = 'Your message';
 $string['yourtotalgrade'] = 'Your total grade in this activity is <strong>{$a}</strong>.';
+$string['zoomslotmessage'] = 'Hello, your link to join the Zoom meeting is below:';
+$string['zoomwarning'] = 'Teacher does not have a Zoom Account. Zoom Meeting can not be generated';
 
 
 /* ***********  Help strings from here on ************ */
@@ -615,3 +639,52 @@ $string['email_invite_html'] = '<p>Please choose a time slot for an appointment 
 
 $string['email_invitereminder_subject'] = 'Reminder: {$a->module}';
 $string['email_invitereminder_html'] = '<p>This is just a reminder that you have not yet set up your appointment. Please choose a time slot as soon as possible at:</p><p>{$a->scheduler_url}</p>';
+
+/***** Import Sessions Option Under Settings ***********/
+$string['confirm'] = 'Confirm';
+$string['courseshortname'] = 'Course shortname';
+$string['duration'] = 'Duration of lesson';
+$string['error:coursenotfound'] = 'A course with the short name {$a} can not be found.';
+$string['error:coursehasnoattendance'] = 'The course with the short name {$a} has no attendance activities.';
+$string['error:sessioncourseinvalid'] = 'A session course is invalid! Skipping.';
+$string['error:sessiondateinvalid'] = 'A session date is invalid! Skipping.';
+$string['error:sessionendinvalid'] = 'A session end time is invalid! Skipping.';
+$string['error:sessionstartinvalid'] = 'A session start time is invalid! Skipping.';
+$string['error:sessionschedulerinvalid'] = 'A session scheduler name is invalid! Skipping.';
+$string['errorinaddingsession'] = 'Error in adding session';
+$string['erroringeneratingsessions'] = 'Error in generating sessions ';
+$string['error:invalidschedulername'] = 'Name given for scheduler was not found. Skipping';
+$string['error:invalidstudent'] = 'Student not found in course. Skipping';
+$string['error:invalidzoomuser'] = 'Teacher does not have a Zoom account. Unable to generate Zoom meeting.';
+$string['eventdurationupdated'] = 'Session duration updated';
+$string['eventreportviewed'] = 'Attendance report viewed';
+$string['eventscreated'] = 'Calendar events created';
+$string['eventsdeleted'] = 'Calendar events deleted';
+$string['eventsessionadded'] = 'Session added';
+$string['eventsessiondeleted'] = 'Session deleted';
+$string['eventsessionsimported'] = 'Sessions imported';
+$string['eventsessionupdated'] = 'Session updated';
+$string['import'] = 'Import';
+$string['importfile'] = 'Import file';
+$string['importfile_help'] = 'Import file columns needed: Course Name, Scheduler Name, Course Date yyyy/mm/dd, Start Time, Student First Name, and Student Last Name';
+$string['importsessions'] = 'Import Sessions';
+$string['invalidimportfile'] = 'File format is invalid.';
+$string['processingfile'] = 'Processing file';
+$string['sessionduplicate'] = 'A duplicate session exists for course: {$a->course} in attendance: {$a->activity}';
+$string['sessionsgenerated'] = '{$a} sessions were successfully generated';
+$string['schedulername'] = 'Name of Scheduler';
+$string['schedulezoom'] = 'Schedule a Zoom Meeting';
+$string['studentfirstname'] = 'First name of student';
+$string['studentlastname'] = 'Last name of student';
+$string['time'] = 'Lesson start time';
+
+
+
+/******TAB MENU*********** */
+$string['defaultstatus'] = 'Default status set';
+$string['settings'] = 'Settings';
+$string['coursesummary'] = 'Course summary report';
+$string['importsessions'] = 'Import Sessions';
+$string['csvdelimiter'] = 'CSV delimiter';
+$string['encoding'] = 'Encoding';
+$string['confirmcolumnmappings'] = 'Confirm column mappings';

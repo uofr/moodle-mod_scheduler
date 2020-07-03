@@ -6,5 +6,13 @@
                 "saveseen.js"
             ]
         }
+    },
+    "name": "moodle-mod_scheduler-studentattend",
+    "builds": {
+        "moodle-mod_scheduler-studentattend": {
+            "jsfiles": [
+                "studentattend.js"
+            ]
+        }
     }
 }

@@ -13,6 +13,11 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
+//ADDED FOR ZOOM
+
+require_once((dirname(dirname(__FILE__))).'/zoom/lib.php');
+//END OF ADDED
+
 /**
  * Base class for slot-related forms
  *
@@ -166,6 +171,8 @@ abstract class scheduler_slotform_base extends moodleform {
  */
 class scheduler_editslot_form extends scheduler_slotform_base {
 
+    
+
     /**
      * @var int id of the slot being edited
      */
@@ -173,7 +180,13 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
     protected function definition() {
 
+        
+        
+
         global $DB, $output;
+        $pluginconfig = get_config('scheduler');
+
+
 
         $mform = $this->_form;
         $this->slotid = 0;
@@ -198,6 +211,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         $mform->setDefault('ignoreconflicts', false);
         $mform->addHelpButton('ignoreconflicts', 'ignoreconflicts', 'scheduler');
 
+
         // Common fields.
         $this->add_base_fields();
 
@@ -210,10 +224,32 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                             array('optional'  => true));
         $mform->setDefault('remindersel', -1);
 
+
+        //ADDED FOR ZOOM
+        //$mform->addElement('checkbox', 'addzoom', get_string('addzoom', 'scheduler'));
+
+        $addzoom = has_capability('mod/scheduler:addzoom',  $this->scheduler->get_context());
+
+        if($addzoom){
+
+            $mform->addElement('advcheckbox', 'addzoom', get_string('addzoom', 'scheduler'),get_string('addzoom', 'scheduler'), array(), array(0, 1));
+            //$mform->addElement('advcheckbox', 'addzoom', get_string('addzoom', 'scheduler'), array());
+            $mform->setDefault('addzoom', false);
+
+            //a hacky way to have id in from of zoom meeting... not great will try and find better
+            $mform->addElement('hidden', 'addzoomvalue', '0');
+            //second hacky way for when form is cancelled and zoom meeting has been generated
+            $mform->addElement('hidden', 'addzoomog', '0');
+
+            //$mform->addHelpButton('ignoreconflicts', 'ignoreconflicts', 'scheduler');
+        }
+            //END OF ADDED
+
         // Slot comments.
         $mform->addElement('editor', 'notes_editor', get_string('comments', 'scheduler'),
-                           array('rows' => 3, 'columns' => 60), $this->noteoptions);
+                            array('rows' => 3, 'columns' => 60), $this->noteoptions);
         $mform->setType('notes', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
+        
 
         // Appointments.
 
@@ -339,8 +375,63 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 $errors['starttime'] = $msg;
             }
         }
+        //ADDED FOR ZOOM
+        if ($data['addzoom']==1) {
+            //check if Teacher 
+            $host_id = $this->get_teacher_zoom($data['teacherid']);
+
+            if($host_id == false){
+                $msg = get_string('zoomwarning', 'scheduler');
+                $errors['addzoom'] = $msg;
+            }
+        }
+        //END OF ADDED
         return $errors;
     }
+
+        /**
+     * Fill the form data from an existing slot
+     *
+     * @param scheduler_slot $slot
+     * @return stdClass form data
+     */
+    public function get_teacher_zoom($teacherid) {
+
+        global $DB;
+        //call zoom page
+        require_once((dirname(dirname(__FILE__))).'/zoom/lib.php');
+        require_once((dirname(dirname(__FILE__))).'/zoom/locallib.php');
+
+        //check update teacher based on slot data 
+        $teacher =  $DB->get_record('user', array('id' => $teacherid), '*', MUST_EXIST);
+    
+        $required=true;
+        $cache = cache::make('mod_zoom', 'zoomid');
+
+        if (!($zoomuserid = $cache->get($teacherid))) {
+            $zoomuserid = false;
+            $service = new mod_zoom_webservice();
+                   
+            try {
+                $zoomuser = $service->get_user($teacher->email);
+
+                if ($zoomuser !== false) {
+                    $zoomuserid = $zoomuser->id;
+                 }
+            } catch (moodle_exception $error) {
+                if ($required) {
+                    throw $error;
+                } else {
+                    $zoomuserid = $zoomuser->id;
+                }
+            }
+            $cache->set($teacherid, $zoomuserid);
+        }
+
+        return $zoomuserid;
+    }
+
+
 
     /**
      * Fill the form data from an existing slot
@@ -364,6 +455,14 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         if ($slot->emaildate < 0) {
             $data->emaildate = 0;
         }
+
+        //ADDED FOR ZOOM
+        if($slot->zoomid != 0){
+            $data->addzoom = TRUE;
+            $data->addzoomvalue = $slot->zoomid;
+            $data->addzoomog = $slot->zoomid;
+        }
+        //END OF ADDED
 
         $i = 0;
         foreach ($slot->get_appointments() as $appointment) {
@@ -425,6 +524,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         }
 
         $editor = $data->notes_editor;
+       
         $slot->notes = file_save_draft_area_files($editor['itemid'], $context->id, 'mod_scheduler', 'slotnote', $slotid,
                 $this->noteoptions, $editor['text']);
         $slot->notesformat = $editor['format'];
@@ -470,12 +570,57 @@ class scheduler_editslot_form extends scheduler_slotform_base {
             }
         }
 
-        $slot->save();
+        //ADDED FOR ZOOM  MAKE INTO OWN FUNCTION        
+        if($data->addzoomvalue != 0){
+           $this->update_zoom($data->addzoomvalue,$slot);
+           $slot->zoomid = (int) $data->addzoomvalue;
+        }
 
+        //need to fully delete zoom meeting
+        if($data->addzoomvalue == 0 && $data->addzoomog !=0 ){
+            $id = $data->addzoomog;
+            //call to delete instance
+            $deleted = zoom_delete_instance($id);
+        }
+        //END OF ADDED
+
+        $slot->save();
         $slot = $this->scheduler->get_slot($slot->id);
 
         return $slot;
     }
+
+    //ADDED FOR ZOOM
+    /**
+     * Save a slot object, updating it with data from the form
+     * @param int $slotid
+     * @param mixed $data form data
+     * @return scheduler_slot the updated slot
+     */
+    public function update_zoom($id, $slot) {
+
+        global $DB;
+        //call zoom page
+        require_once((dirname(dirname(__FILE__))).'/zoom/lib.php');
+        require_once((dirname(dirname(__FILE__))).'/zoom/locallib.php');
+        //create array similar to zoom array
+        $zoom  = $DB->get_record('zoom', array('id' => $id), '*', MUST_EXIST);
+        $zoom->instance = $id;
+        $zoom->start_time=$slot->starttime;
+        $zoom->duration= $slot->duration*60;
+
+        //check update teacher based on slot data 
+        $teacherid= $slot->teacherid;
+        $host_id = $this->get_teacher_zoom($teacherid);
+        $zoom->host_id = $host_id;
+
+        //need to adjust for recurring meetings
+        //$zoom->recurring=0;
+
+        //update instance 
+        zoom_update_instance($zoom);
+    }
+    //END FOR ZOOM
 }
 
 /**
@@ -614,5 +759,326 @@ class scheduler_addsession_form extends scheduler_slotform_base {
         // Conflict checks are now being done after submitting the form.
 
         return $errors;
+    }
+}
+
+//ADDDED FOR LIMITED EDITING OF INSTRUCTOR 
+
+/**
+ * Slot edit with limited options form
+ *
+ * @package    mod_scheduler
+ * @copyright  2013 Henning Bostelmann and others (see README.txt)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class scheduler_limited_editslot_form extends scheduler_slotform_base {
+
+    /**
+     * @var int id of the slot being edited
+     */
+    protected $slotid;
+
+    protected function definition() {
+
+        global $DB, $output, $CFG, $USER;
+
+        $mform = $this->_form;
+        $this->slotid = 0;
+        if (isset($this->_customdata['slotid'])) {
+            $this->slotid = $this->_customdata['slotid'];
+        }
+        $timeoptions = null;
+        if (isset($this->_customdata['timeoptions'])) {
+            $timeoptions = $this->_customdata['timeoptions'];
+            
+        }
+
+        // Start date/time of the slot.
+        $mform->addElement('date_time_selector', 'starttime', get_string('date', 'scheduler'), $timeoptions);
+        $mform->setDefault('starttime', time());
+        $mform->addHelpButton('starttime', 'choosingslotstart', 'scheduler');
+
+        // Duration of the slot.
+        $this->add_duration_field();
+
+        // Ignore conflict checkbox.
+        $mform->addElement('checkbox', 'ignoreconflicts', get_string('ignoreconflicts', 'scheduler'));
+        $mform->setDefault('ignoreconflicts', false);
+        $mform->addHelpButton('ignoreconflicts', 'ignoreconflicts', 'scheduler');
+
+        // Send e-mail reminder?
+        $mform->addElement('date_selector', 'emaildate', get_string('emailreminderondate', 'scheduler'),
+                            array('optional'  => true));
+        $mform->setDefault('remindersel', -1);
+
+        //ADDED FOR ZOOM
+        $addzoom = has_capability('mod/scheduler:addzoom',  $this->scheduler->get_context());
+
+        if($addzoom){
+            $mform->addElement('advcheckbox', 'addzoom', get_string('addzoom', 'scheduler'),get_string('addzoom', 'scheduler'), array(), array(0, 1));
+            $mform->setDefault('addzoom', false);
+
+            //a hacky way to have id in from of zoom meeting... not great will try and find better
+            $mform->addElement('hidden', 'addzoomvalue', '0');
+            //second hacky way for when form is cancelled and zoom meeting has been generated
+            $mform->addElement('hidden', 'addzoomog', '0');
+        }
+        //END OF ADDED
+
+        // Slot comments.
+        $mform->addElement('editor', 'notes_editor', get_string('comments', 'scheduler'),
+                           array('rows' => 3, 'columns' => 60), $this->noteoptions);
+        $mform->setType('notes', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
+
+        // Appointments.
+       $studentapps=$DB->get_records('scheduler_appointment', array('slotid' => $this->slotid), $sort='', $fields='id, studentid,attended');
+       $repeatno = count($studentapps);
+      
+        $i=0;
+        foreach ($studentapps as $app){
+    
+            $mform->addElement('header', 'appointhead', get_string('appointmentno', 'scheduler', $i+1));
+
+            // Choose student.
+            $students = $this->scheduler->get_available_students($this->usergroups);
+            
+            if ($students) {
+                foreach ($students as $astudent) {
+                    if($astudent->id == $app->studentid)
+                        $studentsmenu = array('0' => fullname($astudent));
+                }
+            }
+            else
+                $studentsmenu = array('0' => get_string('choosedots'));
+
+
+            $mform->addElement('select', 'studentid2['.$i.']', '', $studentsmenu,'disabled');
+            $mform->addElement('hidden', 'appointid['.$i.']', $app->id);
+            $mform->setDefault('appointid', $app->id);
+            $mform->addElement('hidden', 'studentid['.$i.']', $app->studentid);
+            $mform->setDefault('studentid', $app->studentid);
+
+            // Seen tickbox.
+            //ADDED DATE CHECK
+            $moddate = $this->_customdata['timestamp'] + 86400;
+
+            if(($this->_customdata['timestamp']<= time()  && time() <= $moddate))
+                $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'));
+            else
+                $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'),'', array('disabled' => 'disabled'));
+
+           
+            // Grade.
+            if ($this->scheduler->scale != 0) {
+                $output->grading_choices($this->scheduler);
+                $mform->addElement('static', 'attendedlabel', '', get_string('grade', 'scheduler'));
+                $mform->addElement('select', 'grade', '', $gradechoices);
+            }
+
+            // Appointment notes, visible to teacher and/or student.
+            if ($this->scheduler->uses_appointmentnotes()) {
+                $mform->addElement('editor', 'appointmentnote_editor['.$i.']', get_string('appointmentnote', 'scheduler'),
+                                                    array('rows' => 3, 'columns' => 60), $this->noteoptions);
+            }
+            if ($this->scheduler->uses_teachernotes()) {
+                $mform->addElement('editor', 'teachernote_editor['.$i.']', get_string('teachernote', 'scheduler'),
+                                                    array('rows' => 3, 'columns' => 60), $this->noteoptions);
+
+            }
+        
+            $i++;
+        }
+
+        $mform->addElement('hidden', 'teacherid');
+        $mform->setDefault('teacherid', $USER->id);
+        $mform->setType('teacherid', PARAM_INT);
+
+        $mform->addElement('hidden', 'appointment_repeats');
+        $mform->setDefault('appointment_repeats', $repeatno);
+        $mform->setType('appointment_repeats', PARAM_INT);
+
+       /* $mform->createElement('advcheckbox', 'exclusivityenable', '', get_string('enable'));
+        $mform->setDefault('exclusivityenable', 1);
+        $mform->disabledIf('exclusivity', 'exclusivityenable', 'eq', 0);*/
+
+
+        $this->add_action_buttons();
+
+    }
+
+    public function validation($data, $files) {
+        global $output;
+
+        $errors = parent::validation($data, $files);
+
+        // Check number of appointments vs exclusivity.
+        $numappointments = 0;
+        for ($i = 0; $i < $data['appointment_repeats']; $i++) {
+            if ($data['studentid'][$i] > 0) {
+                $numappointments++;
+            }
+        }
+      /*  if ($data['exclusivityenable'] && $data['exclusivity'] <= 0) {
+            $errors['exclusivitygroup'] = get_string('exclusivitypositive', 'scheduler');
+        } else if ($data['exclusivityenable'] && $numappointments > $data['exclusivity']) {
+            $errors['exclusivitygroup'] = get_string('exclusivityoverload', 'scheduler', $numappointments);
+        }*/
+
+        // Avoid empty slots starting in the past.
+        if ($numappointments == 0 && $data['starttime'] < time()) {
+            $errors['starttime'] = get_string('startpast', 'scheduler');
+        }
+
+        if (!isset($data['ignoreconflicts'])) {
+            /* Avoid overlapping slots by warning the user */
+            $conflicts = $this->scheduler->get_conflicts(
+                            $data['starttime'], $data['starttime'] + $data['duration'] * 60,
+                            $data['teacherid'], 0, SCHEDULER_ALL, $this->slotid);
+
+            if (count($conflicts) > 0) {
+
+                $cl = new scheduler_conflict_list();
+                $cl->add_conflicts($conflicts);
+
+                $msg = get_string('slotwarning', 'scheduler');
+                $msg .= $output->render($cl);
+                $msg .= $output->doc_link('mod/scheduler/conflict', '', true);
+
+                $errors['starttime'] = $msg;
+            }
+        }
+        return $errors;
+    }
+
+    /**
+     * Fill the form data from an existing slot
+     *
+     * @param scheduler_slot $slot
+     * @return stdClass form data
+     */
+    public function prepare_formdata(scheduler_slot $slot) {
+
+        $context = $slot->get_scheduler()->get_context();
+
+        $data = $slot->get_data();
+        $data->exclusivityenable = ($data->exclusivity > 0);
+
+        $data = file_prepare_standard_editor($data, "notes", $this->noteoptions, $context,
+                'mod_scheduler', 'slotnote', $slot->id);
+        $data->notes = array();
+        $data->notes['text'] = $slot->notes;
+        $data->notes['format'] = $slot->notesformat;
+
+        if ($slot->emaildate < 0) {
+            $data->emaildate = 0;
+        }
+
+        $i = 0;
+        foreach ($slot->get_appointments() as $appointment) {
+            $data->appointid[$i] = $appointment->id;
+            $data->studentid[$i] = $appointment->studentid;
+            $data->attended[$i] = $appointment->attended;
+
+            $draftid = file_get_submitted_draft_itemid('appointmentnote');
+            $currenttext = file_prepare_draft_area($draftid, $context->id,
+                    'mod_scheduler', 'appointmentnote', $appointment->id,
+                    $this->noteoptions, $appointment->appointmentnote);
+            $data->appointmentnote_editor[$i] = array('text' => $currenttext,
+                    'format' => $appointment->appointmentnoteformat,
+                    'itemid' => $draftid);
+
+            $draftid = file_get_submitted_draft_itemid('teachernote');
+            $currenttext = file_prepare_draft_area($draftid, $context->id,
+                    'mod_scheduler', 'teachernote', $appointment->id,
+                    $this->noteoptions, $appointment->teachernote);
+            $data->teachernote_editor[$i] = array('text' => $currenttext,
+                    'format' => $appointment->teachernoteformat,
+                    'itemid' => $draftid);
+
+            $data->grade[$i] = $appointment->grade;
+            $i++;
+        }
+        return $data;
+    }
+
+    /**
+     * Save a slot object, updating it with data from the form
+     * @param int $slotid
+     * @param mixed $data form data
+     * @return scheduler_slot the updated slot
+     */
+    public function save_slot($slotid, $data) {
+
+        $context = $this->scheduler->get_context();
+
+        if ($slotid) {
+            $slot = scheduler_slot::load_by_id($slotid, $this->scheduler);
+        } else {
+            $slot = new scheduler_slot($this->scheduler);
+        }
+
+        // Set data fields from input form.
+        $slot->starttime = $data->starttime;
+        $slot->duration = $data->duration;
+       // $slot->exclusivity = $data->exclusivityenable ? $data->exclusivity : 0;
+        $slot->teacherid = $data->teacherid;
+        $slot->emaildate = $data->emaildate;
+        $slot->timemodified = time();
+
+        if (!$slotid) {
+            $slot->save(); // Make sure that a new slot has a slot id before proceeding.
+        }
+
+        $editor = $data->notes_editor;
+
+        $slot->notes = file_save_draft_area_files($editor['itemid'], $context->id, 'mod_scheduler', 'slotnote', $slotid,
+                $this->noteoptions, $editor['text']);
+
+        $slot->notesformat = $editor['format'];
+
+        $currentapps = $slot->get_appointments();
+      
+        for ($i = 0; $i < $data->appointment_repeats; $i++) {
+            if ($data->studentid[$i] > 0) {
+                $app = null;
+
+                if ($data->appointid[$i]) {
+                    $app = $slot->get_appointment($data->appointid[$i]);
+                } else {
+                    $app = $slot->create_appointment();
+                    $app->studentid = $data->studentid[$i];
+                    $app->save();
+                }
+            
+                $app->attended = isset($data->attended[$i]);
+
+                if (isset($data->grade)) {
+                    $selgrade = $data->grade[$i];
+                    $app->grade = ($selgrade >= 0) ? $selgrade : null;
+                }
+
+                if ($this->scheduler->uses_appointmentnotes()) {
+                    $editor = $data->appointmentnote_editor[$i];
+                    $app->appointmentnote = file_save_draft_area_files($editor['itemid'], $context->id,
+                            'mod_scheduler', 'appointmentnote', $app->id,
+                            $this->noteoptions, $editor['text']);
+                    $app->appointmentnoteformat = $editor['format'];
+                }
+
+                if ($this->scheduler->uses_teachernotes()) {
+                    $editor = $data->teachernote_editor[$i];
+                    $app->teachernote = file_save_draft_area_files($editor['itemid'], $context->id,
+                            'mod_scheduler', 'teachernote', $app->id,
+                            $this->noteoptions, $editor['text']);
+                    $app->teachernoteformat = $editor['format'];
+                }
+            }
+        }
+
+        $slot->save();
+
+        $slot = $this->scheduler->get_slot($slot->id);
+
+        return $slot;
     }
 }

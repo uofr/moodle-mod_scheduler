@@ -281,3 +281,63 @@ if ($action == 'cancelbooking') {
     redirect($returnurl);
 
 }
+
+
+/******************************** ADDED for student to send a message saying they need to reschedule ******************************/
+/**
+ * Send a message asking for a reschedule
+ *
+ * @param scheduler_instance $scheduler
+ * @param mixed $formdata
+ * @param moodle_url $returnurl the URL to redirect to after the action has been performed
+ */
+if ($action == 'reschedule') {
+
+    global $DB, $USER, $COURSE;
+
+    require_sesskey();
+    
+    // Get the request parameters.
+    $slotid = required_param('slotid', PARAM_INT);
+    $slot = $scheduler->get_slot($slotid);
+    if (!$slot) {
+        throw new moodle_exception('error');
+    }
+
+    $baseurl = new moodle_url('/mod/scheduler/view.php', array(
+        'id' => $scheduler->cmid,
+        'subpage' => $subpage,
+        'offset' => $offset
+    ));
+
+    $actionurl = new moodle_url($baseurl, array('what' => 'updateslot', 'slotid' => $slotid));
+    $teach = required_param('teacherid', PARAM_INT);
+    $teacher = $DB->get_records('user',array('id' => $teach),$sort='', $fields='*');
+
+    //remove from array to just have object
+    foreach( $teacher as $t){
+        $teacher2 = $t;
+    }
+    $format = FORMAT_HTML;
+    $htmlmessage = "<p>".fullname($USER->id)." I need to reschedule the lesson on: ".mod_scheduler_renderer::userdate($slot->starttime)."</p> <br> <a href=".$actionurl.">Click Here to Edit Slot</a>";
+
+    $message = new \core\message\message();
+    $message->component = 'moodle';
+    $message->name = 'instantmessage';
+    $message->userfrom = $USER;
+    $message->userto = $teacher2;
+    $message->subject = 'Lesson Reschedule';
+    $message->fullmessageformat = FORMAT_MARKDOWN;
+    $message->fullmessagehtml = $htmlmessage;
+    $message->notification = '0';
+    $message->contexturl = $actionurl;
+    //$message->contexturlname = 'Context name';
+    $message->courseid = $COURSE->id; // This is required in recent versions, use it from 3.2 on https://tracker.moodle.org/browse/MDL-47162
+    
+    $messageid = message_send($message);
+
+    $message = get_string('reschedulesent', 'scheduler');
+    $messagetype = \core\output\notification::NOTIFY_SUCCESS;
+    redirect($returnurl, $message, 0, $messagetype);
+}
+

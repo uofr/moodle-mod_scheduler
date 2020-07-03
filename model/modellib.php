@@ -111,6 +111,7 @@ abstract class mvc_record_model extends mvc_model {
      */
     public function save() {
         global $DB;
+
         if (is_null($this->data)) {
             throw new coding_exception('Missing data, cannot save');
         } else if (property_exists($this->data, 'id') && ($this->data->id)) {

@@ -138,7 +138,9 @@ if ($action == 'addslot') {
     if ($mform->is_cancelled()) {
         redirect($viewurl);
     } else if ($formdata = $mform->get_data()) {
+        
         $slot = $mform->save_slot(0, $formdata);
+
         \mod_scheduler\event\slot_added::create_from_slot($slot)->trigger();
         redirect($viewurl,
                  get_string('oneslotadded', 'scheduler'),
@@ -148,6 +150,12 @@ if ($action == 'addslot') {
         echo $output->header();
         echo $output->heading(get_string('addsingleslot', 'scheduler'));
         $mform->display();
+        
+        //ADDED FOR ZOOM BUTTON
+        $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
+        'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+        //END of ADDED
+     
         echo $output->footer($course);
         die;
     }
@@ -155,39 +163,95 @@ if ($action == 'addslot') {
 /************************************ View : Update single slot form ****************************************/
 if ($action == 'updateslot') {
 
-    $slotid = required_param('slotid', PARAM_INT);
-    $slot = $scheduler->get_slot($slotid);
-    if ($slot->starttime % 300 !== 0 || $slot->duration % 5 !== 0) {
-        $timeoptions = array('step' => 1, 'optional' => false);
-    } else {
-        $timeoptions = array('step' => 5, 'optional' => false);
+    //ADDED Line For Student mark attendance
+    $limitedediting = has_capability('mod/scheduler:unlimitedediting', $context);
+    //END of ADDED
+
+    if(!$limitedediting){
+
+        $slotid = required_param('slotid', PARAM_INT);
+        $slot = $scheduler->get_slot($slotid);
+        if ($slot->starttime % 300 !== 0 || $slot->duration % 5 !== 0) {
+            $timeoptions = array('step' => 1, 'optional' => false);
+        } else {
+            $timeoptions = array('step' => 5, 'optional' => false);
+        }
+
+        $actionurl = new moodle_url($baseurl, array('what' => 'updateslot', 'slotid' => $slotid));
+
+        $mform = new scheduler_limited_editslot_form($actionurl, $scheduler, $cm, $groupsicansee, array(
+                'slotid' => $slotid,
+                'timeoptions' => $timeoptions,
+                'timestamp'=> $slot->starttime
+                )
+            );
+        $data = $mform->prepare_formdata($slot);
+        $mform->set_data($data);
+
+
+        if ($mform->is_cancelled()) {
+            redirect($viewurl);
+        } else if ($formdata = $mform->get_data()) {
+            $mform->save_slot($slotid, $formdata);
+            redirect($viewurl,
+                    get_string('slotupdated', 'scheduler'),
+                    0,
+                    \core\output\notification::NOTIFY_SUCCESS);
+        } else {
+            echo $output->header();
+            echo $output->heading(get_string('updatesingleslot', 'scheduler'));
+            $mform->display();
+
+            //ADDED FOR ZOOM BUTTON
+            $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
+            'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+            //END of ADDED
+
+            echo $output->footer($course);
+            die;
+        }
+
+
     }
+    else{
+        $slotid = required_param('slotid', PARAM_INT);
+        $slot = $scheduler->get_slot($slotid);
+        if ($slot->starttime % 300 !== 0 || $slot->duration % 5 !== 0) {
+            $timeoptions = array('step' => 1, 'optional' => false);
+        } else {
+            $timeoptions = array('step' => 5, 'optional' => false);
+        }
 
-    $actionurl = new moodle_url($baseurl, array('what' => 'updateslot', 'slotid' => $slotid));
+        $actionurl = new moodle_url($baseurl, array('what' => 'updateslot', 'slotid' => $slotid));
 
-    $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee, array(
-            'slotid' => $slotid,
-            'timeoptions' => $timeoptions)
-        );
-    $data = $mform->prepare_formdata($slot);
-    $mform->set_data($data);
+        $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee, array(
+                'slotid' => $slotid,
+                'timeoptions' => $timeoptions)
+            );
+        $data = $mform->prepare_formdata($slot);
+        $mform->set_data($data);
 
-    if ($mform->is_cancelled()) {
-        redirect($viewurl);
-    } else if ($formdata = $mform->get_data()) {
-        $mform->save_slot($slotid, $formdata);
-        redirect($viewurl,
-                 get_string('slotupdated', 'scheduler'),
-                 0,
-                 \core\output\notification::NOTIFY_SUCCESS);
-    } else {
-        echo $output->header();
-        echo $output->heading(get_string('updatesingleslot', 'scheduler'));
-        $mform->display();
-        echo $output->footer($course);
-        die;
+
+        if ($mform->is_cancelled()) {
+            redirect($viewurl);
+        } else if ($formdata = $mform->get_data()) {
+            $mform->save_slot($slotid, $formdata);
+            redirect($viewurl,
+                    get_string('slotupdated', 'scheduler'),
+                    0,
+                    \core\output\notification::NOTIFY_SUCCESS);
+        } else {
+            echo $output->header();
+            echo $output->heading(get_string('updatesingleslot', 'scheduler'));
+            $mform->display();
+            //ADDED FOR ZOOM BUTTON
+            $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
+            'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+            //END of ADDED
+            echo $output->footer($course);
+            die;
+        }
     }
-
 }
 /************************************ Add session multiple slots form ****************************************/
 if ($action == 'addsession') {
@@ -358,9 +422,14 @@ if ($action == 'sendmessage') {
 // Trigger view event.
 \mod_scheduler\event\appointment_list_viewed::create_from_scheduler($scheduler)->trigger();
 
+//ADDED Advanced student capabilties
+$canadd = has_capability('mod/scheduler:canadd', $context);
+$candelete = has_capability('mod/scheduler:candelete', $context);
+$canrevoke= has_capability('mod/scheduler:canrevoke', $context);
+$unlimitedediting= has_capability('mod/scheduler:unlimitedediting', $context);
+//END of ADDED
 
 // Print top tabs.
-
 $actionurl = new moodle_url($viewurl, array('sesskey' => sesskey()));
 
 $inactive = array();
@@ -425,46 +494,58 @@ $slots = $scheduler->get_slots_for_teacher($teacherid, $slotgroup, $offset * $pa
 echo $output->heading(get_string('slots', 'scheduler'));
 
 // Print instructions and button for creating slots.
-$key = ($slots) ? 'addslot' : 'welcomenewteacher';
-echo html_writer::div(get_string($key, 'scheduler'));
+if($slots){
+    if($canadd)
+        echo html_writer::div(get_string('addslot', 'scheduler'));
+}
+else{
+    echo html_writer::div(get_string('welcomenewteacher', 'scheduler'));
+}
 
 
 $commandbar = new scheduler_command_bar();
-$commandbar->title = get_string('actions', 'scheduler');
+if($canadd || $candelete){
+    $commandbar->title = get_string('actions', 'scheduler');
+}
 
-$addbuttons = array();
-$addbuttons[] = $commandbar->action_link(new moodle_url($actionurl, array('what' => 'addsession')), 'addsession', 't/add');
-$addbuttons[] = $commandbar->action_link(new moodle_url($actionurl, array('what' => 'addslot')), 'addsingleslot', 't/add');
-$commandbar->add_group(get_string('addcommands', 'scheduler'), $addbuttons);
+if($canadd){
+    $addbuttons = array();
+    $addbuttons[] = $commandbar->action_link(new moodle_url($actionurl, array('what' => 'addsession')), 'addsession', 't/add');
+    $addbuttons[] = $commandbar->action_link(new moodle_url($actionurl, array('what' => 'addslot')), 'addsingleslot', 't/add');
+    $commandbar->add_group(get_string('addcommands', 'scheduler'), $addbuttons);
+}
 
-// If slots already exist, also show delete buttons.
-if ($slots) {
-    $delbuttons = array();
+if($candelete){
 
-    $delselectedurl = new moodle_url($actionurl, array('what' => 'deleteslots'));
-    $PAGE->requires->yui_module('moodle-mod_scheduler-delselected', 'M.mod_scheduler.delselected.init',
-                                array($delselectedurl->out(false)) );
-    $delselected = $commandbar->action_link($delselectedurl, 'deleteselection', 't/delete',
-                                            'confirmdelete-selected', 'delselected');
-    $delselected->formid = 'delselected';
-    $delbuttons[] = $delselected;
+    // If slots already exist, also show delete buttons.
+    if ($slots) {
+        $delbuttons = array();
 
-    if (has_capability('mod/scheduler:manageallappointments', $context) && $subpage == 'allappointments') {
+        $delselectedurl = new moodle_url($actionurl, array('what' => 'deleteslots'));
+        $PAGE->requires->yui_module('moodle-mod_scheduler-delselected', 'M.mod_scheduler.delselected.init',
+                                    array($delselectedurl->out(false)) );
+        $delselected = $commandbar->action_link($delselectedurl, 'deleteselection', 't/delete',
+                                                'confirmdelete-selected', 'delselected');
+        $delselected->formid = 'delselected';
+        $delbuttons[] = $delselected;
+
+        if (has_capability('mod/scheduler:manageallappointments', $context) && $subpage == 'allappointments') {
+            $delbuttons[] = $commandbar->action_link(
+                            new moodle_url($actionurl, array('what' => 'deleteall')),
+                            'deleteallslots', 't/delete', 'confirmdelete-all');
+            $delbuttons[] = $commandbar->action_link(
+                            new moodle_url($actionurl, array('what' => 'deleteallunused')),
+                            'deleteallunusedslots', 't/delete', 'confirmdelete-unused');
+        }
         $delbuttons[] = $commandbar->action_link(
-                        new moodle_url($actionurl, array('what' => 'deleteall')),
-                        'deleteallslots', 't/delete', 'confirmdelete-all');
+                        new moodle_url($actionurl, array('what' => 'deleteunused')),
+                        'deleteunusedslots', 't/delete', 'confirmdelete-myunused');
         $delbuttons[] = $commandbar->action_link(
-                        new moodle_url($actionurl, array('what' => 'deleteallunused')),
-                        'deleteallunusedslots', 't/delete', 'confirmdelete-unused');
+                        new moodle_url($actionurl, array('what' => 'deleteonlymine')),
+                        'deletemyslots', 't/delete', 'confirmdelete-mine');
+
+        $commandbar->add_group(get_string('deletecommands', 'scheduler'), $delbuttons);
     }
-    $delbuttons[] = $commandbar->action_link(
-                    new moodle_url($actionurl, array('what' => 'deleteunused')),
-                    'deleteunusedslots', 't/delete', 'confirmdelete-myunused');
-    $delbuttons[] = $commandbar->action_link(
-                    new moodle_url($actionurl, array('what' => 'deleteonlymine')),
-                    'deletemyslots', 't/delete', 'confirmdelete-mine');
-
-    $commandbar->add_group(get_string('deletecommands', 'scheduler'), $delbuttons);
 }
 
 echo $output->render($commandbar);
@@ -487,15 +568,32 @@ if ($slots) {
         $studlist->linkappointment = true;
         $studlist->checkboxname = 'seen[]';
         $studlist->buttontext = get_string('saveseen', 'scheduler');
+        //check if date can be selected
+        if(!$unlimitedediting){
+                //ADDDED
+            //if the meeting was within the last 24 hrs.
+            $moddate = $slot->starttime + 86400;
+
+            if(($slot->starttime<= time()  && time() <= $moddate))
+                $studlist->checkboxdisable = TRUE;
+            else
+                $studlist->checkboxdisable = FALSE;
+            //END OF ADDED
+        }
+        else
+            $studlist->checkboxdisable = TRUE;
+
         $studlist->actionurl = new moodle_url($actionurl, array('what' => 'saveseen', 'slotid' => $slot->id));
         foreach ($slot->get_appointments() as $app) {
             $studlist->add_student($app, false, $app->is_attended(), true, $scheduler->uses_studentdata());
         }
 
-        $slotman->add_slot($slot, $studlist, $editable);
+        $slotman->add_slot($slot, $studlist, $editable, $canadd, $candelete, $canrevoke);
     }
 
     echo $output->render($slotman);
+    
+    
 
     if ($sqlcount > $pagesize) {
         echo $output->paging_bar($sqlcount, $offset, $pagesize, $actionurl, 'offset');

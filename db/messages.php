@@ -15,6 +15,9 @@ $messageproviders = array (
     // Invitations to make a booking.
     'invitation' => array(
     ),
+    // Reschedule alert.
+    'reschedule' => array(
+    ),
 
     // Notifications about bookings (to teachers or students).
     'bookingnotification' => array(
@@ -25,3 +28,4 @@ $messageproviders = array (
     ),
 
 );
+

@@ -385,6 +385,13 @@ class scheduler_slot extends mvc_child_record_model {
         $baseevent->timeduration = $this->duration * MINSECS;
         $baseevent->visible = 1;
 
+        //ADDED FOR ZOOM
+        if($this->data->zoomid != 0){
+            $zoom = $DB->get_record('zoom', array('id' => $this->data->zoomid), '*', MUST_EXIST);
+            $baseevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->join_url."'>".$zoom->join_url."</a>";
+        }
+        //END OF ADDED
+
         // Update student events.
 
         $studentevent = clone($baseevent);

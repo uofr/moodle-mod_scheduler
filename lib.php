@@ -698,3 +698,44 @@ function scheduler_pluginfile($course, $cm, $context, $filearea, $args, $forcedo
     send_stored_file($file, 0, 0, $forcedownload, $options);
 }
 
+
+/*NEWLY ADDED NOT ORIGINAL
+/**
+ * Print tabs on attendance settings page.
+ *
+ * @param string $selected - current selected tab.
+ */
+function scheduler_print_settings_tabs($selected = 'settings') {
+    global $CFG;
+    // Print tabs for different settings pages.
+    $tabs = array();
+    $tabs[] = new tabobject('settings', $CFG->wwwroot.'/admin/settings.php?section=modsettingscheduler',
+        get_string('settings', 'scheduler'), get_string('settings'), false);
+
+    $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/scheduler/defaultstatus.php',
+        get_string('defaultstatus', 'scheduler'), get_string('defaultstatus', 'scheduler'), false);
+
+    if (get_config('scheduler', 'enablewarnings')) {
+        $tabs[] = new tabobject('defaultwarnings', $CFG->wwwroot . '/mod/scheduler/warnings.php',
+            get_string('defaultwarnings', 'scheduler'), get_string('defaultwarnings', 'scheduler'), false);
+    }
+
+    $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/scheduler/coursesummary.php',
+        get_string('coursesummary', 'scheduler'), get_string('coursesummary', 'scheduler'), false);
+
+    if (get_config('scheduler', 'enablewarnings')) {
+        $tabs[] = new tabobject('absentee', $CFG->wwwroot . '/mod/scheduler/absentee.php',
+            get_string('absenteereport', 'scheduler'), get_string('absenteereport', 'scheduler'), false);
+    }
+
+    $tabs[] = new tabobject('importsessions', $CFG->wwwroot . '/mod/scheduler/import/sessions.php',
+        get_string('importsessions', 'scheduler'), get_string('importsessions', 'scheduler'), false);
+
+    ob_start();
+    print_tabs(array($tabs), $selected);
+    $tabmenu = ob_get_contents();
+    ob_end_clean();
+
+    return $tabmenu;
+}
+
