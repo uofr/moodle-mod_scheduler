@@ -10,6 +10,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+
 $capabilities = array(
 
     'mod/scheduler:addinstance' => array(
@@ -53,7 +54,6 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW
         )
     ),
-
     'mod/scheduler:manage' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -64,7 +64,16 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-
+    'mod/scheduler:addzoom' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+            )
+    ),
     'mod/scheduler:candelete' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -75,18 +84,6 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-
-    'mod/scheduler:addzoom' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-
     'mod/scheduler:canrevoke' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,

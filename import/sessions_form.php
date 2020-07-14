@@ -24,9 +24,9 @@
  */
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
-use core_text;
-use csv_import_reader;
-use moodleform;
+//use core_text;
+//use csv_import_reader;
+//use moodleform;
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir . '/csvlib.class.php');
 

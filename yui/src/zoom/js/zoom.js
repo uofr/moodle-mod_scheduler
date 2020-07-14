@@ -48,6 +48,10 @@ MOD.create_new = function(cmid, spinner) {
               
                 if(parsedResponse.join_url !== undefined){
 
+                   Y.one('#addcohost').removeClass('hidden');
+                    console.log("testing");
+                    console.log(Y.one('#addcohost'));
+
                     Y.all(SELECTORS.ERROR).each( function(box) {
                         box.setStyle('display', 'none');
                         box= Y.all('p').remove();
@@ -88,8 +92,12 @@ MOD.create_new = function(cmid, spinner) {
  * submit button is pressed. This removes the need to add back the zoom meeting if form is canceled
  * @return void
  */
-MOD.delete_zoom = function() {
+MOD.partial_delete = function() {
            
+    Y.one('#addcohost').addClass('hidden');
+    console.log("testing");
+    console.log(Y.one('#addcohost'));
+
     Y.all(SELECTORS.EDITOR).each( function(box) {
         box.setHTML("");
         box.simulate("blur");
@@ -106,7 +114,7 @@ MOD.delete_zoom = function() {
  * @param id of zoom meeting created 
  * @return void
  */
-MOD.cancel_form = function(cmid, id) {
+MOD.full_delete = function(cmid, id,spinner) {
 
     Y.io(M.cfg.wwwroot + '/mod/scheduler/ajax.php', {
         // The request paramaters.
@@ -153,14 +161,29 @@ MOD.cancel_form = function(cmid, id) {
 
 MOD.init = function(cmid) {
 
+    
+
 	Y.all(SELECTORS.CHECKBOXES).each( function(box) {
+        //check if box is checked if so remove hidden class from options
+        console.log("TESTTEST");
+        if(box.get("checked")){
+            Y.one('#addcohost').removeClass('hidden');
+            console.log("testing");
+            console.log(Y.one('#addcohost'));
+        }
+
 		box.on('change', function(e) {
             var spinner = M.util.add_spinner(Y, box.ancestor('div'));
         
+            changed = Y.one('[name="addzoomvalue"]').get('value');
+            og = Y.one('[name="addzoomog"]').get('value');
+
             if(box.get("checked")){
                 M.mod_scheduler.zoom.create_new(cmid, spinner);
+            }else if(og==0 && changed !=0){
+                M.mod_scheduler.zoom.full_delete(cmid,changed,spinner);
             }else{
-                M.mod_scheduler.zoom.delete_zoom();
+                M.mod_scheduler.zoom.partial_delete();
             }
 		})
     });
@@ -169,11 +192,12 @@ MOD.init = function(cmid) {
     Y.all(SELECTORS.CANCEL).each( function(box) {
 		box.on('change', function(e) {
 
+            var spinner = M.util.add_spinner(Y, box.ancestor('div'));
             changed = Y.one('[name="addzoomvalue"]').get('value');
             og = Y.one('[name="addzoomog"]').get('value');
 
             if(og==0 && changed !=0)
-                M.mod_scheduler.zoom.cancel_form(cmid,changed);
+                M.mod_scheduler.zoom.full_delete(cmid,changed,spinner);
         })
     });
 };

@@ -215,3 +215,80 @@ body.path-mod-scheduler.jsenabled  input.studentselectsubmit {
     float: left;
     margin-left: 0.5em;
 }
+
+/*ADDED for Co-host Selectize */
+.container {
+    width: 40%;
+    margin: 30px auto;
+  }
+  .label {
+    display:inline-block;
+  }
+  .tag-container {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: #fff;
+    display: flex;
+    align-content: flex-start;
+    margin-bottom: 5%;
+  }
+  .tag-container .tag {
+    height: 30px;
+    margin: 5px;
+    padding: 5px 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    color: #333;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 1px 1px #fff;
+    cursor: default;
+  }
+  .tag i {
+    font-size: 16px;
+    color: #666;
+    margin-left: 5px;
+  }
+  .tag-container input {
+    padding: 5px;
+    font-size: 16px;
+    border: 0;
+    outline: none;
+    font-family: 'Rubik';
+    color: #333;
+    flex: 1;
+  }
+
+  /* fallback */
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/materialicons/v53/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+  }
+  
+  .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .whiteout{
+      color:#FFF !important;
+      display: none !important;
+  }
+
+  .hidden{
+    display: none !important;
+}

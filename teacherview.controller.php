@@ -196,12 +196,12 @@ function scheduler_action_delete_slots(array $slots, $action, moodle_url $return
         \mod_scheduler\event\slot_deleted::create_from_slot($slot, $action)->trigger();
 
         //ADDED FOR ZOOM
-        if($slot->zoomid !=0){
-            //call zoom page
-            require_once((dirname(dirname(__FILE__))).'/zoom/lib.php');
-
-            //call to delete instance
-            $deleted = zoom_delete_instance($slot->zoomid);
+        if(SCHEDULER_ZOOM){
+            if($slot->zoomid !=0){
+                $zoomid = zoomer_get_zoomid($slot->id);
+                //call to delete instance
+                $deleted = zoomer_delete_zoom_meeting($zoomid);
+            }
         }
         //END OF ADDED
 

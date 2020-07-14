@@ -17,6 +17,17 @@ require_once($CFG->dirroot.'/mod/scheduler/mailtemplatelib.php');
 require_once($CFG->dirroot.'/mod/scheduler/renderer.php');
 require_once($CFG->dirroot.'/mod/scheduler/renderable.php');
 
+
+//ADDED FOR ZOOM
+if (is_file(dirname(dirname(__FILE__)).'/zoomer/lib.php')){
+    require_once((dirname(dirname(__FILE__))).'/zoomer/lib.php');
+    define('SCHEDULER_ZOOM', TRUE);  
+}else{
+    define('SCHEDULER_ZOOM', FALSE);  
+}
+//END OF ADDED
+
+
 define('SCHEDULER_TIMEUNKNOWN', 0);  // This is used for appointments for which no time is entered.
 define('SCHEDULER_SELF', 0); // Used for setting conflict search scope.
 define('SCHEDULER_OTHERS', 1); // Used for setting conflict search scope.

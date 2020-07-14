@@ -59,6 +59,37 @@ function scheduler_print_schedulebox(scheduler_instance $scheduler, $studentid, 
     }
 }
 
+//ADDED FOR ZOOM CO-HOST FEATURE
+
+
+/**
+ * Get array of instructors in a course
+ *
+ * @param scheduler_instance $scheduler
+ * @param int $studentid student to schedule
+ * @param int $groupid group to schedule
+ */
+function scheduler_get_instructors(scheduler_instance $scheduler) {
+
+        $teachername = s($scheduler->get_teacher_name());
+        $teachers = $scheduler->get_available_teachers();
+        $teachersmenu = array();
+        if ($teachers) {
+            foreach ($teachers as $teacher) {
+                $teacherarray=new stdClass;
+                $teacherarray->id = $teacher->id;
+                $teacherarray->name = fullname($teacher);
+                $teachersmenu[] = $teacherarray;
+            }
+        } 
+
+        return $teachersmenu;
+}
+
+
+
+//END OF ADDED
+
 // Load group restrictions.
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = false;
@@ -152,8 +183,10 @@ if ($action == 'addslot') {
         $mform->display();
         
         //ADDED FOR ZOOM BUTTON
-        $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
-        'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+        if(SCHEDULER_ZOOM){
+            $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
+            'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+        }
         //END of ADDED
      
         echo $output->footer($course);
@@ -203,8 +236,10 @@ if ($action == 'updateslot') {
             $mform->display();
 
             //ADDED FOR ZOOM BUTTON
-            $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
-            'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+            if(SCHEDULER_ZOOM){
+                $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
+                'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+            }
             //END of ADDED
 
             echo $output->footer($course);
@@ -245,8 +280,21 @@ if ($action == 'updateslot') {
             echo $output->heading(get_string('updatesingleslot', 'scheduler'));
             $mform->display();
             //ADDED FOR ZOOM BUTTON
-            $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
-            'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+            if(SCHEDULER_ZOOM){
+                $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
+                'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+
+                 // Choose the teacher (if allowed).
+                if (has_capability('mod/scheduler:canscheduletootherteachers', $scheduler->get_context())) {
+                    $teacherarray =array();
+                    $teacherarray =scheduler_get_instructors($scheduler);
+
+                    //get list of co-hosts already added, if none false is returned
+                    $cohosts = zoomer_get_cohosts($slotid);
+                   
+                    $PAGE->requires->yui_module('moodle-mod_scheduler-cohost','M.mod_scheduler.cohost.init', array($teacherarray,$cohosts));
+                }
+            }
             //END of ADDED
             echo $output->footer($course);
             die;

@@ -26,17 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-use csv_import_reader;
-use mod_zoom;
-use mod_scheduler_notifyqueue;
-use stdClass;
-
 require_once($CFG->dirroot . '/mod/scheduler/model/scheduler_instance.php');
-
-//call zoom plugin page
-require_once($CFG->dirroot .'/mod/zoom/lib.php');
-require_once($CFG->dirroot .'/mod/zoom/locallib.php');
-
 
 /**
  * Import scheduler slots.
@@ -97,16 +87,27 @@ class sessions {
      * @return array The headers (lang strings)
      */
     public static function list_required_headers() {
-        return array(
-            get_string('courseshortname', 'scheduler'),
-            get_string('schedulername', 'scheduler'),
-            get_string('date', 'scheduler'),
-            get_string('time', 'scheduler'),
-            get_string('duration', 'scheduler'),
-            get_string('studentfirstname', 'scheduler'),
-            get_string('studentlastname', 'scheduler'),
-            get_string('schedulezoom', 'scheduler'),
-        );
+        if(SCHEDULER_ZOOM){
+            return array(
+                get_string('courseshortname', 'scheduler'),
+                get_string('schedulername', 'scheduler'),
+                get_string('date', 'scheduler'),
+                get_string('time', 'scheduler'),
+                get_string('duration', 'scheduler'),
+                get_string('studentfirstname', 'scheduler'),
+                get_string('studentlastname', 'scheduler'),
+                get_string('schedulezoom', 'scheduler'),
+            );
+        }else{
+            return array(
+                get_string('courseshortname', 'scheduler'),
+                get_string('schedulername', 'scheduler'),
+                get_string('date', 'scheduler'),
+                get_string('time', 'scheduler'),
+                get_string('duration', 'scheduler'),
+                get_string('studentfirstname', 'scheduler'),
+                get_string('studentlastname', 'scheduler'));
+        }
     }
 
     /**
@@ -272,10 +273,12 @@ class sessions {
             }
 
             //ADD ZOOM 
-            $addzoom= $this->get_column_data($row, $mapping['schedulezoom']);
-            if (empty($from)) {
-                \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'scheduler'));
-                continue;
+            if(SCHEDULER_ZOOM){
+                $addzoom= $this->get_column_data($row, $mapping['schedulezoom']);
+                if (empty($from)) {
+                    \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'scheduler'));
+                    continue;
+                }
             }
 
             $session->duration = clean_param($duration, PARAM_INT);
@@ -383,20 +386,25 @@ class sessions {
                                           WHERE cx.contextlevel = '50' AND c.id =".$course->id.";");
                         
 
+                       
+                       
+                        //Add zoom meeting if choosen 
                         //ADDED FOR ZOOM
                         $zoommeeting = array();
-                        if($session->addzoom){
-                            $host_id = $this->zoom_user($teacher->id );
-                            if($host_id){
-                                $zoommeeting = $this->create_zoom_meeting($session, $host_id, $cm, $course->id);
-                            }else{
-                                mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidzoomuser','scheduler', $session->scheduler));
+                        if(SCHEDULER_ZOOM){
+                            if($session->addzoom){
+                                $host_id = zoomer_get_user($teacher->id);
+                                if($host_id){
+                                    $zoommeeting = zoomer_create_zoom_meeting($session, $host_id, $cm, $course->id,0);
+                                }else{
+                                    mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidzoomuser','scheduler', $session->scheduler));
+                                }
                             }
                         }
                         //END OF ZOOM ADDED
-                       
                         //format slot for DB add
                         $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id, $zoommeeting);
+
 
                         // Check for duplicate sessions.
                         if ($this->session_exists($slot)) {
@@ -419,15 +427,21 @@ class sessions {
                                 //get new slot id
                                 $slotid = $this->add_slot($slot,$scheduler);
 
+                                //Added for zoom
+                                if(SCHEDULER_ZOOM && $session->addzoom){
+                                    zoomer_update_zoom($zoommeeting->id, $slot);
+                                }
+                                //End of Added
+
                                 //Add to calendar
                                 $this->update_calendar($scheduler,$slot,$teacher,$student,$zoommeeting);
-
 
 
                                 //format appointments for DB add
                                 $appointment = $this->construct_appointment_data_for_add($session, $slotid, $student->id);
                                 //add appointment
-                                $this->add_appointment($appointment);
+                                $context = get_context_instance(CONTEXT_COURSE, $course->id);
+                                $this->add_appointment($appointment,$context);
                                 $okcount ++;
                             }else{
                                 mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidstudent','scheduler', $session->scheduler));
@@ -499,114 +513,6 @@ class sessions {
         return false;
     }
 
-      /**
-     * Check teacher has a zoom account
-     *
-     * @param int $teacherid 
-     * @return boolean
-     */
-    private function zoom_user($teacherid) {
-
-        global $DB;
-        $teacher =  $DB->get_record('user', array('id' => $teacherid), '*', MUST_EXIST);
-    
-        $required=true;
-        $cache = cache::make('mod_zoom', 'zoomid');
-            
-            if (!($zoomuserid = $cache->get($teacherid))) {
-                $zoomuserid = false;
-                $service = new mod_zoom_webservice();
-                       
-                try {
-                    $zoomuser = $service->get_user($teacher->email);
-
-                    if ($zoomuser !== false) {
-                        $zoomuserid = $zoomuser->id;
-                     }
-                } catch (moodle_exception $error) {
-                    if ($required) {
-                        throw $error;
-                    } else {
-                        $zoomuserid = $zoomuser->id;
-                    }
-                }
-                $cache->set($teacherid, $zoomuserid);
-            }
-        return $zoomuserid;
-    }
-
-    /**
-     * Create Zoom Meeting 
-     *
-     * @param stdClass $formdata holds info for whole session
-     * @param string $host_id user/teacher's zoom host id
-     * @param  $cm course module
-     * @param $course that session is taking place in
-     * @return boolean
-     */
-    private function create_zoom_meeting($formdata, $host_id, $cm, $course) {
-
-        global $DB;
-
-        $sesstarttime = $formdata->sestime['starthour'] * HOURSECS + $formdata->sestime['startminute'] * MINSECS;
-        $sessiondate = $formdata->sessiondate + $sesstarttime;
-        $duration = $formdata->duration;
-            
-        $addzoom = $formdata->addzoom;
-
-        //create array similar to zoom array
-        $zoom = new stdClass();
-        $zoom->name = "Scheduler Zoom Meeting";
-        $zoom->showdescription=0;
-        $zoom->start_time=$sessiondate;
-        $zoom->duration= $duration*60;
-        $zoom->recurring=0;
-        $zoom->webinar=0;
-        $zoom->password= "";
-        $zoom->option_host_video=1;
-        $zoom->option_participants_video=1;
-        $zoom->option_audio="both";
-        $zoom->option_jbh=1;
-        $zoom->alternative_hosts=null;
-        $zoom->meeting_id = -1;
-        $zoom->host_id = $host_id;
-        $zoom->grade=0;
-        $zoom->grade_rescalegrades =null;
-        $zoom->gradepass =null;
-        $zoom->visible=1;
-        $zoom->visibleoncoursepage=1;
-        $zoom->cmidnumber=null;
-        $zoom->availabilityconditionsjson = array("op"=>"&","c"=>[],"showc"=>[]);  
-        $zoom->tag =   array();
-        $zoom->course = $course;
-        $zoom->coursemodule = $cm->id;
-        $zoom->section =0;
-        $zoom->module = null;
-        $zoom->instance =null;
-        $zoom->add = "zoom";
-        $zoom->update =0;
-        $zoom->return =0;
-        $zoom->sr =0;
-        $zoom->submitbutton =null;
-        $zoom->groupingid =0;
-        $zoom->completion =0;
-        $zoom->completionview =0;
-        $zoom->completionexpected =0;
-        $zoom->completiongradeitemnumber=null;
-        $zoom->conditiongradegroup= array();
-        $zoom->conditionfieldgroup = array();
-        $zoom->groupmode =0;
-        $zoom->intro =null;
-        $zoom->introformat =1;
-
-        //send it to zoom add_instance
-       $returnid = zoom_add_instance($zoom);
-
-        //take return id and do db call to find link
-       $zoommeeting  = $DB->get_record('zoom', array('id' => $returnid), '*', MUST_EXIST);
-       return $zoommeeting;
-    }
-
 
 /**
  * Create the slot to be added to the DB 
@@ -651,11 +557,11 @@ function construct_slot_data_for_add($formdata, $schedulerid, $teacherid, $zoom)
     $sess->emaildate = 0;
     //hideuntil
     $sess->hideuntil = time();
-    $sess->zoomid = 0;
 
-    if(!empty($zoom)){
-        $sess->zoomid = $zoom->id;
-        $sess->notes = "<h2>".get_string('zoomslotmessage', 'scheduler')."</h2><br><a href=' ".$zoom->join_url."'>".$zoom->join_url."</a>";                    
+    if(SCHEDULER_ZOOM){
+        if(!empty($zoom)){
+            $sess->notes = "<h2>".get_string('zoomslotmessage', 'scheduler')."</h2><br><a href=' ".$zoom->join_url."'>".$zoom->join_url."</a>";                    
+        }
     }
     return $sess;
 }
@@ -668,12 +574,14 @@ function construct_slot_data_for_add($formdata, $schedulerid, $teacherid, $zoom)
 */
 public function add_slot($sess, $scheduler) {
         global $DB;
+
+        $context = get_context_instance(CONTEXT_COURSE, $scheduler->course);
       
         $sess->id = $DB->insert_record('scheduler_slots', $sess);
 
         //Need to add potential file slot into draft area? for notes, appointment notes, teachernote, studentnote
         $description = file_save_draft_area_files(0,
-            $this->context->id, 'mod_scheduler', 'notes', $sess->id,
+            $context->id, 'mod_scheduler', 'notes', $sess->id,
             array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
             $sess->notes);
 
@@ -723,24 +631,25 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
      * @param stdClass $sess
      * @return int $sessionid
      */
-    public function add_appointment($sess) {
+    public function add_appointment($sess,$context) {
         global $DB;
       
         $sess->id = $DB->insert_record('scheduler_appointment', $sess);
+       
 
         //Need to add potential file slot into draft area? appointment notes, teachernote, studentnote
         $description = file_save_draft_area_files(0,
-            $this->context->id, 'mod_scheduler', 'appointmentnote', $sess->id,
+            $context->id, 'mod_scheduler', 'appointmentnote', $sess->id,
             array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
             $sess->appointmentnote);
         
         $description = file_save_draft_area_files(0,
-            $this->context->id, 'mod_scheduler', 'teachernote', $sess->id,
+            $context->id, 'mod_scheduler', 'teachernote', $sess->id,
             array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
             $sess->teachernote);
 
         $description = file_save_draft_area_files(0,
-            $this->context->id, 'mod_scheduler', 'studentnote', $sess->id,
+            $context->id, 'mod_scheduler', 'studentnote', $sess->id,
             array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
             $sess->studentnote);
        
@@ -770,8 +679,10 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
         $baseevent->visible = 1;
 
         //ADDED FOR ZOOM
-        if($slot->zoomid != 0){
-            $baseevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->join_url."'>".$zoom->join_url."</a>";
+        if(SCHEDULER_ZOOM){
+            if(!empty($zoom)){
+                $baseevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->join_url."'>".$zoom->join_url."</a>";
+            }
         }
         //END OF ADDED
 
@@ -780,15 +691,17 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
         $studenteventname = get_string('meetingwith', 'scheduler').' '.$scheduler->get_teacher_name().', '.fullname($teacher);
         $studentevent->name = shorten_text($studenteventname, 200);
 
-        $this->add_calendar_event( "SSstu:{$slot->id}:{$slot->course}", $student->id, $studentevent);
+        $this->add_calendar_event( "SSstu:{$slot->id}:{$scheduler->course}", $student->id, $studentevent);
 
         // Update teacher events.
         $teacherevent = clone($baseevent);
-        
-        $teachereventname = get_string('meetingwith', 'scheduler').' '.get_string('student', 'scheduler').', '.$studentnames[0];
+        $teachereventname = get_string('meetingwith', 'scheduler').' '.get_string('student', 'scheduler').', '.fullname($student);
         $teacherevent->name = shorten_text($teachereventname, 200);
+
+
+
     
-        $this->add_calendar_event("SSsup:{$slot->id}:{$slot->course}", $teacher->id, $teacherevent);
+        $this->add_calendar_event("SSsup:{$slot->id}:{$scheduler->course}", $teacher->id, $teacherevent);
     }
 
     /**

@@ -13,11 +13,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
-//ADDED FOR ZOOM
-
-require_once((dirname(dirname(__FILE__))).'/zoom/lib.php');
-//END OF ADDED
-
 /**
  * Base class for slot-related forms
  *
@@ -226,24 +221,58 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
 
         //ADDED FOR ZOOM
-        //$mform->addElement('checkbox', 'addzoom', get_string('addzoom', 'scheduler'));
+        if(SCHEDULER_ZOOM){
+            $addzoom = has_capability('mod/scheduler:addzoom',  $this->scheduler->get_context());
 
-        $addzoom = has_capability('mod/scheduler:addzoom',  $this->scheduler->get_context());
+            if($addzoom){
 
-        if($addzoom){
+                $mform->addElement('advcheckbox', 'addzoom', get_string('addzoom', 'scheduler'),get_string('addzoom', 'scheduler'), array(), array(0, 1));
+                $mform->setDefault('addzoom', false);
+                
 
-            $mform->addElement('advcheckbox', 'addzoom', get_string('addzoom', 'scheduler'),get_string('addzoom', 'scheduler'), array(), array(0, 1));
-            //$mform->addElement('advcheckbox', 'addzoom', get_string('addzoom', 'scheduler'), array());
-            $mform->setDefault('addzoom', false);
+                //a hacky way to have id in from of zoom meeting... not great will try and find better
+                $mform->addElement('hidden', 'addzoomvalue', '0');
+                //second hacky way for when form is cancelled and zoom meeting has been generated
+                $mform->addElement('hidden', 'addzoomog', '0');
 
-            //a hacky way to have id in from of zoom meeting... not great will try and find better
-            $mform->addElement('hidden', 'addzoomvalue', '0');
-            //second hacky way for when form is cancelled and zoom meeting has been generated
-            $mform->addElement('hidden', 'addzoomog', '0');
+                //Add co-host select option 
+                $mform->addElement('text', 'newcohost', '','hidden');
+                $mform->addElement('text', 'cohostid', '','hidden');
 
-            //$mform->addHelpButton('ignoreconflicts', 'ignoreconflicts', 'scheduler');
+
+                //surrounded by a hidden div to open when zoom meeting is clicked.
+          
+                $mform->addElement('html', '<div id="addcohost"  class="form-group row  fitem  hidden" >');
+
+                $mform->addElement('html', '<div class="col-md-3" >');
+                $mform->addElement('html', '<label>Add Alternative Hosts</label> ');
+                       
+               
+                $mform->addHelpButton('addzoom','zoomaddcohost', 'scheduler');
+
+                $mform->addElement('html', '</div>');
+                
+         
+
+                $mform->addElement('html', '<div class="col-md-9" >');
+                $mform->addElement('html', '<div id="demo" class="  yui3-skin-sam tag-container" >');
+                
+
+                $mform->addElement('text', 'ac-input', '');
+                
+
+                $mform->addElement('html', '</div>');
+                $mform->addElement('html', '</div>');
+                $mform->addElement('html', '</div>');
+                
+               
+            
+                
+                
+               
+            }
         }
-            //END OF ADDED
+        //END OF ADDED
 
         // Slot comments.
         $mform->addElement('editor', 'notes_editor', get_string('comments', 'scheduler'),
@@ -376,63 +405,81 @@ class scheduler_editslot_form extends scheduler_slotform_base {
             }
         }
         //ADDED FOR ZOOM
-        if ($data['addzoom']==1) {
-            //check if Teacher 
-            $host_id = $this->get_teacher_zoom($data['teacherid']);
+        if(SCHEDULER_ZOOM){
+            if ($data['addzoom']==1) {
+                //check if Teacher 
+                $host_id = zoomer_get_user($data['teacherid']);
 
-            if($host_id == false){
-                $msg = get_string('zoomwarning', 'scheduler');
-                $errors['addzoom'] = $msg;
+                if($host_id == false){
+                    $msg = get_string('zoomwarning', 'scheduler');
+                    $errors['addzoom'] = $msg;
+                }
+
+                //check if any co-hosts are added if so check if valid zoom id's
+
+                if (isset($data['cohostid'])) {
+
+                    $teacherids = explode(",", $data['cohostid']);
+
+                    error_log(print_r("Test 1",TRUE));
+                    error_log(print_r($teacherids,TRUE));
+                    
+                    
+                    //the ids are only populate based on the instructor in the course
+                    //therefore it should match and give proper email.
+                    foreach($teacherids as $id){
+                    error_log(print_r("Test 3",TRUE));
+                    if($id !=0){
+                        //check if provided emails are connected to zoom accounts
+                            $host_id = zoomer_get_user((int)$id);
+
+                            error_log(print_r("Test 5",TRUE));
+                            error_log(print_r($host_id,TRUE));
+                            if($host_id == false){
+                                $msg = get_string('zoomcohost', 'scheduler');
+                                $errors['addzoom'] = $msg;
+                            }
+                        }
+                    }
+                }
+
+                //now check typed in email, first check if they are valid emails, then if they have accounts
+                if (isset($data['newcohost'])) {
+                    $teacheremails = explode(",", $data['newcohost']);
+
+                    error_log(print_r("Test 6",TRUE));
+                    error_log(print_r($teacheremails,TRUE));
+                    //check if provided emails are connected to zoom accounts
+                    foreach($teacheremails as $email){
+
+                        
+                        if($email != ""){
+
+                            $email=trim($email);
+                            error_log(print_r("Test 6b",TRUE));
+                            error_log(print_r($email,TRUE));
+                            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                                $host_id = zoomer_user_email($email);
+                                error_log(print_r("Test 7",TRUE));
+                                error_log(print_r($host_id,TRUE));
+
+                                if($host_id == false){
+                                    $msg = get_string('zoomcohost', 'scheduler');
+                                    $errors['addzoom'] = $msg;
+                                }
+                            }else{
+                                $msg = get_string('zoomcohostemail', 'scheduler').": ".$email;
+                                $errors['addzoom'] = $msg;
+                            }
+                        }
+                    }
+                }
             }
         }
         //END OF ADDED
         return $errors;
     }
-
-        /**
-     * Fill the form data from an existing slot
-     *
-     * @param scheduler_slot $slot
-     * @return stdClass form data
-     */
-    public function get_teacher_zoom($teacherid) {
-
-        global $DB;
-        //call zoom page
-        require_once((dirname(dirname(__FILE__))).'/zoom/lib.php');
-        require_once((dirname(dirname(__FILE__))).'/zoom/locallib.php');
-
-        //check update teacher based on slot data 
-        $teacher =  $DB->get_record('user', array('id' => $teacherid), '*', MUST_EXIST);
     
-        $required=true;
-        $cache = cache::make('mod_zoom', 'zoomid');
-
-        if (!($zoomuserid = $cache->get($teacherid))) {
-            $zoomuserid = false;
-            $service = new mod_zoom_webservice();
-                   
-            try {
-                $zoomuser = $service->get_user($teacher->email);
-
-                if ($zoomuser !== false) {
-                    $zoomuserid = $zoomuser->id;
-                 }
-            } catch (moodle_exception $error) {
-                if ($required) {
-                    throw $error;
-                } else {
-                    $zoomuserid = $zoomuser->id;
-                }
-            }
-            $cache->set($teacherid, $zoomuserid);
-        }
-
-        return $zoomuserid;
-    }
-
-
-
     /**
      * Fill the form data from an existing slot
      *
@@ -457,10 +504,15 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         }
 
         //ADDED FOR ZOOM
-        if($slot->zoomid != 0){
-            $data->addzoom = TRUE;
-            $data->addzoomvalue = $slot->zoomid;
-            $data->addzoomog = $slot->zoomid;
+        //call on zoomer to see if record exists 
+        if(SCHEDULER_ZOOM){
+            $zoomid = zoomer_get_zoomid($slot->id);
+
+            if($zoomid){
+                $data->addzoom = TRUE;
+                $data->addzoomvalue = $zoomid;
+                $data->addzoomog = $zoomid;
+            }
         }
         //END OF ADDED
 
@@ -570,17 +622,48 @@ class scheduler_editslot_form extends scheduler_slotform_base {
             }
         }
 
-        //ADDED FOR ZOOM  MAKE INTO OWN FUNCTION        
-        if($data->addzoomvalue != 0){
-           $this->update_zoom($data->addzoomvalue,$slot);
-           $slot->zoomid = (int) $data->addzoomvalue;
-        }
+        //ADDED FOR ZOOM  MAKE INTO OWN FUNCTION     
+        if(SCHEDULER_ZOOM){   
 
-        //need to fully delete zoom meeting
-        if($data->addzoomvalue == 0 && $data->addzoomog !=0 ){
-            $id = $data->addzoomog;
-            //call to delete instance
-            $deleted = zoom_delete_instance($id);
+            //update time, co-host, and duration of meeting
+            if($data->addzoomvalue != 0){
+                zoomer_update_zoom($data->addzoomvalue,$slot);
+               // $slot->zoomid = (int) $data->addzoomvalue;
+            
+                if(isset($data->cohostid)){
+                    $teacherids = explode(",", $data->cohostid);
+                    $teachers = $this->scheduler->get_available_teachers();
+                    $teacheremail =[];
+                    
+                    //the ids are only populate based on the instructor in the course
+                    //therefore it should match and give proper email.
+                    foreach($teacherids as $id){
+                        foreach($teachers as $teacher){
+                            if($id==$teacher->id){
+                                $teacheremails[] = $teacher->email;
+                            }
+                        }
+                    }
+
+                    error_log(print_r("In Save slot 1",TRUE));
+                    error_log(print_r($teacheremails,TRUE));
+
+                    zoomer_update_cohost($data->addzoomvalue,$teacheremails);
+                }
+                if(isset($data->newcohost )&& !empty($data->newcohost)){
+                    $teacheremails = explode(",", $data->newcohost);
+                    error_log(print_r("In Save slot 2",TRUE));
+                    error_log(print_r($teacheremails,TRUE));
+                    zoomer_append_cohost($data->addzoomvalue,$teacheremails);
+
+                }
+            }
+            //need to fully delete zoom meeting
+            if($data->addzoomvalue == 0 && $data->addzoomog !=0){
+                $id = $data->addzoomog;
+                //call to delete instance
+                $deleted = zoom_delete_instance($id);
+            }
         }
         //END OF ADDED
 
@@ -589,38 +672,6 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
         return $slot;
     }
-
-    //ADDED FOR ZOOM
-    /**
-     * Save a slot object, updating it with data from the form
-     * @param int $slotid
-     * @param mixed $data form data
-     * @return scheduler_slot the updated slot
-     */
-    public function update_zoom($id, $slot) {
-
-        global $DB;
-        //call zoom page
-        require_once((dirname(dirname(__FILE__))).'/zoom/lib.php');
-        require_once((dirname(dirname(__FILE__))).'/zoom/locallib.php');
-        //create array similar to zoom array
-        $zoom  = $DB->get_record('zoom', array('id' => $id), '*', MUST_EXIST);
-        $zoom->instance = $id;
-        $zoom->start_time=$slot->starttime;
-        $zoom->duration= $slot->duration*60;
-
-        //check update teacher based on slot data 
-        $teacherid= $slot->teacherid;
-        $host_id = $this->get_teacher_zoom($teacherid);
-        $zoom->host_id = $host_id;
-
-        //need to adjust for recurring meetings
-        //$zoom->recurring=0;
-
-        //update instance 
-        zoom_update_instance($zoom);
-    }
-    //END FOR ZOOM
 }
 
 /**
@@ -812,16 +863,19 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         $mform->setDefault('remindersel', -1);
 
         //ADDED FOR ZOOM
-        $addzoom = has_capability('mod/scheduler:addzoom',  $this->scheduler->get_context());
+        if(SCHEDULER_ZOOM){  
+            $addzoom = has_capability('mod/scheduler:addzoom',  $this->scheduler->get_context());
 
-        if($addzoom){
-            $mform->addElement('advcheckbox', 'addzoom', get_string('addzoom', 'scheduler'),get_string('addzoom', 'scheduler'), array(), array(0, 1));
-            $mform->setDefault('addzoom', false);
+            if($addzoom){
+                $mform->addElement('advcheckbox', 'addzoom', get_string('addzoom', 'scheduler'),get_string('addzoom', 'scheduler'), array(), array(0, 1));
+                $mform->setDefault('addzoom', false);
 
-            //a hacky way to have id in from of zoom meeting... not great will try and find better
-            $mform->addElement('hidden', 'addzoomvalue', '0');
-            //second hacky way for when form is cancelled and zoom meeting has been generated
-            $mform->addElement('hidden', 'addzoomog', '0');
+                //a hacky way to have id in from of zoom meeting... not great will try and find better
+                $mform->addElement('hidden', 'addzoomvalue', '0');
+                //second hacky way for when form is cancelled and zoom meeting has been generated
+            
+                $mform->addElement('hidden', 'addzoomog', '0');
+            }
         }
         //END OF ADDED
 

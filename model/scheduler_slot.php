@@ -385,18 +385,22 @@ class scheduler_slot extends mvc_child_record_model {
         $baseevent->timeduration = $this->duration * MINSECS;
         $baseevent->visible = 1;
 
-        //ADDED FOR ZOOM
-        if($this->data->zoomid != 0){
-            $zoom = $DB->get_record('zoom', array('id' => $this->data->zoomid), '*', MUST_EXIST);
-            $baseevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->join_url."'>".$zoom->join_url."</a>";
-        }
-        //END OF ADDED
+       
 
         // Update student events.
 
         $studentevent = clone($baseevent);
         $studenteventname = get_string('meetingwith', 'scheduler').' '.$scheduler->get_teacher_name().', '.fullname($teacher);
         $studentevent->name = shorten_text($studenteventname, 200);
+
+         //ADDED FOR ZOOM
+         if(SCHEDULER_ZOOM){
+            if($this->data->zoomid != 0){
+                $zoom = $DB->get_record('zoom', array('id' => $this->data->zoomid), '*', MUST_EXIST);
+                $studentevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->join_url."'>".$zoom->join_url."</a>";
+            }
+        }
+        //END OF ADDED
 
         $this->update_calendar_events( $this->get_student_eventtype(), $studentids, $studentevent);
 
@@ -415,6 +419,15 @@ class scheduler_slot extends mvc_child_record_model {
             }
             $teacherevent->name = shorten_text($teachereventname, 200);
         }
+
+         //ADDED FOR ZOOM
+         if(SCHEDULER_ZOOM){
+            if($this->data->zoomid != 0){
+                $zoom = $DB->get_record('zoom', array('id' => $this->data->zoomid), '*', MUST_EXIST);
+                $teacherevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->start_url."'>".$zoom->start_url."</a>";
+            }
+        }
+        //END OF ADDED
 
         $this->update_calendar_events( $this->get_teacher_eventtype(), $teacherids, $teacherevent);
 
