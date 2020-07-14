@@ -21,6 +21,7 @@ MOD = M.mod_scheduler.zoom = {};
 MOD.create_new = function(cmid, spinner) {
 
     teacherid= Y.one('[name="teacherid"]').get("value");
+    ogmeeting= Y.one('[name="addzoomog"]').get('value');
 
     Y.io(M.cfg.wwwroot + '/mod/scheduler/ajax.php', {
         // The request paramaters.
@@ -28,6 +29,7 @@ MOD.create_new = function(cmid, spinner) {
         	action: 'addzoom',
             id: cmid,
             teacherid : teacherid,
+            zoomid: ogmeeting,
             sesskey: M.cfg.sesskey
         },
 
