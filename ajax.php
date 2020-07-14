@@ -46,7 +46,7 @@ switch ($action) {
   
         $teacherid = required_param('teacherid', PARAM_INT);
         //check if teacher has zoom account 
-        $zoomuserid = zoomer_get_user($teacherid);
+        $zoomuserid = zoomscheduler_get_user($teacherid);
         if(!$zoomuserid){
             $return = false;
         }else{
@@ -55,7 +55,7 @@ switch ($action) {
             $formdata->start_time = time();
 
             //Add a temp slotid update after full submit
-            $zoommeeting = zoomer_create_zoom_meeting($formdata, $zoomuserid, $cm, $course, 0);
+            $zoommeeting = zoomscheduler_create_zoom_meeting($formdata, $zoomuserid, $cm, $course, 0);
 
             $return = $zoommeeting;
         }
@@ -66,7 +66,7 @@ switch ($action) {
 
         $id = required_param('zoomid', PARAM_INT);
         //call to delete instance
-        zoomer_delete_zoom_meeting($id);
+        zoomscheduler_delete_zoom_meeting($id);
 
     break;
 }

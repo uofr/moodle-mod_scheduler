@@ -19,8 +19,8 @@ require_once($CFG->dirroot.'/mod/scheduler/renderable.php');
 
 
 //ADDED FOR ZOOM
-if (is_file($CFG->dirroot.'/local/zoomer/lib.php')){
-    require_once($CFG->dirroot.'/local/zoomer/lib.php');
+if (is_file($CFG->dirroot.'/local/zoomscheduler/lib.php')){
+    require_once($CFG->dirroot.'/local/zoomscheduler/lib.php');
     define('SCHEDULER_ZOOM', TRUE);  
 }else{
     define('SCHEDULER_ZOOM', FALSE);  

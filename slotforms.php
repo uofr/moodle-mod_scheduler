@@ -408,7 +408,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         if(SCHEDULER_ZOOM){
             if ($data['addzoom']==1) {
                 //check if Teacher 
-                $host_id = zoomer_get_user($data['teacherid']);
+                $host_id = zoomscheduler_get_user($data['teacherid']);
 
                 if($host_id == false){
                     $msg = get_string('zoomwarning', 'scheduler');
@@ -427,7 +427,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                   
                     if($id !=0){
                         //check if provided emails are connected to zoom accounts
-                            $host_id = zoomer_get_user((int)$id);
+                            $host_id = zoomscheduler_get_user((int)$id);
 
                             if($host_id == false){
                                 $msg = get_string('zoomcohost', 'scheduler');
@@ -448,7 +448,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                             $email=trim($email);
                             
                             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                $host_id = zoomer_user_email($email);
+                                $host_id = zoomscheduler_user_email($email);
                                 
                                 if($host_id == false){
                                     $msg = get_string('zoomcohost', 'scheduler');
@@ -491,9 +491,9 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         }
 
         //ADDED FOR ZOOM
-        //call on zoomer to see if record exists 
+        //call on zoomscheduler to see if record exists 
         if(SCHEDULER_ZOOM){
-            $zoomid = zoomer_get_zoomid($slot->id);
+            $zoomid = zoomscheduler_get_zoomid($slot->id);
 
             if($zoomid){
                 $data->addzoom = TRUE;
@@ -614,7 +614,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
             //update time, co-host, and duration of meeting
             if($data->addzoomvalue != 0){
-                zoomer_update_zoom($data->addzoomvalue,$slot);
+                zoomscheduler_update_zoom($data->addzoomvalue,$slot);
                // $slot->zoomid = (int) $data->addzoomvalue;
             
                 if(isset($data->cohostid)){
@@ -631,18 +631,18 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                             }
                         }
                     }
-                    zoomer_update_cohost($data->addzoomvalue,$teacheremails);
+                    zoomscheduler_update_cohost($data->addzoomvalue,$teacheremails);
                 }
                 if(isset($data->newcohost )&& !empty($data->newcohost)){
                     $teacheremails = explode(",", $data->newcohost);
-                    zoomer_append_cohost($data->addzoomvalue,$teacheremails);
+                    zoomscheduler_append_cohost($data->addzoomvalue,$teacheremails);
                 }
             }
             //need to fully delete zoom meeting
             if($data->addzoomvalue == 0 && $data->addzoomog !=0){
                 $id = $data->addzoomog;
                 //call to delete instance
-                $deleted = zoomer_delete_zoom_meeting($id);
+                $deleted = zoomscheduler_delete_zoom_meeting($id);
             }
         }
         //END OF ADDED

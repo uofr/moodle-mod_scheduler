@@ -186,6 +186,17 @@ if ($action == 'addslot') {
         if(SCHEDULER_ZOOM){
             $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
             'M.mod_scheduler.zoom.init', array($scheduler->cmid));
+
+             // Choose the teacher (if allowed).
+             if (has_capability('mod/scheduler:canscheduletootherteachers', $scheduler->get_context())) {
+                $teacherarray =array();
+                $teacherarray =scheduler_get_instructors($scheduler);
+
+                //get list of co-hosts already added, if none false is returned
+                $cohosts = zoomscheduler_get_cohosts($slotid);
+               
+                $PAGE->requires->yui_module('moodle-mod_scheduler-cohost','M.mod_scheduler.cohost.init', array($teacherarray,$cohosts));
+            }
         }
         //END of ADDED
      
@@ -290,7 +301,7 @@ if ($action == 'updateslot') {
                     $teacherarray =scheduler_get_instructors($scheduler);
 
                     //get list of co-hosts already added, if none false is returned
-                    $cohosts = zoomer_get_cohosts($slotid);
+                    $cohosts = zoomscheduler_get_cohosts($slotid);
                    
                     $PAGE->requires->yui_module('moodle-mod_scheduler-cohost','M.mod_scheduler.cohost.init', array($teacherarray,$cohosts));
                 }

@@ -393,9 +393,9 @@ class sessions {
                         $zoommeeting = array();
                         if(SCHEDULER_ZOOM){
                             if($session->addzoom){
-                                $host_id = zoomer_get_user($teacher->id);
+                                $host_id = zoomscheduler_get_user($teacher->id);
                                 if($host_id){
-                                    $zoommeeting = zoomer_create_zoom_meeting($session, $host_id, $cm, $course->id,0);
+                                    $zoommeeting = zoomscheduler_create_zoom_meeting($session, $host_id, $cm, $course->id,0);
                                 }else{
                                     mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidzoomuser','scheduler', $session->scheduler));
                                 }
@@ -429,7 +429,7 @@ class sessions {
 
                                 //Added for zoom
                                 if(SCHEDULER_ZOOM && $session->addzoom){
-                                    zoomer_update_zoom($zoommeeting->id, $slot);
+                                    zoomscheduler_update_zoom($zoommeeting->id, $slot);
                                 }
                                 //End of Added
 
