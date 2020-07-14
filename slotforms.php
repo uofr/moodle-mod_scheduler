@@ -642,7 +642,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
             if($data->addzoomvalue == 0 && $data->addzoomog !=0){
                 $id = $data->addzoomog;
                 //call to delete instance
-                $deleted = zoom_delete_instance($id);
+                $deleted = zoomer_delete_zoom_meeting($id);
             }
         }
         //END OF ADDED
