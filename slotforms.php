@@ -421,20 +421,14 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
                     $teacherids = explode(",", $data['cohostid']);
 
-                    error_log(print_r("Test 1",TRUE));
-                    error_log(print_r($teacherids,TRUE));
-                    
-                    
                     //the ids are only populate based on the instructor in the course
                     //therefore it should match and give proper email.
                     foreach($teacherids as $id){
-                    error_log(print_r("Test 3",TRUE));
+                  
                     if($id !=0){
                         //check if provided emails are connected to zoom accounts
                             $host_id = zoomer_get_user((int)$id);
 
-                            error_log(print_r("Test 5",TRUE));
-                            error_log(print_r($host_id,TRUE));
                             if($host_id == false){
                                 $msg = get_string('zoomcohost', 'scheduler');
                                 $errors['addzoom'] = $msg;
@@ -447,22 +441,15 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 if (isset($data['newcohost'])) {
                     $teacheremails = explode(",", $data['newcohost']);
 
-                    error_log(print_r("Test 6",TRUE));
-                    error_log(print_r($teacheremails,TRUE));
                     //check if provided emails are connected to zoom accounts
                     foreach($teacheremails as $email){
 
-                        
                         if($email != ""){
-
                             $email=trim($email);
-                            error_log(print_r("Test 6b",TRUE));
-                            error_log(print_r($email,TRUE));
+                            
                             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                                 $host_id = zoomer_user_email($email);
-                                error_log(print_r("Test 7",TRUE));
-                                error_log(print_r($host_id,TRUE));
-
+                                
                                 if($host_id == false){
                                     $msg = get_string('zoomcohost', 'scheduler');
                                     $errors['addzoom'] = $msg;
@@ -644,18 +631,11 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                             }
                         }
                     }
-
-                    error_log(print_r("In Save slot 1",TRUE));
-                    error_log(print_r($teacheremails,TRUE));
-
                     zoomer_update_cohost($data->addzoomvalue,$teacheremails);
                 }
                 if(isset($data->newcohost )&& !empty($data->newcohost)){
                     $teacheremails = explode(",", $data->newcohost);
-                    error_log(print_r("In Save slot 2",TRUE));
-                    error_log(print_r($teacheremails,TRUE));
                     zoomer_append_cohost($data->addzoomvalue,$teacheremails);
-
                 }
             }
             //need to fully delete zoom meeting

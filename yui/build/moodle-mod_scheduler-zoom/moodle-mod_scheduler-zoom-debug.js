@@ -51,9 +51,7 @@ MOD.create_new = function(cmid, spinner) {
                 if(parsedResponse.join_url !== undefined){
 
                    Y.one('#addcohost').removeClass('hidden');
-                    console.log("testing");
-                    console.log(Y.one('#addcohost'));
-
+                   
                     Y.all(SELECTORS.ERROR).each( function(box) {
                         box.setStyle('display', 'none');
                         box= Y.all('p').remove();
@@ -97,9 +95,7 @@ MOD.create_new = function(cmid, spinner) {
 MOD.partial_delete = function() {
            
     Y.one('#addcohost').addClass('hidden');
-    console.log("testing");
-    console.log(Y.one('#addcohost'));
-
+   
     Y.all(SELECTORS.EDITOR).each( function(box) {
         box.setHTML("");
         box.simulate("blur");
@@ -167,11 +163,8 @@ MOD.init = function(cmid) {
 
 	Y.all(SELECTORS.CHECKBOXES).each( function(box) {
         //check if box is checked if so remove hidden class from options
-        console.log("TESTTEST");
         if(box.get("checked")){
             Y.one('#addcohost').removeClass('hidden');
-            console.log("testing");
-            console.log(Y.one('#addcohost'));
         }
 
 		box.on('change', function(e) {
