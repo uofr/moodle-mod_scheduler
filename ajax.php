@@ -44,20 +44,31 @@ switch ($action) {
         break;
     case 'addzoom':
   
-        $teacherid = required_param('teacherid', PARAM_INT);
-        //check if teacher has zoom account 
-        $zoomuserid = zoomscheduler_get_user($teacherid);
-        if(!$zoomuserid){
-            $return = false;
+        //check if meeting already exists for this slot
+        $zoomid= required_param('zoomid', PARAM_INT);
+        error_log(print_r("testing",TRUE));
+        error_log(print_r($ogmeeting,TRUE));
+        //if so snag info
+        if($zoomid!= 0){
+            $return = zoomscheduler_get_zoom_meeting($zoomid);
+            error_log(print_r($return,TRUE));
         }else{
-            $formdata = new stdClass();
-            $formdata->duration= 60;
-            $formdata->start_time = time();
+            //else create new meeting
+            $teacherid = required_param('teacherid', PARAM_INT);
+            //check if teacher has zoom account 
+            $zoomuserid = zoomscheduler_get_user($teacherid);
+            if(!$zoomuserid){
+                $return = false;
+            }else{
+                $formdata = new stdClass();
+                $formdata->duration= 60;
+                $formdata->start_time = time();
 
-            //Add a temp slotid update after full submit
-            $zoommeeting = zoomscheduler_create_zoom_meeting($formdata, $zoomuserid, $cm, $course, 0);
+                //Add a temp slotid update after full submit
+                $zoommeeting = zoomscheduler_create_zoom_meeting($formdata, $zoomuserid, $cm, $course, 0);
 
-            $return = $zoommeeting;
+                $return = $zoommeeting;
+            }
         }
 
     break;

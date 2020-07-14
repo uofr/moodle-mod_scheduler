@@ -239,37 +239,24 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 $mform->addElement('text', 'newcohost', '','hidden');
                 $mform->addElement('text', 'cohostid', '','hidden');
 
-
                 //surrounded by a hidden div to open when zoom meeting is clicked.
-          
                 $mform->addElement('html', '<div id="addcohost"  class="form-group row  fitem  hidden" >');
 
                 $mform->addElement('html', '<div class="col-md-3" >');
                 $mform->addElement('html', '<label>Add Alternative Hosts</label> ');
                        
-               
                 $mform->addHelpButton('addzoom','zoomaddcohost', 'scheduler');
 
                 $mform->addElement('html', '</div>');
                 
-         
-
                 $mform->addElement('html', '<div class="col-md-9" >');
                 $mform->addElement('html', '<div id="demo" class="  yui3-skin-sam tag-container" >');
                 
-
                 $mform->addElement('text', 'ac-input', '');
                 
-
                 $mform->addElement('html', '</div>');
                 $mform->addElement('html', '</div>');
                 $mform->addElement('html', '</div>');
-                
-               
-            
-                
-                
-               
             }
         }
         //END OF ADDED
@@ -278,10 +265,8 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         $mform->addElement('editor', 'notes_editor', get_string('comments', 'scheduler'),
                             array('rows' => 3, 'columns' => 60), $this->noteoptions);
         $mform->setType('notes', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
-        
 
         // Appointments.
-
         $repeatarray = array();
         $grouparray = array();
         $repeatarray[] = $mform->createElement('header', 'appointhead', get_string('appointmentno', 'scheduler', '{no}'));
@@ -611,12 +596,10 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
         //ADDED FOR ZOOM  MAKE INTO OWN FUNCTION     
         if(SCHEDULER_ZOOM){   
-
             //update time, co-host, and duration of meeting
             if($data->addzoomvalue != 0){
                 zoomscheduler_update_zoom($data->addzoomvalue,$slot);
-               // $slot->zoomid = (int) $data->addzoomvalue;
-            
+               
                 if(isset($data->cohostid)){
                     $teacherids = explode(",", $data->cohostid);
                     $teachers = $this->scheduler->get_available_teachers();
