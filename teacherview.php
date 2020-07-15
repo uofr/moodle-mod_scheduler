@@ -71,18 +71,16 @@ function scheduler_print_schedulebox(scheduler_instance $scheduler, $studentid, 
  */
 function scheduler_get_instructors(scheduler_instance $scheduler) {
 
-        $teachername = s($scheduler->get_teacher_name());
         $teachers = $scheduler->get_available_teachers();
         $teachersmenu = array();
         if ($teachers) {
             foreach ($teachers as $teacher) {
                 $teacherarray=new stdClass;
-                $teacherarray->id = $teacher->id;
+                $teacherarray->email = $teacher->email;
                 $teacherarray->name = fullname($teacher);
                 $teachersmenu[] = $teacherarray;
             }
         } 
-
         return $teachersmenu;
 }
 

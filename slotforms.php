@@ -401,30 +401,27 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 }
 
                 //check if any co-hosts are added if so check if valid zoom id's
-
                 if (isset($data['cohostid'])) {
 
-                    $teacherids = explode(",", $data['cohostid']);
-
-                    //the ids are only populate based on the instructor in the course
-                    //therefore it should match and give proper email.
-                    foreach($teacherids as $id){
+                    $teacheremails = array_filter(explode(",", $data['cohostid']));
+                    foreach($teacheremails as $email){
                   
-                    if($id !=0){
-                        //check if provided emails are connected to zoom accounts
-                            $host_id = zoomscheduler_get_user((int)$id);
+                        if($email !="0"){
+
+                            //check if provided emails are connected to zoom accounts
+                            $host_id = zoomscheduler_get_user($email);
 
                             if($host_id == false){
                                 $msg = get_string('zoomcohost', 'scheduler');
                                 $errors['addzoom'] = $msg;
                             }
                         }
-                    }
+                     }
                 }
 
                 //now check typed in email, first check if they are valid emails, then if they have accounts
                 if (isset($data['newcohost'])) {
-                    $teacheremails = explode(",", $data['newcohost']);
+                    $teacheremails = array_filter(explode(",", $data['newcohost']));
 
                     //check if provided emails are connected to zoom accounts
                     foreach($teacheremails as $email){
@@ -433,7 +430,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                             $email=trim($email);
                             
                             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                $host_id = zoomscheduler_user_email($email);
+                                $host_id = zoomscheduler_get_user($email);
                                 
                                 if($host_id == false){
                                     $msg = get_string('zoomcohost', 'scheduler');
@@ -601,23 +598,11 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 zoomscheduler_update_zoom($data->addzoomvalue,$slot);
                
                 if(isset($data->cohostid)){
-                    $teacherids = explode(",", $data->cohostid);
-                    $teachers = $this->scheduler->get_available_teachers();
-                    $teacheremail =[];
-                    
-                    //the ids are only populate based on the instructor in the course
-                    //therefore it should match and give proper email.
-                    foreach($teacherids as $id){
-                        foreach($teachers as $teacher){
-                            if($id==$teacher->id){
-                                $teacheremails[] = $teacher->email;
-                            }
-                        }
-                    }
+                    $teacheremails = array_filter(explode(",", $data->cohostid));
                     zoomscheduler_update_cohost($data->addzoomvalue,$teacheremails);
                 }
                 if(isset($data->newcohost )&& !empty($data->newcohost)){
-                    $teacheremails = explode(",", $data->newcohost);
+                    $teacheremails = array_filter(explode(",", $data->newcohost));
                     zoomscheduler_append_cohost($data->addzoomvalue,$teacheremails);
                 }
             }

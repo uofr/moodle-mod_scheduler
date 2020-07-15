@@ -24,37 +24,42 @@ MOD.clearTags=function(tagContainer) {
 
 MOD.addTags = function(tagContainer, tagsarray) {
  M.mod_scheduler.cohost.clearTags(tagContainer);
- //tags.slice().reverse().each( function(tag) {
 
  var input = Y.one('#id_ac-input');
 
-
  Y.Array.each( tagsarray, function(tag) {
-    //tagContainer.prepend(M.mod_scheduler.cohost.createTag(tag));
     tagContainer.insert(M.mod_scheduler.cohost.createTag(tag.name),input);
 
   });
 }
 
-MOD.addIds = function(tagsarray) {
+MOD.addEmails = function(tagsarray) {
  
   var input = Y.one('#id_cohostid');
   input.set('value',"");
  
   var inputstring ="";
   Y.Array.each( tagsarray, function(tag) {
-      inputstring += tag.id+',';
+
+      if(tag != "0" && tag != 0  ){
+        inputstring += tag.email+',';
+      }
    });
 
-   input.set('value',inputstring);
+   if(inputstring != "")
+    input.set('value',inputstring);
  }
 
  MOD.addNewEmail = function(value) {
  
-  var input = Y.one('#id_newcohost');
-  inputvalue = input.get('value');
-  value = value.trim();
-  input.set('value', inputvalue+','+value);
+    var input = Y.one('#id_newcohost');
+    inputvalue = input.get('value');
+    value = value.trim();
+    if(inputvalue ==""){
+      input.set('value', value);
+    }else{
+      input.set('value', inputvalue+','+value);
+    }
  }
 
  MOD.deleteEmail = function(value) {
@@ -100,7 +105,7 @@ MOD.init = function(ogteachers, cohosts) {
     Y.one('#id_newcohost').set('value',"");
 
     M.mod_scheduler.cohost.addTags(tagContainer,tagsarray);  
-    M.mod_scheduler.cohost.addIds(tagsarray);  
+    M.mod_scheduler.cohost.addEmails(tagsarray);  
 
     Y.Array.each(ogteachers, function(tag){
       teachersnames.push(tag.name);
@@ -129,8 +134,8 @@ MOD.init = function(ogteachers, cohosts) {
           if(p.name !== tagLabel){
             temp.push(p);
           }else{
-            //clear email if match and id is 0
-            if(p.id==0){
+            //clear email if match and email is 0
+            if(p.email==0){
               M.mod_scheduler.cohost.deleteEmail(p.name);
             }
           }
@@ -139,7 +144,7 @@ MOD.init = function(ogteachers, cohosts) {
        tagsarray = temp;
   
         M.mod_scheduler.cohost.addTags(tagContainer,tagsarray);    
-        M.mod_scheduler.cohost.addIds(tagsarray);
+        M.mod_scheduler.cohost.addEmails(tagsarray);
 
       }
     })
@@ -198,10 +203,10 @@ MOD.init = function(ogteachers, cohosts) {
 
             newtag = e.target.get("value");
            
-            tagsarray.push({id: 0, name: newtag});
+            tagsarray.push({email: 0, name: newtag});
             
             M.mod_scheduler.cohost.addTags(tagContainer,tagsarray);
-            M.mod_scheduler.cohost.addIds(tagsarray);
+            M.mod_scheduler.cohost.addEmails(tagsarray);
             M.mod_scheduler.cohost.addNewEmail(newtag);
             inputNode.set('value',"");
           }
@@ -226,12 +231,12 @@ MOD.init = function(ogteachers, cohosts) {
 
             if(contains){
               //Go through og array to find teacher ids to attach
-              teacherid=0;
+              teacheremail="0";
 
               Y.Array.each(ogteachers,function(teacher){
 
                   if(teacher.name === value)
-                    teacherid = teacher.id
+                    teacheremail = teacher.email
               });
 
               temp=[];
@@ -242,10 +247,10 @@ MOD.init = function(ogteachers, cohosts) {
               });
               
               tagfill = temp;
-              tagsarray.push({id: teacherid, name: value});
+              tagsarray.push({email: teacheremail, name: value});
 
               M.mod_scheduler.cohost.addTags(tagContainer,tagsarray);
-              M.mod_scheduler.cohost.addIds(tagsarray);
+              M.mod_scheduler.cohost.addEmails(tagsarray);
               inputNode.set('value',"");
             }
   

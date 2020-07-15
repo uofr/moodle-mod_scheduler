@@ -46,12 +46,9 @@ switch ($action) {
   
         //check if meeting already exists for this slot
         $zoomid= required_param('zoomid', PARAM_INT);
-        error_log(print_r("testing",TRUE));
-        error_log(print_r($ogmeeting,TRUE));
         //if so snag info
         if($zoomid!= 0){
             $return = zoomscheduler_get_zoom_meeting($zoomid);
-            error_log(print_r($return,TRUE));
         }else{
             //else create new meeting
             $teacherid = required_param('teacherid', PARAM_INT);
