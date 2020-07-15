@@ -393,7 +393,7 @@ class sessions {
                         $zoommeeting = array();
                         if(SCHEDULER_ZOOM){
                             if($session->addzoom){
-                                $host_id = zoomscheduler_get_user($teacher->id);
+                                $host_id = zoomscheduler_hostkey_id($teacher->id);
                                 if($host_id){
                                     $zoommeeting = zoomscheduler_create_zoom_meeting($session, $host_id, $cm, $course->id,0);
                                 }else{

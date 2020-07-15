@@ -53,7 +53,7 @@ switch ($action) {
             //else create new meeting
             $teacherid = required_param('teacherid', PARAM_INT);
             //check if teacher has zoom account 
-            $zoomuserid = zoomscheduler_get_user($teacherid);
+            $zoomuserid = zoomscheduler_hostkey_id($teacherid);
             if(!$zoomuserid){
                 $return = false;
             }else{

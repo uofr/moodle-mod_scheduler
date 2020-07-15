@@ -393,7 +393,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         if(SCHEDULER_ZOOM){
             if ($data['addzoom']==1) {
                 //check if Teacher 
-                $host_id = zoomscheduler_get_user($data['teacherid']);
+                $host_id = zoomscheduler_hostkey_id($data['teacherid']);
 
                 if($host_id == false){
                     $msg = get_string('zoomwarning', 'scheduler');
@@ -409,7 +409,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                         if($email !="0"){
 
                             //check if provided emails are connected to zoom accounts
-                            $host_id = zoomscheduler_get_user($email);
+                            $host_id = zoomscheduler_hostkey_email($email);
 
                             if($host_id == false){
                                 $msg = get_string('zoomcohost', 'scheduler');
@@ -430,7 +430,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                             $email=trim($email);
                             
                             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                $host_id = zoomscheduler_get_user($email);
+                                $host_id = zoomscheduler_hostkey_email($email);
                                 
                                 if($host_id == false){
                                     $msg = get_string('zoomcohost', 'scheduler');
