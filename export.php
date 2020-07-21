@@ -77,7 +77,10 @@ if (!$data || $preview) {
                         $userid,
                         $currentgroupid,
                         $data->includeemptyslots,
-                        $pageperteacher);
+                        $pageperteacher,
+                        $data->meetingstart,
+                        $data->meetingend 
+                    );
 
         $limit = 20;
         echo $canvas->as_html($limit, false);
@@ -115,7 +118,8 @@ $export->build($scheduler,
                $userid,
                $currentgroupid,
                $data->includeemptyslots,
-               $pageperteacher);
+               $pageperteacher,$data->meetingstart,
+               $data->meetingend);
 
 $filename = clean_filename(format_string($course->shortname).'_'.format_string($scheduler->name));
 $canvas->send($filename);

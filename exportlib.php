@@ -1413,25 +1413,25 @@ class scheduler_export {
      * @param bool $includeempty whether to include slots without appointments
      * @param bool $pageperteacher whether one page should be used for each teacher
      */
-    public function build(scheduler_instance $scheduler, array $fields, $mode, $userid, $groupid, $includeempty, $pageperteacher) {
+    public function build(scheduler_instance $scheduler, array $fields, $mode, $userid, $groupid, $includeempty, $pageperteacher,$meetingstart=0, $meetingend=0) {
         if ($groupid) {
             $this->studfilter = array_keys(groups_get_members($groupid, 'u.id'));
         }
         $this->canvas->set_title(format_string($scheduler->name));
         if ($userid) {
             $slots = $scheduler->get_slots_for_teacher($userid, $groupid);
-            $this->build_page($scheduler, $fields, $slots, $mode, $includeempty);
+            $this->build_page($scheduler, $fields, $slots, $mode, $includeempty,$meetingstart,$meetingend);
         } else if ($pageperteacher) {
             $teachers = $scheduler->get_teachers();
             foreach ($teachers as $teacher) {
                 $slots = $scheduler->get_slots_for_teacher($teacher->id, $groupid);
                 $title = fullname($teacher);
                 $this->canvas->start_page($title);
-                $this->build_page($scheduler, $fields, $slots, $mode, $includeempty);
+                $this->build_page($scheduler, $fields, $slots, $mode, $includeempty,$meetingstart,$meetingend);
             }
         } else {
             $slots = $scheduler->get_slots_for_group($groupid);
-            $this->build_page($scheduler, $fields, $slots, $mode, $includeempty);
+            $this->build_page($scheduler, $fields, $slots, $mode, $includeempty,$meetingstart,$meetingend);
         }
     }
 
@@ -1445,7 +1445,7 @@ class scheduler_export {
      * @param string $mode output mode
      * @param bool $includeempty whether to include slots without appointments
      */
-    protected function build_page(scheduler_instance $scheduler, array $fields, array $slots, $mode, $includeempty) {
+    protected function build_page(scheduler_instance $scheduler, array $fields, array $slots, $mode, $includeempty,$meetingstart,$meetingend) {
 
         // Output the header.
         $row = 0;
@@ -1472,23 +1472,35 @@ class scheduler_export {
                     $row++;
                 }
                 foreach ($appts as $appt) {
-                    $this->write_row($row, $slot, $appt, $fields, false);
-                    $row++;
+                    //check if row is between dates if selected 
+                    if(($meetingstart ==0 && $meetingend == 0)|| ($meetingstart <= $slot->starttime && $meetingend > $slot->starttime)){
+                        $this->write_row($row, $slot, $appt, $fields, false);
+                        $row++;
+                    } 
                 }
             } else {
                 if ($appts) {
                     if ($mode == 'onelineperappointment') {
                         foreach ($appts as $appt) {
-                            $this->write_row($row, $slot, $appt, $fields, true);
-                            $row++;
+                            //check if row is between dates if selected 
+                            if(($meetingstart ==0 && $meetingend == 0)|| ($meetingstart <= $slot->starttime && $meetingend > $slot->starttime)){
+                                $this->write_row($row, $slot, $appt, $fields, true);
+                                $row++;
+                            }
                         }
                     } else {
-                        $this->write_row($row, $slot, $appts[0], $fields, true, count($appts) > 1);
+                        //check if row is between dates if selected 
+                        if(($meetingstart ==0 && $meetingend == 0)|| ($meetingstart <= $slot->starttime && $meetingend > $slot->starttime)){
+                            $this->write_row($row, $slot, $appts[0], $fields, true, count($appts) > 1);
+                            $row++;
+                        }
+                    }
+                } else if ($includeempty) {   
+                    //check if row is between dates if selected 
+                    if(($meetingstart ==0 && $meetingend == 0)|| ($meetingstart <= $slot->starttime && $meetingend > $slot->starttime)){
+                        $this->write_row($row, $slot, null, $fields, true);
                         $row++;
                     }
-                } else if ($includeempty) {
-                    $this->write_row($row, $slot, null, $fields, true);
-                    $row++;
                 }
             }
         }

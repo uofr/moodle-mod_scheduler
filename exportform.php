@@ -75,6 +75,12 @@ class scheduler_export_form extends moodleform {
         $mform->addElement('selectyesno', 'includeemptyslots', get_string('includeemptyslots', 'scheduler'));
         $mform->setDefault('includeemptyslots', 1);
 
+        //ADDED Date Selector
+        $dateInit = array('startyear' => 1970,'stopyear'  => 2020,'timezone'  => 99,'optional'  => true,);
+        $mform->addElement('date_selector', 'meetingstart', get_string('meetingstartdate', 'scheduler'), $dateInit);
+        $mform->addElement('date_selector', 'meetingend', get_string('meetingenddate', 'scheduler'),$dateInit);
+        //END of Added
+
         // Select data to export.
         $mform->addElement('header', 'datafieldhdr', get_string('datatoinclude', 'scheduler'));
         $mform->addHelpButton('datafieldhdr', 'datatoinclude', 'scheduler');
@@ -148,10 +154,27 @@ class scheduler_export_form extends moodleform {
         $mform->addGroup($checkboxes, 'fields-'.$groupid, $grouplabel, null, false);
     }
 
+     /**
+     * More validation on form data.
+     * See documentation in lib/formslib.php.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
     public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
+        global $CFG,$USER;
+        //$errors = parent::validation($data, $files);
+        $errors = array();
+
+        // Make sure start date is in the future.
+    
+        if(($data['meetingstart'] == 0 && $data['meetingend'] >0 )||($data['meetingstart'] > 0 && $data['meetingend'] ==0 )){
+            $errors['meetingstart'] = get_string('error:bothdates', 'scheduler');
+       }else if($data['meetingstart'] > $data['meetingend']){
+            $errors['meetingstart'] = get_string('error:invaliddate', 'scheduler');
+       }
 
         return $errors;
     }
-
 }
