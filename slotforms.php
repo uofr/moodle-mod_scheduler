@@ -235,9 +235,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 //second hacky way for when form is cancelled and zoom meeting has been generated
                 $mform->addElement('hidden', 'addzoomog', '0');
 
-                //Add co-host select option 
-                $mform->addElement('text', 'newcohost', '','hidden');
-                $mform->addElement('text', 'cohostid', '','hidden');
+             
 
                 //surrounded by a hidden div to open when zoom meeting is clicked.
                 $mform->addElement('html', '<div id="addcohost"  class="form-group row  fitem  hidden" >');
@@ -245,7 +243,10 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 $mform->addElement('html', '<div class="col-md-3" >');
                 $mform->addElement('html', '<label>Add Alternative Hosts</label> ');
                        
-                $mform->addHelpButton('addzoom','zoomaddcohost', 'scheduler');
+                //Add co-host select option  - odd placement but helps to format a better spot for help icon
+                $mform->addElement('text', 'newcohost', '','hidden');
+                $mform->addElement('text', 'cohostid', '','hidden');
+                
 
                 $mform->addElement('html', '</div>');
                 
@@ -257,6 +258,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 $mform->addElement('html', '</div>');
                 $mform->addElement('html', '</div>');
                 $mform->addElement('html', '</div>');
+                $mform->addHelpButton('newcohost','zoomaddcohost', 'scheduler');
             }
         }
         //END OF ADDED

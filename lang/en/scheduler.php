@@ -523,7 +523,7 @@ $string['zoomslotmessage'] = 'Hello, your link to join the Zoom meeting is below
 $string['zoomwarning'] = 'Teacher does not have a Zoom Account. Zoom Meeting can not be generated';
 $string['zoomcohost'] = 'Added cohost does not have a Zoom Account';
 $string['zoomaddcohost'] = 'Adding Alternative Hosts';
-$string['zoomaddcohost_help'] = 'The alternative host option allows you to schedule meetings and designate another Pro user on the same account to start the meeting or webinar if you are unable to. This user will receive an email notifying them that they have been added as an alternative host, with a link to start the meeting. Click an instructors name to add them as a host. If different hosts are need add them by email. Separate multiple emails by comma (without spaces).';
+$string['zoomaddcohost_help'] = 'The alternative host option allows you to schedule meetings and designate another Pro user on the same account to start the meeting or webinar if you are unable to. This user will receive an email notifying them that they have been added as an alternative host, with a link to start the meeting. Click an instructors name to add them as a host. If different hosts are need add them by email. Separate multiple emails by comma (without spaces) Press SPACEBAR to add new email.';
 $string['zoomcohostemail'] = 'Co-host entered email invalid';
 
 
