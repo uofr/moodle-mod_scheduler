@@ -50,7 +50,7 @@ MOD.create_new = function(cmid, spinner) {
               
                 if(parsedResponse.join_url !== undefined){
 
-                   Y.one('#addcohost').removeClass('hidden');
+                   Y.one('#id_addcohost').removeClass('hidden');
                    
                     Y.all(SELECTORS.ERROR).each( function(box) {
                         box.setStyle('display', 'none');
@@ -93,8 +93,8 @@ MOD.create_new = function(cmid, spinner) {
  * @return void
  */
 MOD.partial_delete = function() {
-           
-    Y.one('#addcohost').addClass('hidden');
+   
+    Y.one('#id_addcohost').addClass('hidden');
    
     Y.all(SELECTORS.EDITOR).each( function(box) {
         box.setHTML("");
@@ -113,6 +113,8 @@ MOD.partial_delete = function() {
  * @return void
  */
 MOD.full_delete = function(cmid, id,spinner) {
+
+    Y.one('#id_addcohost').addClass('hidden');
 
     Y.io(M.cfg.wwwroot + '/mod/scheduler/ajax.php', {
         // The request paramaters.
@@ -164,7 +166,7 @@ MOD.init = function(cmid) {
 	Y.all(SELECTORS.CHECKBOXES).each( function(box) {
         //check if box is checked if so remove hidden class from options
         if(box.get("checked")){
-            Y.one('#addcohost').removeClass('hidden');
+            Y.one('#id_addcohost').removeClass('hidden');
         }
 
 		box.on('change', function(e) {

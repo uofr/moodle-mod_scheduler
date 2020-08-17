@@ -225,31 +225,68 @@ body.path-mod-scheduler.jsenabled  input.studentselectsubmit {
     display:inline-block;
   }
   .tag-container {
-    border: 1px solid #ccc;
+   /* border: 1px solid #ccc;
     border-radius: 3px;
     background: #fff;
     display: flex;
     align-content: flex-start;
-    margin-bottom: 5%;
+    margin-bottom: 5%;*/
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: #fff;
+    display: inline-block;
+    align-content: flex-start;
+    /*margin-bottom: 5%;*/
+    width: 100%;
+    font-family: inherit;
+
   }
   .tag-container .tag {
-    height: 30px;
+    /*height: 30px;
     margin: 5px;
     padding: 5px 6px;
     border: 1px solid #ccc;
     border-radius: 3px;
-    background: #eee;
-    display: flex;
-    align-items: center;
+    background: #eee;*/
+   /* display: flex; */
+  /*  align-items: center;
     color: #333;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 1px 1px #fff;
-    cursor: default;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 1px 1px #fff;*/
+    
+    cursor: pointer;
+    padding: 1px !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    max-width: 100% !important;
+    margin: 5px !important;
+    text-indent: 0 !important;
+    border: 0 none !important;
+
+    line-height: inherit !important;
+    -webkit-user-select: auto !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    background: #eee;
+    color: #333;
+  }
+  .tag-container .tag:focus{
+    background: #1177d1;
+    color:#FFF
+  }
+  .tag-container .tag:active {
+    background: #1177d1;
+    color:#FFF
   }
   .tag i {
-    font-size: 16px;
+    font-size: 14px;
     color: #666;
     margin-left: 5px;
   }
+
+  .tag i:hover {
+    background: #ddd;
+  }
+
   .tag-container input {
     padding: 5px;
     font-size: 16px;
@@ -258,6 +295,13 @@ body.path-mod-scheduler.jsenabled  input.studentselectsubmit {
     font-family: 'Rubik';
     color: #333;
     flex: 1;
+  }
+
+  .tag-container input:focus  {
+    border-color: #FFF;
+    outline: 0; 
+    -webkit-box-shadow: 0 0 0 0.0rem rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 0.0rem rgba(255, 255, 255, 0.25);
   }
 
   /* fallback */
@@ -273,7 +317,7 @@ body.path-mod-scheduler.jsenabled  input.studentselectsubmit {
     font-weight: normal;
     font-style: normal;
     font-size: 24px;
-    line-height: 1;
+   /* line-height: 1;*/
     letter-spacing: normal;
     text-transform: none;
     display: inline-block;
@@ -284,11 +328,67 @@ body.path-mod-scheduler.jsenabled  input.studentselectsubmit {
     -webkit-font-smoothing: antialiased;
   }
 
-  .whiteout{
-      color:#FFF !important;
-      display: none !important;
-  }
-
-  .hidden{
+.path-mod-scheduler_hidden{
     display: none !important;
 }
+.ui-autocomplete { 
+  position: absolute; 
+  cursor: default; 
+  background:#FFF ;
+  height: auto;
+  padding: 0;
+  margin: 2px 0 0 0;
+  z-index: 1000;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}   
+
+/* workarounds */
+html .ui-autocomplete { width:1px; } /* without this, the menu expands to 100% in IE6 */
+.ui-menu {
+    list-style:none;
+    padding: 2px;
+    margin: 0;
+    display:block;
+    float: left;
+    background:#FFF ;
+    border: 1px solid #cccccc;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+.ui-menu .ui-menu {
+    margin-top: -3px;
+}
+.ui-menu .ui-menu-item {
+    margin:0;
+    padding: 0;
+    zoom: 1;
+    float: left;
+    clear: left;
+    width: 100%;
+}
+.ui-menu .ui-menu-item:hover {
+  cursor: pointer;
+  background: #eee;
+}
+
+.ui-menu .ui-menu-item a {
+    text-decoration:none;
+    display:block;
+    padding:.2em .4em;
+    line-height:1.5;
+    zoom:1;
+    cursor: pointer;
+}
+.ui-menu .ui-menu-item a.ui-state-hover,
+.ui-menu .ui-menu-item a.ui-state-active {
+    font-weight: normal;
+    margin: -1px;
+    background: #eee;
+    cursor: pointer;
+}
+.ui-helper-hidden-accessible{display:none;}

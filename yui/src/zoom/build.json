@@ -6,13 +6,5 @@
                 "zoom.js"
             ]
         }
-    },
-    "name": "moodle-mod_scheduler-cohost",
-    "builds": {
-        "moodle-mod_scheduler-cohost": {
-            "jsfiles": [
-                "cohost.js"
-            ]
-        }
     }
 }

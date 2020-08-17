@@ -193,7 +193,7 @@ if ($action == 'addslot') {
                 //get list of co-hosts already added, if none false is returned
                 $cohosts = zoomscheduler_get_cohosts($slotid);
                
-                $PAGE->requires->yui_module('moodle-mod_scheduler-cohost','M.mod_scheduler.cohost.init', array($teacherarray,$cohosts));
+                $PAGE->requires->js_call_amd('mod_scheduler/cohost', 'init',[$teacherarray,$cohosts]);
             }
         }
         //END of ADDED
@@ -301,7 +301,7 @@ if ($action == 'updateslot') {
                     //get list of co-hosts already added, if none false is returned
                     $cohosts = zoomscheduler_get_cohosts($slotid);
                    
-                    $PAGE->requires->yui_module('moodle-mod_scheduler-cohost','M.mod_scheduler.cohost.init', array($teacherarray,$cohosts));
+                    $PAGE->requires->js_call_amd('mod_scheduler/cohost', 'init',[$teacherarray,$cohosts]);
                 }
             }
             //END of ADDED
