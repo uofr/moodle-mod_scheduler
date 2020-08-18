@@ -83,6 +83,7 @@ abstract class scheduler_export_field {
      * @return string the form label for this field
      */
     public function get_formlabel(scheduler_instance $scheduler) {
+
         return $this->get_header($scheduler);
     }
 
