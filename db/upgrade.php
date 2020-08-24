@@ -326,8 +326,11 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         $table = new xmldb_table('scheduler_appointment');
     
         $field = new xmldb_field('studentattended', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'attend');
+        $field2 = new xmldb_field('studentattend', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'attend');
         if ($dbman->field_exists($table, $field)) {
             $dbman->rename_field($table, $field, "studentattend", $continue=true, $feedback=true);
+        }else{
+            $dbman->add_field($table, $field2);
         }
     }
     return true;
