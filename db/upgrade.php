@@ -321,17 +321,18 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         // Scheduler savepoint reached.
         upgrade_mod_savepoint(true, 2017040100, 'scheduler');
     }
-    if ($oldversion < 2018112660) {
+    if ($oldversion < 2018112661) {
         //fix rename error
         $table = new xmldb_table('scheduler_appointment');
     
-        $field = new xmldb_field('studentattended', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'attend');
-        $field2 = new xmldb_field('studentattend', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'attend');
+        $field = new xmldb_field('studentattended', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'attended');
+        $field2 = new xmldb_field('studentattend', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'attended');
         if ($dbman->field_exists($table, $field)) {
             $dbman->rename_field($table, $field, "studentattend", $continue=true, $feedback=true);
         }else{
             $dbman->add_field($table, $field2);
         }
+        upgrade_mod_savepoint(true, 2018112661, 'scheduler');
     }
     return true;
 }
