@@ -666,9 +666,9 @@ $string['error:sessionstartinvalid'] = 'A session start time is invalid! Skippin
 $string['error:sessionschedulerinvalid'] = 'A session scheduler name is invalid! Skipping.';
 $string['errorinaddingsession'] = 'Error in adding session';
 $string['erroringeneratingsessions'] = 'Error in generating sessions ';
-$string['error:invalidschedulername'] = 'Name given for scheduler was not found. Skipping';
-$string['error:invalidstudent'] = 'Student not found in course. Skipping';
-$string['error:invalidzoomuser'] = 'Teacher does not have a Zoom account. Unable to generate Zoom meeting.';
+$string['error:invalidschedulername'] = 'Name given for scheduler {$a} was not found. Skipping';
+$string['error:invalidstudent'] = 'Student {$a->name} was not found in course {$a->course}. Skipping';
+$string['error:invalidzoomuser'] = 'Teacher {$a} does not have a Zoom account. Unable to generate Zoom meeting.';
 $string['eventdurationupdated'] = 'Session duration updated';
 $string['eventreportviewed'] = 'Attendance report viewed';
 $string['eventscreated'] = 'Calendar events created';
@@ -688,8 +688,9 @@ $string['sessionsgenerated'] = '{$a} sessions were successfully generated';
 $string['schedulername'] = 'Name of Scheduler';
 $string['schedulezoom'] = 'Schedule a Zoom Meeting';
 $string['studentfirstname'] = 'First name of student';
+$string['studentname'] = 'Name of student (Lastname, Firstname)';
 $string['studentlastname'] = 'Last name of student';
-$string['time'] = 'Lesson start time';
+$string['time'] = 'Lesson start time (24hr or 12 hr)';
 
 
 

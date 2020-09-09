@@ -94,8 +94,7 @@ class sessions {
                 get_string('date', 'scheduler'),
                 get_string('time', 'scheduler'),
                 get_string('duration', 'scheduler'),
-                get_string('studentfirstname', 'scheduler'),
-                get_string('studentlastname', 'scheduler'),
+                get_string('studentname', 'scheduler'),
                 get_string('schedulezoom', 'scheduler'),
             );
         }else{
@@ -105,8 +104,8 @@ class sessions {
                 get_string('date', 'scheduler'),
                 get_string('time', 'scheduler'),
                 get_string('duration', 'scheduler'),
-                get_string('studentfirstname', 'scheduler'),
-                get_string('studentlastname', 'scheduler'));
+                get_string('studentname', 'scheduler'),
+            );
         }
     }
 
@@ -126,27 +125,47 @@ class sessions {
      */
     protected function read_mapping_data($data) {
         if ($data) {
-            return array(
-                'course' => $data->header0,
-                'scheduler' => $data->header1,
-                'date' => $data->header2,
-                'time' => $data->header3,
-                'duration' => $data->header4,
-                'studentfirstname' => $data->header5,
-                'studentlastname' => $data->header6,
-                'schedulezoom' => $data->header7
-            );
+            if(SCHEDULER_ZOOM){
+                return array(
+                    'course' => $data->header0,
+                    'scheduler' => $data->header1,
+                    'date' => $data->header2,
+                    'time' => $data->header3,
+                    'duration' => $data->header4,
+                    'studentname' => $data->header5,
+                    'schedulezoom' => $data->header6
+                );
+            }else{
+                return array(
+                    'course' => $data->header0,
+                    'scheduler' => $data->header1,
+                    'date' => $data->header2,
+                    'time' => $data->header3,
+                    'duration' => $data->header4,
+                    'studentname' => $data->header5
+                );
+            }
         } else {
-            return array(
-                'course' => 0,
-                'scheduler' => 1,
-                'date' => 2,
-                'time' => 3,
-                'duration' => 4,
-                'studentfirstname' => 5,
-                'studentlastname' => 6,
-                'schedulezoom' => 7,
-            );
+            if(SCHEDULER_ZOOM){
+                return array(
+                    'course' => 0,
+                    'scheduler' => 1,
+                    'date' => 2,
+                    'time' => 3,
+                    'duration' => 4,
+                    'studentname' => 5,
+                    'schedulezoom' => 6,
+                );
+             }else{
+                return array(
+                    'course' => 0,
+                    'scheduler' => 1,
+                    'date' => 2,
+                    'time' => 3,
+                    'duration' => 4,
+                    'studentname' => 5
+                );
+            }
         }
     }
 
@@ -241,23 +260,45 @@ class sessions {
                 $session->sessiontype = \mod_attendance_structure::SESSION_COMMON;
             }*/
 
-            // Expect standardised date format, eg YYYY-MM-DD.
-            $sessiondate = strtotime($this->get_column_data($row, $mapping['date']));
+            // Expect standardised date format, eg 6 Sep 2020
+            $sessiondate = $this->get_column_data($row, $mapping['date']);
             if ($sessiondate === false) {
                 \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessiondateinvalid', 'scheduler'));
                 continue;
             }
-            $session->sessiondate = $sessiondate;
 
-            // Expect standardised time format, eg HH:MM.
+            //Put in YYYY-MM-DD format
+            $sessiondate = explode(" ",$sessiondate);
+            $month = date_parse($sessiondate[1]);
+            $month = $month['month'];
+
+            $session->sessiondate = strtotime($sessiondate[2]."-".$month."-".$sessiondate[0]);
+
+            // Expect standardised time format, eg HH:MM or HH:MM am/pm.
             $from = $this->get_column_data($row, $mapping['time']);
             if (empty($from)) {
                 \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'scheduler'));
                 continue;
             }
-            $from = explode(':', $from);
-            $session->sestime['starthour'] = $from[0];
-            $session->sestime['startminute'] = $from[1];
+
+            //check if 12 hr or 24 hour
+            $fromsplit = explode(':', $from);
+            //check if am or pm placed
+            $amsplit = explode(" ",$fromsplit[1]);
+
+            if(strlen($amsplit[1]) > 1){
+                //convert to 24 hour
+                $time24  = date("H:i", strtotime($from));
+                $time24split = explode(':', $time24);
+
+                $session->sestime['starthour'] = $time24split[0];
+                $session->sestime['startminute'] = $time24split[1];
+              
+            }else{
+                $session->sestime['starthour'] = $fromsplit[0];
+                $session->sestime['startminute'] = $fromsplit[1];
+            }
+            
 
             $to = $this->get_column_data($row, $mapping['time']);
             if (empty($to)) {
@@ -279,12 +320,17 @@ class sessions {
                     \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'scheduler'));
                     continue;
                 }
+                $session->addzoom = clean_param($addzoom, PARAM_BOOL);
             }
 
             $session->duration = clean_param($duration, PARAM_INT);
-            $session->addzoom = clean_param($addzoom, PARAM_BOOL);
-            $session->studentfirstname = format_text($this->get_column_data($row, $mapping['studentfirstname']),FORMAT_PLAIN);
-            $session->studentlastname = format_text($this->get_column_data($row, $mapping['studentlastname']),FORMAT_PLAIN);
+            
+            $studentname = format_text($this->get_column_data($row, $mapping['studentname']),FORMAT_PLAIN);
+            $studentname = explode(",",$studentname);
+            $firstname = ltrim($studentname[1]," ");
+
+            $session->studentfirstname = $firstname;
+            $session->studentlastname = $studentname[0];
            
             $session->statusset = 0;
 
@@ -397,14 +443,13 @@ class sessions {
                                 if($host_id){
                                     $zoommeeting = zoomscheduler_create_zoom_meeting($session, $host_id, $cm, $course->id,0);
                                 }else{
-                                    mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidzoomuser','scheduler', $session->scheduler));
+                                    mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidzoomuser','scheduler', $teacher->firstname." ".$teacher->lastname));
                                 }
                             }
                         }
                         //END OF ZOOM ADDED
                         //format slot for DB add
                         $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id, $zoommeeting);
-
 
                         // Check for duplicate sessions.
                         if ($this->session_exists($slot)) {
@@ -444,7 +489,7 @@ class sessions {
                                 $this->add_appointment($appointment,$context);
                                 $okcount ++;
                             }else{
-                                mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidstudent','scheduler', $session->scheduler));
+                                mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidstudent','scheduler', ['name' => $session->studentfirstname." ".$session->studentlastname, 'course' => $session->course]));
                             }
                         } 
                     }else{
