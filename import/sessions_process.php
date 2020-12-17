@@ -436,7 +436,7 @@ class sessions {
                        
                         //Add zoom meeting if choosen 
                         //ADDED FOR ZOOM
-                        $zoommeeting = array();
+                       /* $zoommeeting = array();
                         if(SCHEDULER_ZOOM){
                             if($session->addzoom){
                                 $host_id = zoomscheduler_hostkey_id($teacher->id);
@@ -446,7 +446,7 @@ class sessions {
                                     mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidzoomuser','scheduler', $teacher->firstname." ".$teacher->lastname));
                                 }
                             }
-                        }
+                        }*/
                         //END OF ZOOM ADDED
                         //format slot for DB add
                         $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id, $zoommeeting);
@@ -473,9 +473,9 @@ class sessions {
                                 $slotid = $this->add_slot($slot,$scheduler);
 
                                 //Added for zoom
-                                if(SCHEDULER_ZOOM && $session->addzoom){
+                               /* if(SCHEDULER_ZOOM && $session->addzoom){
                                     zoomscheduler_update_zoom($zoommeeting->id, $slot);
-                                }
+                                }*/
                                 //End of Added
 
                                 //Add to calendar
