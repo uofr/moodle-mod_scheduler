@@ -87,7 +87,7 @@ class sessions {
      * @return array The headers (lang strings)
      */
     public static function list_required_headers() {
-        if(SCHEDULER_ZOOM){
+       /* if(SCHEDULER_ZOOM){
             return array(
                 get_string('courseshortname', 'scheduler'),
                 get_string('schedulername', 'scheduler'),
@@ -95,9 +95,9 @@ class sessions {
                 get_string('time', 'scheduler'),
                 get_string('duration', 'scheduler'),
                 get_string('studentname', 'scheduler'),
-                get_string('schedulezoom', 'scheduler'),
+
             );
-        }else{
+        }else{*/
             return array(
                 get_string('courseshortname', 'scheduler'),
                 get_string('schedulername', 'scheduler'),
@@ -106,7 +106,7 @@ class sessions {
                 get_string('duration', 'scheduler'),
                 get_string('studentname', 'scheduler'),
             );
-        }
+        //}
     }
 
     /**
@@ -125,7 +125,7 @@ class sessions {
      */
     protected function read_mapping_data($data) {
         if ($data) {
-            if(SCHEDULER_ZOOM){
+           /* if(SCHEDULER_ZOOM){
                 return array(
                     'course' => $data->header0,
                     'scheduler' => $data->header1,
@@ -134,8 +134,8 @@ class sessions {
                     'duration' => $data->header4,
                     'studentname' => $data->header5,
                     'schedulezoom' => $data->header6
-                );
-            }else{
+                );*/
+           // }else{
                 return array(
                     'course' => $data->header0,
                     'scheduler' => $data->header1,
@@ -144,9 +144,9 @@ class sessions {
                     'duration' => $data->header4,
                     'studentname' => $data->header5
                 );
-            }
+            //}
         } else {
-            if(SCHEDULER_ZOOM){
+           /* if(SCHEDULER_ZOOM){
                 return array(
                     'course' => 0,
                     'scheduler' => 1,
@@ -156,7 +156,7 @@ class sessions {
                     'studentname' => 5,
                     'schedulezoom' => 6,
                 );
-             }else{
+             }else{*/
                 return array(
                     'course' => 0,
                     'scheduler' => 1,
@@ -165,7 +165,7 @@ class sessions {
                     'duration' => 4,
                     'studentname' => 5
                 );
-            }
+           // }
         }
     }
 
@@ -314,14 +314,14 @@ class sessions {
             }
 
             //ADD ZOOM 
-            if(SCHEDULER_ZOOM){
+           /* if(SCHEDULER_ZOOM){
                 $addzoom= $this->get_column_data($row, $mapping['schedulezoom']);
                 if (empty($from)) {
                     \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'scheduler'));
                     continue;
                 }
                 $session->addzoom = clean_param($addzoom, PARAM_BOOL);
-            }
+            }*/
 
             $session->duration = clean_param($duration, PARAM_INT);
             
@@ -603,11 +603,11 @@ function construct_slot_data_for_add($formdata, $schedulerid, $teacherid, $zoom)
     //hideuntil
     $sess->hideuntil = time();
 
-    if(SCHEDULER_ZOOM){
+   /* if(SCHEDULER_ZOOM){
         if(!empty($zoom)){
             $sess->notes = "<h2>".get_string('zoomslotmessage', 'scheduler')."</h2><br><a href=' ".$zoom->join_url."'>".$zoom->join_url."</a>";                    
         }
-    }
+    }*/
     return $sess;
 }
 
@@ -724,11 +724,11 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
         $baseevent->visible = 1;
 
         //ADDED FOR ZOOM
-        if(SCHEDULER_ZOOM){
+       /* if(SCHEDULER_ZOOM){
             if(!empty($zoom)){
                 $baseevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->join_url."'>".$zoom->join_url."</a>";
             }
-        }
+        }*/
         //END OF ADDED
 
         // Update student events.

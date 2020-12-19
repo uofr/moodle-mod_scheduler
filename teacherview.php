@@ -181,7 +181,7 @@ if ($action == 'addslot') {
         $mform->display();
         
         //ADDED FOR ZOOM BUTTON
-        if(SCHEDULER_ZOOM){
+       /* if(SCHEDULER_ZOOM){
             $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
             'M.mod_scheduler.zoom.init', array($scheduler->cmid));
 
@@ -195,7 +195,7 @@ if ($action == 'addslot') {
                
                 $PAGE->requires->js_call_amd('mod_scheduler/cohost', 'init',[$teacherarray,$cohosts]);
             }
-        }
+        }*/
         //END of ADDED
      
         echo $output->footer($course);
@@ -245,10 +245,10 @@ if ($action == 'updateslot') {
             $mform->display();
 
             //ADDED FOR ZOOM BUTTON
-            if(SCHEDULER_ZOOM){
+            /*if(SCHEDULER_ZOOM){
                 $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
                 'M.mod_scheduler.zoom.init', array($scheduler->cmid));
-            }
+            }*/
             //END of ADDED
 
             echo $output->footer($course);
@@ -289,7 +289,7 @@ if ($action == 'updateslot') {
             echo $output->heading(get_string('updatesingleslot', 'scheduler'));
             $mform->display();
             //ADDED FOR ZOOM BUTTON
-            if(SCHEDULER_ZOOM){
+            /*if(SCHEDULER_ZOOM){
                 $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
                 'M.mod_scheduler.zoom.init', array($scheduler->cmid));
 
@@ -303,7 +303,7 @@ if ($action == 'updateslot') {
                    
                     $PAGE->requires->js_call_amd('mod_scheduler/cohost', 'init',[$teacherarray,$cohosts]);
                 }
-            }
+            }*/
             //END of ADDED
             echo $output->footer($course);
             die;

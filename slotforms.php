@@ -221,7 +221,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
 
         //ADDED FOR ZOOM
-        if(SCHEDULER_ZOOM){
+      /*  if(SCHEDULER_ZOOM){
             $addzoom = has_capability('mod/scheduler:addzoom',  $this->scheduler->get_context());
 
             if($addzoom){
@@ -261,7 +261,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 $mform->addHelpButton('cohost', 'alternative_hosts', 'zoom');
                 //End of added
             }
-        }
+        }*/
         //END OF ADDED
 
         // Slot comments.
@@ -393,7 +393,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
             }
         }
         //ADDED FOR ZOOM
-        if(SCHEDULER_ZOOM){
+       /* if(SCHEDULER_ZOOM){
             if ($data['addzoom']==1) {
                 //check if Teacher 
                 $host_id = zoomscheduler_hostkey_id($data['teacherid']);
@@ -475,7 +475,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                     }
                 }   
             }
-        }
+        }*/
         //END OF ADDED
         return $errors;
     }
@@ -505,7 +505,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
         //ADDED FOR ZOOM
         //call on zoomscheduler to see if record exists 
-        if(SCHEDULER_ZOOM){
+       /* if(SCHEDULER_ZOOM){
             $zoomid = zoomscheduler_get_zoomid($slot->id);
 
             if($zoomid){
@@ -513,7 +513,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 $data->addzoomvalue = $zoomid;
                 $data->addzoomog = $zoomid;
             }
-        }
+        }*/
         //END OF ADDED
 
         $i = 0;
@@ -623,7 +623,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         }
 
         //ADDED FOR ZOOM  MAKE INTO OWN FUNCTION     
-        if(SCHEDULER_ZOOM){   
+       /* if(SCHEDULER_ZOOM){   
             //update time, co-host, and duration of meeting
             if($data->addzoomvalue != 0){
                 zoomscheduler_update_zoom($data->addzoomvalue,$slot);
@@ -643,7 +643,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 //call to delete instance
                 $deleted = zoomscheduler_delete_zoom_meeting($id);
             }
-        }
+        }*/
         //END OF ADDED
 
         $slot->save();
@@ -829,7 +829,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         $mform->addHelpButton('starttime', 'choosingslotstart', 'scheduler');
 
         // Duration of the slot.
-        $this->add_duration_field();
+        //$this->add_duration_field();
 
         // Ignore conflict checkbox.
         $mform->addElement('checkbox', 'ignoreconflicts', get_string('ignoreconflicts', 'scheduler'));
@@ -842,7 +842,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         $mform->setDefault('remindersel', -1);
 
         //ADDED FOR ZOOM
-        if(SCHEDULER_ZOOM){  
+        /*if(SCHEDULER_ZOOM){  
             $addzoom = has_capability('mod/scheduler:addzoom',  $this->scheduler->get_context());
 
             if($addzoom){
@@ -855,7 +855,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
             
                 $mform->addElement('hidden', 'addzoomog', '0');
             }
-        }
+        }*/
         //END OF ADDED
 
         // Slot comments.
@@ -1052,7 +1052,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
 
         // Set data fields from input form.
         $slot->starttime = $data->starttime;
-        $slot->duration = $data->duration;
+        //$slot->duration = $data->duration;
        // $slot->exclusivity = $data->exclusivityenable ? $data->exclusivity : 0;
         $slot->teacherid = $data->teacherid;
         $slot->emaildate = $data->emaildate;
