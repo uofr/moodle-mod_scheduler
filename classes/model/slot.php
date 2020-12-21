@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * A class for representing a scheduler slot.
@@ -8,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_scheduler\model;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -16,13 +32,18 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_slot extends mvc_child_record_model {
+class slot extends mvc_child_record_model {
 
     /**
      * @var mvc_child_list list of appointments in this slot
      */
     protected $appointments;
 
+    /**
+     * get_table
+     *
+     * @return string
+     */
     protected function get_table() {
         return 'scheduler_slots';
     }
@@ -30,23 +51,26 @@ class scheduler_slot extends mvc_child_record_model {
     /**
      * Create a new slot in a specific scheduler
      *
-     * @param scheduler_instance $scheduler
+     * @param scheduler $scheduler
      */
-    public function __construct(scheduler_instance $scheduler) {
+    public function __construct(scheduler $scheduler) {
         parent::__construct();
-        $this->data = new stdClass();
+        $this->data = new \stdClass();
         $this->data->id = 0;
         $this->set_parent($scheduler);
         $this->data->schedulerid = $scheduler->get_id();
         $this->appointments = new mvc_child_list($this, 'scheduler_appointment', 'slotid',
-                        new scheduler_appointment_factory($this));
+                                                 new appointment_factory($this));
     }
 
     /**
      * Create a scheduler slot from the database.
+     *
+     * @param int $id
+     * @param scheduler $scheduler
      */
-    public static function load_by_id($id, scheduler_instance $scheduler) {
-        $slot = new scheduler_slot($scheduler);
+    public static function load_by_id($id, scheduler $scheduler) {
+        $slot = new slot($scheduler);
         $slot->load($id);
         return $slot;
     }
@@ -64,9 +88,9 @@ class scheduler_slot extends mvc_child_record_model {
     /**
      * Sets appointment-related data (grade, comments) for all student in this slot.
      *
-     * @param scheduler_appointment $template appointment from which the data will be read
+     * @param appointment $template appointment from which the data will be read
      */
-    public function distribute_appointment_data(scheduler_appointment $template) {
+    public function distribute_appointment_data(appointment $template) {
         $scheduler = $this->get_scheduler();
         foreach ($this->appointments->get_children() as $appointment) {
             if ($appointment->id != $template->id) {
@@ -91,9 +115,9 @@ class scheduler_slot extends mvc_child_record_model {
     /**
      * Distribute plugin files from a source to a target id within a file area
      *
-     * @param unknown $area
-     * @param unknown $sourceid
-     * @param unknown $targetid
+     * @param mixed $area
+     * @param mixed $sourceid
+     * @param mixed $targetid
      */
     private function distribute_file_area($area, $sourceid, $targetid) {
 
@@ -121,7 +145,7 @@ class scheduler_slot extends mvc_child_record_model {
     /**
      * Retrieve the scheduler associated with this appointment.
      *
-     * @return scheduler_instance the scheduler
+     * @return scheduler the scheduler
      */
     public function get_scheduler() {
         return $this->get_parent();
@@ -130,14 +154,14 @@ class scheduler_slot extends mvc_child_record_model {
     /**
      * Return the teacher object
      *
-     * @return stdClass
+     * @return \stdClass
      */
     public function get_teacher() {
         global $DB;
         if ($this->data->teacherid) {
             return $DB->get_record('user', array('id' => $this->data->teacherid), '*', MUST_EXIST);
         } else {
-            return new stdClass();
+            return new \stdClass();
         }
     }
 
@@ -186,7 +210,7 @@ class scheduler_slot extends mvc_child_record_model {
      * Get the appointment in this slot for a specific student, or null if the student doesn't have one.
      *
      * @param int $studentid the id number of the student in question
-     * @return scheduler_appointment the appointment for the specified student
+     * @return appointment the appointment for the specified student
      */
     public function get_student_appointment($studentid) {
         $studapp = null;
@@ -216,6 +240,7 @@ class scheduler_slot extends mvc_child_record_model {
     /**
      * Has the slot been booked by a specific student?
      *
+     * @param mixed $studentid
      * @return boolean
      */
     public function is_booked_by_student($studentid) {
@@ -244,18 +269,20 @@ class scheduler_slot extends mvc_child_record_model {
     }
 
     /**
-     *  Get an appointment by ID
+     * Get an appointment by ID
      *
-     *  @return scheduler_appointment
+     * @param int $id
+     * @return appointment
      */
     public function get_appointment($id) {
         return $this->appointments->get_child_by_id($id);
     }
 
     /**
-     *  Get an array of all appointments
+     * Get an array of all appointments
      *
-     *  @return array
+     * @param mixed $userfilter
+     * @return array
      */
     public function get_appointments($userfilter = null) {
         $apps = $this->appointments->get_children();
@@ -272,7 +299,7 @@ class scheduler_slot extends mvc_child_record_model {
     /**
      * Create a new appointment relating to this slot.
      *
-     * @return scheduler_appointment
+     * @return appointment
      */
     public function create_appointment() {
         return $this->appointments->create_child();
@@ -281,12 +308,15 @@ class scheduler_slot extends mvc_child_record_model {
     /**
      * Remove an appointment from this slot.
      *
-     * @param scheduler_appointment $app
+     * @param appointment $app
      */
-    public function remove_appointment($app) {
+    public function remove_appointment(appointment $app) {
         $this->appointments->remove_child($app);
     }
 
+    /**
+     * delete
+     */
     public function delete() {
         $this->appointments->delete_children();
         $this->clear_calendar();
@@ -375,7 +405,7 @@ class scheduler_slot extends mvc_child_record_model {
         $slotid = $this->get_id();
         $courseid = $scheduler->get_courseid();
 
-        $baseevent = new stdClass();
+        $baseevent = new \stdClass();
         $baseevent->description = "$schedulername<br/><br/>$schedulerdescription";
         $baseevent->format = 1;
         $baseevent->modulename = 'scheduler';
@@ -418,9 +448,9 @@ class scheduler_slot extends mvc_child_record_model {
      *
      * @param string $eventtype
      * @param array $userids users to assign to the event
-     * @param stdClass $eventdata dertails of the event
+     * @param \stdClass $eventdata dertails of the event
      */
-    private function update_calendar_events($eventtype, array $userids, stdClass $eventdata) {
+    private function update_calendar_events($eventtype, array $userids, \stdClass $eventdata) {
 
         global $CFG, $DB;
         require_once($CFG->dirroot.'/calendar/lib.php');
@@ -435,7 +465,7 @@ class scheduler_slot extends mvc_child_record_model {
         foreach ($existingevents as $eventid => $existingdata) {
             if (in_array($existingdata->userid, $userids)) {
                 $eventdata->userid = $existingdata->userid;
-                $calendarevent = calendar_event::load($existingdata);
+                $calendarevent = \calendar_event::load($existingdata);
                 $calendarevent->update($eventdata, false);
                 $handledevents[] = $eventid;
                 $handledusers[] = $existingdata->userid;
@@ -447,14 +477,14 @@ class scheduler_slot extends mvc_child_record_model {
             if (!in_array($userid, $handledusers)) {
                 $thisevent = clone($eventdata);
                 $thisevent->userid = $userid;
-                calendar_event::create($thisevent, false);
+                \calendar_event::create($thisevent, false);
             }
         }
 
         // Remove old, obsolete calendar events.
         foreach ($existingevents as $eventid => $existingdata) {
             if (!in_array($eventid, $handledevents)) {
-                $calendarevent = calendar_event::load($existingdata);
+                $calendarevent = \calendar_event::load($existingdata);
                 $calendarevent->delete();
             }
         }
@@ -464,14 +494,3 @@ class scheduler_slot extends mvc_child_record_model {
 
 }
 
-/**
- * A factory class for scheduler slots.
- *
- * @copyright  2011 Henning Bostelmann and others (see README.txt)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class scheduler_slot_factory extends mvc_child_model_factory {
-    public function create_child(mvc_record_model $parent) {
-        return new scheduler_slot($parent);
-    }
-}
