@@ -87,26 +87,14 @@ class sessions {
      * @return array The headers (lang strings)
      */
     public static function list_required_headers() {
-       /* if(SCHEDULER_ZOOM){
-            return array(
-                get_string('courseshortname', 'scheduler'),
-                get_string('schedulername', 'scheduler'),
-                get_string('date', 'scheduler'),
-                get_string('time', 'scheduler'),
-                get_string('duration', 'scheduler'),
-                get_string('studentname', 'scheduler'),
-
-            );
-        }else{*/
-            return array(
-                get_string('courseshortname', 'scheduler'),
-                get_string('schedulername', 'scheduler'),
-                get_string('date', 'scheduler'),
-                get_string('time', 'scheduler'),
-                get_string('duration', 'scheduler'),
-                get_string('studentname', 'scheduler'),
-            );
-        //}
+        return array(
+            get_string('courseprogramid', 'scheduler'),
+            get_string('schedulername', 'scheduler'),
+            get_string('date', 'scheduler'),
+            get_string('time', 'scheduler'),
+            get_string('duration', 'scheduler'),
+            get_string('studentname', 'scheduler'),
+        );
     }
 
     /**
@@ -125,47 +113,23 @@ class sessions {
      */
     protected function read_mapping_data($data) {
         if ($data) {
-           /* if(SCHEDULER_ZOOM){
-                return array(
-                    'course' => $data->header0,
-                    'scheduler' => $data->header1,
-                    'date' => $data->header2,
-                    'time' => $data->header3,
-                    'duration' => $data->header4,
-                    'studentname' => $data->header5,
-                    'schedulezoom' => $data->header6
-                );*/
-           // }else{
-                return array(
-                    'course' => $data->header0,
-                    'scheduler' => $data->header1,
-                    'date' => $data->header2,
-                    'time' => $data->header3,
-                    'duration' => $data->header4,
-                    'studentname' => $data->header5
-                );
-            //}
+            return array(
+                'course' => $data->header0,
+                'scheduler' => $data->header1,
+                'date' => $data->header2,
+                'time' => $data->header3,
+                'duration' => $data->header4,
+                'studentname' => $data->header5
+            );
         } else {
-           /* if(SCHEDULER_ZOOM){
-                return array(
-                    'course' => 0,
-                    'scheduler' => 1,
-                    'date' => 2,
-                    'time' => 3,
-                    'duration' => 4,
-                    'studentname' => 5,
-                    'schedulezoom' => 6,
-                );
-             }else{*/
-                return array(
-                    'course' => 0,
-                    'scheduler' => 1,
-                    'date' => 2,
-                    'time' => 3,
-                    'duration' => 4,
-                    'studentname' => 5
-                );
-           // }
+            return array(
+                'course' => 0,
+                'scheduler' => 1,
+                'date' => 2,
+                'time' => 3,
+                'duration' => 4,
+                'studentname' => 5
+            );
         }
     }
 
@@ -231,7 +195,6 @@ class sessions {
         $this->foundheaders = $this->importer->get_columns();
         $this->useprogressbar = $useprogressbar;
         $domainid = 1;
-
         $sessions = array();
 
         while ($row = $this->importer->next()) {
@@ -250,15 +213,6 @@ class sessions {
                 \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionschedulerinvalid', 'scheduler'));
                 continue;
             }
-
-            // Handle multiple group assignments per session. Expect semicolon separated group names.
-           /* $groups = $this->get_column_data($row, $mapping['groups']);
-            if (! empty($groups)) {
-                $session->groups = explode(';', $groups);
-                $session->sessiontype = \mod_attendance_structure::SESSION_GROUP;
-            } else {
-                $session->sessiontype = \mod_attendance_structure::SESSION_COMMON;
-            }*/
 
             // Expect standardised date format, eg 6 Sep 2020
             $sessiondate = $this->get_column_data($row, $mapping['date']);
@@ -293,13 +247,11 @@ class sessions {
 
                 $session->sestime['starthour'] = $time24split[0];
                 $session->sestime['startminute'] = $time24split[1];
-              
             }else{
                 $session->sestime['starthour'] = $fromsplit[0];
                 $session->sestime['startminute'] = $fromsplit[1];
             }
             
-
             $to = $this->get_column_data($row, $mapping['time']);
             if (empty($to)) {
                 \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionendinvalid', 'scheduler'));
@@ -312,16 +264,6 @@ class sessions {
                 \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'scheduler'));
                 continue;
             }
-
-            //ADD ZOOM 
-           /* if(SCHEDULER_ZOOM){
-                $addzoom= $this->get_column_data($row, $mapping['schedulezoom']);
-                if (empty($from)) {
-                    \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'scheduler'));
-                    continue;
-                }
-                $session->addzoom = clean_param($addzoom, PARAM_BOOL);
-            }*/
 
             $session->duration = clean_param($duration, PARAM_INT);
             
@@ -380,33 +322,17 @@ class sessions {
         foreach ($this->sessions as $session) {
             $groupids = array();
 
-            // Check course name matches.
-            if ($DB->record_exists('course', array(
-                'shortname' => $session->course
-            ))) {
-                // Get course.
-                $course = $DB->get_record('course', array(
-                    'shortname' => $session->course
-                ), '*', MUST_EXIST);
-        
+            // Check course activenet id matches.
+            $customfield = $DB->get_record('customfield_field', array('shortname'=>"programid"), '*');
+            $sql = "SELECT * FROM mdl_customfield_data WHERE fieldid ='".$customfield->id."'AND VALUE='".$session->course."';";
+            $programfield= $DB->get_record_sql($sql,array(),MUST_EXIST);
+
+            $course = $DB->get_record_sql("SELECT id,shortname FROM mdl_course WHERE id = '{$programfield->instanceid}'");
+            if ($course) {  
                 // Check course has activities.
                 if ($DB->record_exists('scheduler', array(
                     'course' => $course->id
                 ))) {
-                    // Translate group names to group IDs. They are unique per course.
-                   /* if ($session->sessiontype === \mod_attendance_structure::SESSION_GROUP) {
-                        foreach ($session->groups as $groupname) {
-                            $gid = groups_get_group_by_name($course->id, $groupname);
-                            if ($gid === false) {
-                                \mod_attendance_notifyqueue::notify_problem(get_string('sessionunknowngroup',
-                                                                            'attendance', $groupname));
-                            } else {
-                                $groupids[] = $gid;
-                            }
-                        }
-                        $session->groups = $groupids;
-                    }*/
-
                     // Get activities in course.
                     $schedulerdb = $DB->get_records('scheduler', array('course' => $course->id, 'name'=>$session->scheduler), 'id', 'id');
                     $value = reset($schedulerdb);
@@ -431,23 +357,6 @@ class sessions {
                                           LEFT OUTER JOIN mdl_user u ON ra.userid = u.id 
                                           WHERE cx.contextlevel = '50' AND c.id =".$course->id.";");
                         
-
-                       
-                       
-                        //Add zoom meeting if choosen 
-                        //ADDED FOR ZOOM
-                       /* $zoommeeting = array();
-                        if(SCHEDULER_ZOOM){
-                            if($session->addzoom){
-                                $host_id = zoomscheduler_hostkey_id($teacher->id);
-                                if($host_id){
-                                    $zoommeeting = zoomscheduler_create_zoom_meeting($session, $host_id, $cm, $course->id,0);
-                                }else{
-                                    mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidzoomuser','scheduler', $teacher->firstname." ".$teacher->lastname));
-                                }
-                            }
-                        }*/
-                        //END OF ZOOM ADDED
                         //format slot for DB add
                         $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id, $zoommeeting);
 
@@ -455,7 +364,7 @@ class sessions {
                         if ($this->session_exists($slot)) {
                             mod_scheduler_notifyqueue::notify_message(get_string('sessionduplicate', 'scheduler', (array(
                                         'course' => $session->course,
-                                        'activity' => $cm->name
+                                        'activity' => $session->studentfirstname." ".$session->studentlastname." for ".userdate($session->sessiondate )
                             ))));
                             unset($slot);
                         } 
@@ -472,15 +381,8 @@ class sessions {
                                 //get new slot id
                                 $slotid = $this->add_slot($slot,$scheduler);
 
-                                //Added for zoom
-                               /* if(SCHEDULER_ZOOM && $session->addzoom){
-                                    zoomscheduler_update_zoom($zoommeeting->id, $slot);
-                                }*/
-                                //End of Added
-
                                 //Add to calendar
                                 $this->update_calendar($scheduler,$slot,$teacher,$student,$zoommeeting);
-
 
                                 //format appointments for DB add
                                 $appointment = $this->construct_appointment_data_for_add($session, $slotid, $student->id);
@@ -510,7 +412,6 @@ class sessions {
             mod_scheduler_notifyqueue::notify_success($message);
         }
     }
-
 
     /**
      * Check if student is in the course

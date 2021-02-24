@@ -656,6 +656,7 @@ $string['email_invitereminder_html'] = '<p>This is just a reminder that you have
 /***** Import Sessions Option Under Settings ***********/
 $string['confirm'] = 'Confirm';
 $string['courseshortname'] = 'Course shortname';
+$string['courseprogramid'] = 'Course Custom Programid';
 $string['duration'] = 'Duration of lesson';
 $string['error:coursenotfound'] = 'A course with the short name {$a} can not be found.';
 $string['error:coursehasnoattendance'] = 'The course with the short name {$a} has no attendance activities.';
