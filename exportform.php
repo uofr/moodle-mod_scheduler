@@ -76,9 +76,10 @@ class scheduler_export_form extends moodleform {
         $mform->setDefault('includeemptyslots', 1);
 
         //ADDED Date Selector
-        $dateInit = array('startyear' => 1970,'stopyear'  => 2020,'timezone'  => 99,'optional'  => true,);
-        $mform->addElement('date_selector', 'meetingstart', get_string('meetingstartdate', 'scheduler'), $dateInit);
-        $mform->addElement('date_selector', 'meetingend', get_string('meetingenddate', 'scheduler'),$dateInit);
+        $mform->addElement('date_selector', 'meetingstart', get_string('meetingstartdate', 'scheduler'));
+        $mform->setDefault('meetingstart', time());
+        $mform->addElement('date_selector', 'meetingend', get_string('meetingenddate', 'scheduler'));
+        $mform->setDefault('meetingend', time());
         //END of Added
 
         // Select data to export.
