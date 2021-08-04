@@ -337,6 +337,24 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         }
         upgrade_mod_savepoint(true, 2018112661, 'scheduler');
     }
+
+    if ($oldversion < 2021072800) {
+        //fix rename error
+        $table = new xmldb_table('scheduler_appointment');
+    
+        $field = new xmldb_field('absentpaid', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'studentattend');
+        $field2 = new xmldb_field('absentschedule', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'studentattend');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        if (!$dbman->field_exists($table, $field2)) {
+            $dbman->add_field($table, $field2);
+        }
+        
+        upgrade_mod_savepoint(true, 2021072800, 'scheduler');
+    }
     return true;
 }
 

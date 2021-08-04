@@ -107,6 +107,11 @@ body.path-mod-scheduler.jsenabled  input.studentselectsubmit {
     display: none;
 }
 
+.studentselect,.absentpaid,.absentschedule {
+    margin-right:1.5%;
+    margin-left:1.5%;
+}
+
 .path-mod-scheduler img.statictickbox {
     padding-right: 5px;
 }

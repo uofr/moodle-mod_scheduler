@@ -213,6 +213,32 @@ class scheduler_slot extends mvc_child_record_model {
         return $isattended;
     }
 
+     /**
+     * Was the slot absent and paid
+     *
+     * @return boolean
+     */
+    public function is_absentpaid() {
+        $isabsentpaid = false;
+        foreach ($this->appointments->get_children() as $app) {
+            $isabsentpaid = $isabsentpaid || $app->absentpaid;
+        }
+        return $isabsentpaid;
+    }
+
+     /**
+     * Was the slot absent and needs to be reschedule
+     *
+     * @return boolean
+     */
+    public function is_absentschedule() {
+        $isabsentschedule = false;
+        foreach ($this->appointments->get_children() as $app) {
+            $isabsentschedule = $isabsentschedule || $app->absentschedule;
+        }
+        return $isabsentschedule;
+    }
+
     /**
      * Has the slot been booked by a specific student?
      *
@@ -392,20 +418,9 @@ class scheduler_slot extends mvc_child_record_model {
         $studentevent = clone($baseevent);
         $studenteventname = get_string('meetingwith', 'scheduler').' '.$scheduler->get_teacher_name().', '.fullname($teacher);
         $studentevent->name = shorten_text($studenteventname, 200);
-
-         //ADDED FOR ZOOM
-        /* if(SCHEDULER_ZOOM){
-            if($this->data->zoomid != 0){
-                $zoom = $DB->get_record('zoom', array('id' => $this->data->zoomid), '*', MUST_EXIST);
-                $studentevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->join_url."'>".$zoom->join_url."</a>";
-            }
-        }*/
-        //END OF ADDED
-
         $this->update_calendar_events( $this->get_student_eventtype(), $studentids, $studentevent);
 
         // Update teacher events.
-
         $teacherids = array();
         $teacherevent = clone($baseevent);
         if (count($studentids) > 0) {
@@ -419,18 +434,7 @@ class scheduler_slot extends mvc_child_record_model {
             }
             $teacherevent->name = shorten_text($teachereventname, 200);
         }
-
-         //ADDED FOR ZOOM
-        /* if(SCHEDULER_ZOOM){
-            if($this->data->zoomid != 0){
-                $zoom = $DB->get_record('zoom', array('id' => $this->data->zoomid), '*', MUST_EXIST);
-                $teacherevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->start_url."'>".$zoom->start_url."</a>";
-            }
-        }*/
-        //END OF ADDED
-
         $this->update_calendar_events( $this->get_teacher_eventtype(), $teacherids, $teacherevent);
-
     }
 
     /**

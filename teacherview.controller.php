@@ -195,15 +195,6 @@ function scheduler_action_delete_slots(array $slots, $action, moodle_url $return
     foreach ($slots as $slot) {
         \mod_scheduler\event\slot_deleted::create_from_slot($slot, $action)->trigger();
 
-        //ADDED FOR ZOOM
-       /* if(SCHEDULER_ZOOM){
-            $zoomid = zoomscheduler_get_zoomid($slot->id);
-            //call to delete instance
-            if($zoomid)
-                $deleted = zoomscheduler_delete_zoom_meeting($zoomid); 
-        }*/
-        //END OF ADDED
-
         $slot->delete();
         $cnt++;
     }
@@ -254,6 +245,44 @@ switch ($action) {
         if (is_array($seen)) {
             foreach ($slot->get_appointments() as $app) {
                 $app->attended = (in_array($app->id, $seen)) ? 1 : 0;
+                $app->absentpaid =  0;
+                $app->absentschedule = 0;
+                $app->timemodified = time();
+            }
+        }
+        $slot->save();
+        redirect($viewurl);
+    }
+    /************************************ Students were absent but paid ***************************************************/
+    case 'absentpaid': {
+        require_sesskey();
+        $slotid = required_param('slotid', PARAM_INT);
+        $slot = $scheduler->get_slot($slotid);
+        $absentpaid = optional_param_array('absentpaid', array(), PARAM_INT);
+
+        if (is_array($absentpaid)) {
+            foreach ($slot->get_appointments() as $app) {
+                $app->absentpaid = (in_array($app->id, $absentpaid)) ? 1 : 0;
+                $app->absentschedule =  0;
+                $app->attended =  0;
+                $app->timemodified = time();
+            }
+        }
+        $slot->save();
+        redirect($viewurl);
+    }
+    /************************************ Students were absent and need to be rescheduled ***************************************************/
+    case 'absentschedule': {
+        require_sesskey();
+        $slotid = required_param('slotid', PARAM_INT);
+        $slot = $scheduler->get_slot($slotid);
+        $absentschedule = optional_param_array('absentschedule', array(), PARAM_INT);
+
+        if (is_array($absentschedule)) {
+            foreach ($slot->get_appointments() as $app) {
+                $app->absentschedule = (in_array($app->id, $absentschedule)) ? 1 : 0;
+                $app->absentpaid = 0;
+                $app->attended = 0;
                 $app->timemodified = time();
             }
         }

@@ -358,7 +358,7 @@ class sessions {
                                           WHERE cx.contextlevel = '50' AND c.id =".$course->id.";");
                         
                         //format slot for DB add
-                        $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id, $zoommeeting);
+                        $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id);
 
                         // Check for duplicate sessions.
                         if ($this->session_exists($slot)) {
@@ -382,7 +382,7 @@ class sessions {
                                 $slotid = $this->add_slot($slot,$scheduler);
 
                                 //Add to calendar
-                                $this->update_calendar($scheduler,$slot,$teacher,$student,$zoommeeting);
+                                $this->update_calendar($scheduler,$slot,$teacher,$student);
 
                                 //format appointments for DB add
                                 $appointment = $this->construct_appointment_data_for_add($session, $slotid, $student->id);
@@ -465,11 +465,10 @@ class sessions {
  * @param stdClass $formdata moodleform - attendance form.
  * @param int $schedulerid id of scheduler in DB
  * @param int $teacherid of teacher in scheduler
- * @param array $zoom meeting object
  * @return array.
  */
 
-function construct_slot_data_for_add($formdata, $schedulerid, $teacherid, $zoom) {
+function construct_slot_data_for_add($formdata, $schedulerid, $teacherid) {
     global $CFG, $DB;
 
     $sesstarttime = $formdata->sestime['starthour'] * HOURSECS + $formdata->sestime['startminute'] * MINSECS;
@@ -504,11 +503,6 @@ function construct_slot_data_for_add($formdata, $schedulerid, $teacherid, $zoom)
     //hideuntil
     $sess->hideuntil = time();
 
-   /* if(SCHEDULER_ZOOM){
-        if(!empty($zoom)){
-            $sess->notes = "<h2>".get_string('zoomslotmessage', 'scheduler')."</h2><br><a href=' ".$zoom->join_url."'>".$zoom->join_url."</a>";                    
-        }
-    }*/
     return $sess;
 }
 
@@ -607,7 +601,7 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
      *
      * @uses $DB
      */
-    private function update_calendar($scheduler,$slot,$teacher,$student,$zoom ) {
+    private function update_calendar($scheduler,$slot,$teacher,$student) {
 
         global $DB;
 
@@ -624,14 +618,6 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
         $baseevent->timeduration = $slot->duration * MINSECS;
         $baseevent->visible = 1;
 
-        //ADDED FOR ZOOM
-       /* if(SCHEDULER_ZOOM){
-            if(!empty($zoom)){
-                $baseevent->description = "$schedulername<br/><br/>$schedulerdescription<br><br> ZOOM Meeting Link: <a href='".$zoom->join_url."'>".$zoom->join_url."</a>";
-            }
-        }*/
-        //END OF ADDED
-
         // Update student events.
         $studentevent = clone($baseevent);
         $studenteventname = get_string('meetingwith', 'scheduler').' '.$scheduler->get_teacher_name().', '.fullname($teacher);
@@ -644,9 +630,6 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
         $teachereventname = get_string('meetingwith', 'scheduler').' '.get_string('student', 'scheduler').', '.fullname($student);
         $teacherevent->name = shorten_text($teachereventname, 200);
 
-
-
-    
         $this->add_calendar_event("SSsup:{$slot->id}:{$scheduler->course}", $teacher->id, $teacherevent);
     }
 

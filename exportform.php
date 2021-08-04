@@ -96,6 +96,8 @@ class scheduler_export_form extends moodleform {
         $mform->setDefault('field-teachername', 1);
         $mform->setDefault('field-studentfullname', 1);
         $mform->setDefault('field-attended', 1);
+        $mform->setDefault('field-absentpaid', 1);
+        $mform->setDefault('field-absentschedule', 1);
 
         // Output file format.
         $mform->addElement('header', 'fileformathdr', get_string('fileformat', 'scheduler'));

@@ -24,7 +24,6 @@ $string['modulenameplural'] = 'Schedulers';
 $string['scheduler:addinstance'] = 'Add a new scheduler';
 $string['scheduler:appoint'] = 'Book slots';
 $string['scheduler:attend'] = 'Attend students';
-$string['scheduler:addzoom'] = 'Add zoom meeting generation feature: only avaiable if Zoomscheduler plugin installed';
 $string['scheduler:canadd'] = 'Can add new appointment slots';
 $string['scheduler:candelete'] = 'Can delete an appointment';
 $string['scheduler:canrevoke'] = 'Can revoke an appointment';
@@ -102,7 +101,6 @@ $string['addsession'] = 'Add repeated slots';
 $string['addsingleslot'] = 'Add single slot';
 $string['addslot'] = 'You can add additional appointment slots at any time.';
 $string['addstudenttogroup'] = 'Add this student to appointment group';
-$string['addzoom'] = 'Create and add a zoom link directly to this meeting.';
 $string['allappointments'] = 'All appointments';
 $string['allononepage'] = 'All slots on one page';
 $string['allowgroup'] = 'Exclusive slot - click to change';
@@ -217,9 +215,6 @@ $string['end'] = 'End';
 $string['enddate'] = 'Repeat time slots until';
 $string['error:bothdates'] = 'Both dates needed to filter selection.';
 $string['error:invaliddate'] = 'Dates entered are invalid.';
-$string['err_account_creation'] = ' was not found on Zoom. Account could not be created.';
-$string['err_account_invalid'] = ' was not found on Zoom.';
-$string['err_account_basic'] = ' needs to be a PRO account on Zoom to be an alternative host.';
 $string['err_email_invalid'] = 'Invalid email entered.';
 $string['excelformat'] = 'Excel';
 $string['exclusive'] = 'Exclusive';
@@ -523,14 +518,6 @@ $string['yourappointmentnote'] = 'Comments for your eyes';
 $string['yourslotnotes'] = 'Comments on the meeting';
 $string['yourstudentnote'] = 'Your message';
 $string['yourtotalgrade'] = 'Your total grade in this activity is <strong>{$a}</strong>.';
-$string['zoomslotmessage'] = 'Hello, your link to join the Zoom meeting is below:';
-$string['zoomwarning'] = 'Teacher does not have a Zoom Account. Zoom Meeting can not be generated';
-$string['zoomcohost'] = 'Added cohost does not have a Zoom Account';
-$string['zoomaddcohost'] = 'Adding Alternative Hosts';
-$string['zoomaddcohost_help'] = 'The alternative host option allows you to schedule meetings and designate another Pro user on the same account to start the meeting or webinar if you are unable to. This user will receive an email notifying them that they have been added as an alternative host, with a link to start the meeting. Click an instructors name to add them as a host. If different hosts are need add them by email. Separate multiple emails by comma (without spaces) Press SPACEBAR to add new email.';
-$string['zoomcohostemail'] = 'Co-host entered email invalid';
-
-
 
 /* ***********  Help strings from here on ************ */
 
@@ -669,7 +656,6 @@ $string['errorinaddingsession'] = 'Error in adding session';
 $string['erroringeneratingsessions'] = 'Error in generating sessions ';
 $string['error:invalidschedulername'] = 'Name given for scheduler {$a} was not found. Skipping';
 $string['error:invalidstudent'] = 'Student {$a->name} was not found in course {$a->course}. Skipping';
-$string['error:invalidzoomuser'] = 'Teacher {$a} does not have a Zoom account. Unable to generate Zoom meeting.';
 $string['eventdurationupdated'] = 'Session duration updated';
 $string['eventreportviewed'] = 'Attendance report viewed';
 $string['eventscreated'] = 'Calendar events created';
@@ -687,13 +673,10 @@ $string['processingfile'] = 'Processing file';
 $string['sessionduplicate'] = 'A duplicate session exists for course: {$a->course} in attendance: {$a->activity}';
 $string['sessionsgenerated'] = '{$a} sessions were successfully generated';
 $string['schedulername'] = 'Name of Scheduler';
-$string['schedulezoom'] = 'Schedule a Zoom Meeting';
 $string['studentfirstname'] = 'First name of student';
 $string['studentname'] = 'Name of student (Lastname, Firstname)';
 $string['studentlastname'] = 'Last name of student';
 $string['time'] = 'Lesson start time (24hr or 12 hr)';
-
-
 
 /******TAB MENU*********** */
 $string['defaultstatus'] = 'Default status set';

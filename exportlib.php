@@ -173,6 +173,8 @@ function scheduler_get_export_fields(scheduler_instance $scheduler) {
     $result[] = new scheduler_groups_multi_field($scheduler);
 
     $result[] = new scheduler_attended_field();
+    $result[] = new scheduler_absentpaid_field();
+    $result[] = new scheduler_absentschedule_field();
     $result[] = new scheduler_grade_field();
     $result[] = new scheduler_appointmentnote_field();
     $result[] = new scheduler_teachernote_field();
@@ -482,6 +484,60 @@ class scheduler_attended_field extends scheduler_export_field {
             return '';
         }
         $str = $appointment->is_attended() ? get_string('yes') : get_string('no');
+        return $str;
+    }
+
+}
+
+/**
+ * Export field: Whether the appointment was absent and paid
+ *
+ * @package    mod_scheduler
+ * @copyright  2016 Henning Bostelmann and others (see README.txt)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class scheduler_absentpaid_field extends scheduler_export_field {
+
+    public function get_id() {
+        return 'absentpaid';
+    }
+
+    public function get_group() {
+        return 'appointment';
+    }
+
+    public function get_value(scheduler_slot $slot, $appointment) {
+        if (! $appointment instanceof scheduler_appointment) {
+            return '';
+        }
+        $str = $appointment->is_absentpaid() ? get_string('yes') : get_string('no');
+        return $str;
+    }
+
+}
+
+/**
+ * Export field: Whether the appointment was absent and needs to be rescheduled
+ *
+ * @package    mod_scheduler
+ * @copyright  2016 Henning Bostelmann and others (see README.txt)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class scheduler_absentschedule_field extends scheduler_export_field {
+
+    public function get_id() {
+        return 'absentschedule';
+    }
+
+    public function get_group() {
+        return 'appointment';
+    }
+
+    public function get_value(scheduler_slot $slot, $appointment) {
+        if (! $appointment instanceof scheduler_appointment) {
+            return '';
+        }
+        $str = $appointment->is_absentschedule() ? get_string('yes') : get_string('no');
         return $str;
     }
 

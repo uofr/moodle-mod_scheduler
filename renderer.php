@@ -560,10 +560,32 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 if ($studentlist->checkboxname) {
                     if ($editable) {
                     //ADDED
-                        if($studentlist->checkboxdisable)
-                            $checkbox = html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, '',array('class' => 'studentselect'));
-                        else
-                            $checkbox = html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, '',array('class' => 'studentselect', 'disabled'=>'disabled'));
+                        if($studentlist->checkboxdisable){
+                            $checkbox  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Attended"));
+                            $checkbox .= html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, 'A',array('class' => 'studentselect'));
+                            $checkbox .= html_writer::end_tag('span');
+
+                            $checkbox2  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent and Paid"));
+                            $checkbox2 .= html_writer::checkbox($studentlist->checkboxname2, $student->entryid, $student->checkedabsentpaid, 'AP',array('class' => 'absentpaid'));
+                            $checkbox2 .= html_writer::end_tag('span');
+
+                            $checkbox3  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent and Reschedule"));
+                            $checkbox3 .= html_writer::checkbox($studentlist->checkboxname3, $student->entryid, $student->checkedabsentschedule, 'AS',array('class' => 'absentschedule'));
+                            $checkbox3 .= html_writer::end_tag('span');
+                        }
+                        else{
+                            $checkbox  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Attended"));
+                            $checkbox .= html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, 'A',array('class' => 'studentselect', 'disabled'=>'disabled'));
+                            $checkbox .= html_writer::end_tag('span');
+
+                            $checkbox2  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent and Paid"));
+                            $checkbox2 .= html_writer::checkbox($studentlist->checkboxname2, $student->entryid, $student->checkedabsentpaid, 'AP',array('class' => 'absentpaid', 'disabled'=>'disabled'));
+                            $checkbox2 .= html_writer::end_tag('span');
+
+                            $checkbox3  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent and Reschedule"));
+                            $checkbox3 .= html_writer::checkbox($studentlist->checkboxname3, $student->entryid, $student->checkedabsentschedule, 'AS',array('class' => 'absentschedule', 'disabled'=>'disabled'));
+                            $checkbox3 .= html_writer::end_tag('span');
+                        }
 
                     } else {
                         $img = $student->checked ? 'ticked' : 'unticked';
@@ -598,7 +620,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 if ($studentlist->showgrades && $student->grade) {
                     $grade = $this->format_grade($studentlist->scheduler, $student->grade, true);
                 }
-                $o .= html_writer::div($checkbox . $picture . ' ' . $name . $studicons . ' ' . $grade, $class);
+                $o .= html_writer::div($checkbox .$checkbox2.$checkbox3. $picture . ' ' . $name . $studicons . ' ' . $grade, $class);
             }
 
             if ($editable) {

@@ -33,6 +33,8 @@ class scheduler_appointment extends mvc_child_record_model {
         $this->set_parent($slot);
         $this->data->slotid = $slot->get_id();
         $this->data->attended = 0;
+        $this->data->absentpaid = 0;
+        $this->data->absentschedule = 0;
         $this->data->appointmentnoteformat = FORMAT_HTML;
         $this->data->teachernoteformat = FORMAT_HTML;
     }
@@ -95,6 +97,20 @@ class scheduler_appointment extends mvc_child_record_model {
      */
     public function is_attended() {
         return (boolean) $this->data->attended;
+    }
+
+    /**
+     * Was student absent and paid
+     */
+    public function is_absentpaid() {
+        return (boolean) $this->data->absentpaid;
+    }
+
+    /**
+     * Was student absent and lesson needs to rescheduled
+     */
+    public function is_absentschedule() {
+        return (boolean) $this->data->absentschedule;
     }
 
     /**

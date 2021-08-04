@@ -59,34 +59,6 @@ function scheduler_print_schedulebox(scheduler_instance $scheduler, $studentid, 
     }
 }
 
-//ADDED FOR ZOOM CO-HOST FEATURE
-
-
-/**
- * Get array of instructors in a course
- *
- * @param scheduler_instance $scheduler
- * @param int $studentid student to schedule
- * @param int $groupid group to schedule
- */
-function scheduler_get_instructors(scheduler_instance $scheduler) {
-
-        $teachers = $scheduler->get_available_teachers();
-        $teachersmenu = array();
-        if ($teachers) {
-            foreach ($teachers as $teacher) {
-                $teacherarray=new stdClass;
-                $teacherarray->email = $teacher->email;
-                $teacherarray->name = fullname($teacher);
-                $teachersmenu[] = $teacherarray;
-            }
-        } 
-        return $teachersmenu;
-}
-
-
-
-//END OF ADDED
 
 // Load group restrictions.
 $groupmode = groups_get_activity_groupmode($cm);
@@ -179,25 +151,6 @@ if ($action == 'addslot') {
         echo $output->header();
         echo $output->heading(get_string('addsingleslot', 'scheduler'));
         $mform->display();
-        
-        //ADDED FOR ZOOM BUTTON
-       /* if(SCHEDULER_ZOOM){
-            $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
-            'M.mod_scheduler.zoom.init', array($scheduler->cmid));
-
-             // Choose the teacher (if allowed).
-             if (has_capability('mod/scheduler:canscheduletootherteachers', $scheduler->get_context())) {
-                $teacherarray =array();
-                $teacherarray =scheduler_get_instructors($scheduler);
-
-                //get list of co-hosts already added, if none false is returned
-                $cohosts = zoomscheduler_get_cohosts($slotid);
-               
-                $PAGE->requires->js_call_amd('mod_scheduler/cohost', 'init',[$teacherarray,$cohosts]);
-            }
-        }*/
-        //END of ADDED
-     
         echo $output->footer($course);
         die;
     }
@@ -230,7 +183,6 @@ if ($action == 'updateslot') {
         $data = $mform->prepare_formdata($slot);
         $mform->set_data($data);
 
-
         if ($mform->is_cancelled()) {
             redirect($viewurl);
         } else if ($formdata = $mform->get_data()) {
@@ -243,19 +195,9 @@ if ($action == 'updateslot') {
             echo $output->header();
             echo $output->heading(get_string('updatesingleslot', 'scheduler'));
             $mform->display();
-
-            //ADDED FOR ZOOM BUTTON
-            /*if(SCHEDULER_ZOOM){
-                $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
-                'M.mod_scheduler.zoom.init', array($scheduler->cmid));
-            }*/
-            //END of ADDED
-
             echo $output->footer($course);
             die;
         }
-
-
     }
     else{
         $slotid = required_param('slotid', PARAM_INT);
@@ -288,23 +230,6 @@ if ($action == 'updateslot') {
             echo $output->header();
             echo $output->heading(get_string('updatesingleslot', 'scheduler'));
             $mform->display();
-            //ADDED FOR ZOOM BUTTON
-            /*if(SCHEDULER_ZOOM){
-                $PAGE->requires->yui_module('moodle-mod_scheduler-zoom',
-                'M.mod_scheduler.zoom.init', array($scheduler->cmid));
-
-                 // Choose the teacher (if allowed).
-                if (has_capability('mod/scheduler:canscheduletootherteachers', $scheduler->get_context())) {
-                    $teacherarray =array();
-                    $teacherarray =scheduler_get_instructors($scheduler);
-
-                    //get list of co-hosts already added, if none false is returned
-                    $cohosts = zoomscheduler_get_cohosts($slotid);
-                   
-                    $PAGE->requires->js_call_amd('mod_scheduler/cohost', 'init',[$teacherarray,$cohosts]);
-                }
-            }*/
-            //END of ADDED
             echo $output->footer($course);
             die;
         }
@@ -624,10 +549,14 @@ if ($slots) {
         $studlist->editable = $editable;
         $studlist->linkappointment = true;
         $studlist->checkboxname = 'seen[]';
+        $studlist->checkboxname2 = 'absentpaid[]';
+        $studlist->checkboxname3 = 'absentschedule[]';
         $studlist->buttontext = get_string('saveseen', 'scheduler');
+        $studlist->buttontext2 = get_string('absentpaid', 'scheduler');
+        $studlist->buttontext2 = get_string('absentschedule', 'scheduler');
         //check if date can be selected
         if(!$unlimitedediting){
-                //ADDDED
+            //ADDDED
             //if the meeting was within the last 24 hrs.
             $moddate = $slot->starttime + 86400;
 
@@ -642,7 +571,7 @@ if ($slots) {
 
         $studlist->actionurl = new moodle_url($actionurl, array('what' => 'saveseen', 'slotid' => $slot->id));
         foreach ($slot->get_appointments() as $app) {
-            $studlist->add_student($app, false, $app->is_attended(), true, $scheduler->uses_studentdata());
+            $studlist->add_student($app, false, $app->is_attended(), $app->is_absentpaid(), $app->is_absentschedule(), true, $scheduler->uses_studentdata());
         }
 
         $slotman->add_slot($slot, $studlist, $editable, $canadd, $candelete, $canrevoke);

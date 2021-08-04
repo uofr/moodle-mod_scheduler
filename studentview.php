@@ -129,7 +129,7 @@ if (count($pastslots) > 0) {
             foreach ($pastslot->get_appointments() as $otherapp) {
                 $othermark = $scheduler->get_gradebook_info($otherapp->studentid);
                 $gradehidden = !is_null($othermark) && ($othermark->hidden <> 0);
-                $others->add_student($otherapp, $otherapp->studentid == $USER->id, false, !$gradehidden);
+                $others->add_student($otherapp, $otherapp->studentid == $USER->id, false,false,false, !$gradehidden);
             }
         } else {
             $others = null;
@@ -169,7 +169,7 @@ if (count($upcomingslots) > 0) {
                 $gradehidden = !$scheduler->uses_grades() ||
                                ($scheduler->get_gradebook_info($otherapp->studentid)->hidden <> 0) ||
                                (!$showothergrades && $otherapp->studentid <> $USER->id);
-                $others->add_student($otherapp, $otherapp->studentid == $USER->id, false, !$gradehidden);
+                $others->add_student($otherapp, $otherapp->studentid == $USER->id, false, false,false, !$gradehidden);
             }
         } else {
             $others = null;

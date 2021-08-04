@@ -81,6 +81,8 @@ class scheduler_slot_table implements renderable {
         $slot->starttime = $slotmodel->starttime;
         $slot->endtime = $slotmodel->endtime;
         $slot->attended = $appointmentmodel->attended;
+        $slot->absentpaid = $appointmentmodel->absentpaid;
+        $slot->absentschedule = $appointmentmodel->absentschedule;
         $slot->location = $slotmodel->appointmentlocation;
         $slot->slotnote = $slotmodel->notes;
         $slot->slotnoteformat = $slotmodel->notesformat;
@@ -94,7 +96,7 @@ class scheduler_slot_table implements renderable {
            $this->studentattended = TRUE;
          }
          else{ //display a disable box to show if student marked or not
-            $slot->attendcheck = html_writer::checkbox($appointmentmodel->id, $appointmentmodel->id, $appointmentmodel->studentattend, '',
+            $slot->attendcheck = html_writer::checkbox("test", "test", false, '',
             array('class' => 'studentattendselect', 'disabled' => 'disabled'));
            $this->studentattended = TRUE;
          }
@@ -134,9 +136,7 @@ class scheduler_slot_table implements renderable {
         $this->showgrades = $showgrades && $scheduler->uses_grades();
         $this->actionurl = $actionurl;
     }
-
 }
-
 
 /**
  * This class represents a list of students in a slot, to be displayed "inline" within a larger table
@@ -185,8 +185,8 @@ class scheduler_student_list implements renderable {
      * @param bool $showgrade whether to show a grade with this entry
      * @param bool $showstudprovided whether to show an icon for student-provided files
      */
-    public function add_student(scheduler_appointment $appointment, $highlight, $checked = false,
-                                $showgrade = true, $showstudprovided = false) {
+    public function add_student(scheduler_appointment $appointment, $highlight, $checked = false, $checkedabsentpaid =false,
+                                $checkedabsentschedule =false, $showgrade = true, $showstudprovided = false) {
         $student = new stdClass();
         $student->user = $appointment->get_student();
         if ($this->showgrades && $showgrade) {
@@ -196,6 +196,8 @@ class scheduler_student_list implements renderable {
         }
         $student->highlight = $highlight;
         $student->checked = $checked;
+        $student->checkedabsentpaid = $checkedabsentpaid;
+        $student->checkedabsentschedule = $checkedabsentschedule;
         $student->entryid = $appointment->id;
         $scheduler = $appointment->get_scheduler();
         $student->notesprovided = false;
@@ -412,6 +414,8 @@ class scheduler_slot_manager implements renderable {
         $slot->students = $students;
         $slot->editable = $editable;
         $slot->isattended = $slotmodel->is_attended();
+        $slot->isabsentpaid = $slotmodel->is_absentpaid();
+        $slot->isabsentschedule = $slotmodel->is_absentschedule();
         $slot->isappointed = $slotmodel->get_appointment_count();
         $slot->exclusivity = $slotmodel->exclusivity;
         $slot->canadd = $canadd;
