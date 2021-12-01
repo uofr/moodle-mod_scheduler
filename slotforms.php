@@ -709,7 +709,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
 
             // Seen tickbox.
             //ADDED DATE CHECK
-            $moddate = $this->_customdata['timestamp'] + 86400;
+            $moddate = $this->_customdata['timestamp'] + 172800;
 
             if(($this->_customdata['timestamp']<= time()  && time() <= $moddate))
                 $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'));

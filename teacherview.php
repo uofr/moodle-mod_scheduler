@@ -558,7 +558,7 @@ if ($slots) {
         if(!$unlimitedediting){
             //ADDDED
             //if the meeting was within the last 24 hrs.
-            $moddate = $slot->starttime + 86400;
+            $moddate = $slot->starttime + 172800;
 
             if(($slot->starttime<= time()  && time() <= $moddate))
                 $studlist->checkboxdisable = TRUE;

@@ -116,7 +116,7 @@ if (count($pastslots) > 0) {
         //If student can mark attendance
         $studentCanMark =false;
 
-        $moddate = $pastslot->starttime + 86400;
+        $moddate = $pastslot->starttime + 172800;
 
         if($canmarkattend && ($pastslot->starttime<= time()  && time() <= $moddate)){
             $studentCanMark =true;
@@ -154,7 +154,7 @@ if (count($upcomingslots) > 0) {
          $studentCanMark =false;
          //if student has the ability to mark if attend and if the meeting was within the last 24 hrs.
         
-         $moddate = $slot->starttime + 86400;
+         $moddate = $slot->starttime + 172800;
 
          if($canmarkattend && ($slot->starttime<= time()  && time() <= $moddate)){
              $studentCanMark =true;
