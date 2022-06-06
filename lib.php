@@ -712,16 +712,10 @@ function scheduler_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('settings', $CFG->wwwroot.'/admin/settings.php?section=modsettingscheduler',
         get_string('settings', 'scheduler'), get_string('settings'), false);
 
-    $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/scheduler/defaultstatus.php',
-        get_string('defaultstatus', 'scheduler'), get_string('defaultstatus', 'scheduler'), false);
-
     if (get_config('scheduler', 'enablewarnings')) {
         $tabs[] = new tabobject('defaultwarnings', $CFG->wwwroot . '/mod/scheduler/warnings.php',
             get_string('defaultwarnings', 'scheduler'), get_string('defaultwarnings', 'scheduler'), false);
     }
-
-    $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/scheduler/coursesummary.php',
-        get_string('coursesummary', 'scheduler'), get_string('coursesummary', 'scheduler'), false);
 
     if (get_config('scheduler', 'enablewarnings')) {
         $tabs[] = new tabobject('absentee', $CFG->wwwroot . '/mod/scheduler/absentee.php',
