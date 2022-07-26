@@ -17,7 +17,7 @@ defined('MOODLE_INTERNAL') || die();
  * @param mixed $formdata
  * @param moodle_url $returnurl the URL to redirect to after the action has been performed
  */
-function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $returnurl) {
+function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $returnurl, $canceldates) {
 
     global $DB, $output;
 
@@ -47,7 +47,8 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
     $slot->notesformat = FORMAT_HTML;
     $slot->timemodified = time();
 
-    
+
+
     for ($d = 0; $d <= $fordays; $d ++) {
         $starttime = $startfrom + ($d * DAYSECS);
         $eventdate = usergetdate($starttime);
@@ -65,62 +66,116 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
             $data->timeend = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'],
                                             $data->endhour, $data->endminute);
 
-            // This corrects around midnight bug.
-            if ($data->timestart > $data->timeend) {
-                $data->timeend += DAYSECS;
-            }
-            if ($data->hideuntilrel == 0) {
-                $slot->hideuntil = time();
-            } else {
-                $slot->hideuntil = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'], 6, 0) -
-                                    $data->hideuntilrel;
-            }
-            if ($data->emaildaterel == -1) {
-                $slot->emaildate = 0;
-            } else {
-                $slot->emaildate = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'], 0, 0) -
-                                    $data->emaildaterel;
-            }
-            while ($slot->starttime <= $data->timeend - $slot->duration * 60) {
-                $conflicts = $scheduler->get_conflicts($data->timestart, $data->timestart + $slot->duration * 60,
-                                                       $data->teacherid, 0, SCHEDULER_ALL);
-                $resolvable = (boolean) $data->forcewhenoverlap;
-                foreach ($conflicts as $conflict) {
-                    $resolvable = $resolvable
-                                     && $conflict->isself == 1       // Do not delete slots outside the current scheduler.
-                                     && $conflict->numstudents == 0; // Do not delete slots with bookings.
-                }
+            //URCOURSES HACK
+            //check if date matches any included in cancel dates file
+            $createslot = true;
+            if ($canceldates != false){
 
-                if ($conflicts) {
-                    $conflictmsg = '';
-                    $cl = new scheduler_conflict_list();
-                    $cl->add_conflicts($conflicts);
-                    if (!$resolvable) {
-                        $conflictmsg .= get_string('conflictingslots', 'scheduler', userdate($data->timestart));
-                        $conflictmsg .= $output->doc_link('mod/scheduler/conflict', '', true);
-                        $conflictmsg .= $output->render($cl);
-                    } else { // We force, so delete all conflicting before inserting.
-                        foreach ($conflicts as $conflict) {
-                            $cslot = $scheduler->get_slot($conflict->id);
-                            \mod_scheduler\event\slot_deleted::create_from_slot($cslot, 'addsession-conflict')->trigger();
-                            $cslot->delete();
-                        }
-                        $conflictmsg .= get_string('deletedconflictingslots', 'scheduler', userdate($data->timestart));
-                        $conflictmsg .= $output->doc_link('mod/scheduler/conflict', '', true);
-                        $conflictmsg .= $output->render($cl);
+        
+
+                if( in_array($eventdate['year'].'/'.sprintf("%02d",$eventdate['mon']).'/'.sprintf("%02d",$eventdate['mday']), $canceldates)){
+                    $createslot = false;
+                }
+            }
+
+            if($createslot){
+            //END of HACK
+                // This corrects around midnight bug.
+                if ($data->timestart > $data->timeend) {
+                    $data->timeend += DAYSECS;
+                }
+                if ($data->hideuntilrel == 0) {
+                    $slot->hideuntil = time();
+                } else {
+                    $slot->hideuntil = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'], 6, 0) -
+                                        $data->hideuntilrel;
+                }
+                if ($data->emaildaterel == -1) {
+                    $slot->emaildate = 0;
+                } else {
+                    $slot->emaildate = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'], 0, 0) -
+                                        $data->emaildaterel;
+                }
+                while ($slot->starttime <= $data->timeend - $slot->duration * 60) {
+                    $conflicts = $scheduler->get_conflicts($data->timestart, $data->timestart + $slot->duration * 60,
+                                                            $data->teacherid, 0, SCHEDULER_ALL);
+                    $resolvable = (boolean) $data->forcewhenoverlap;
+                    foreach ($conflicts as $conflict) {
+                            $resolvable = $resolvable
+                                            && $conflict->isself == 1       // Do not delete slots outside the current scheduler.
+                                            && $conflict->numstudents == 0; // Do not delete slots with bookings.
                     }
-                    \core\notification::warning($conflictmsg);
-                }
-                if (!$conflicts || $resolvable) {
-                    $slotid = $DB->insert_record('scheduler_slots', $slot, true, true);
 
-                    $slotobj = $scheduler->get_slot($slotid);
+                    if ($conflicts) {
+                        $conflictmsg = '';
+                        $cl = new scheduler_conflict_list();
+                        $cl->add_conflicts($conflicts);
+                        if (!$resolvable) {
+                            $conflictmsg .= get_string('conflictingslots', 'scheduler', userdate($data->timestart));
+                            $conflictmsg .= $output->doc_link('mod/scheduler/conflict', '', true);
+                            $conflictmsg .= $output->render($cl);
+                        } else { // We force, so delete all conflicting before inserting.
+                            foreach ($conflicts as $conflict) {
+                                $cslot = $scheduler->get_slot($conflict->id);
+                                \mod_scheduler\event\slot_deleted::create_from_slot($cslot, 'addsession-conflict')->trigger();
+                                $cslot->delete();
+                            }
+                            $conflictmsg .= get_string('deletedconflictingslots', 'scheduler', userdate($data->timestart));
+                            $conflictmsg .= $output->doc_link('mod/scheduler/conflict', '', true);
+                            $conflictmsg .= $output->render($cl);
+                        }
+                        \core\notification::warning($conflictmsg);
+                    }
+                    if (!$conflicts || $resolvable) {
+                        $slotid = $DB->insert_record('scheduler_slots', $slot, true, true);
 
-                    \mod_scheduler\event\slot_added::create_from_slot($slotobj)->trigger();
-                    $countslots++;
+                        $slotobj = $scheduler->get_slot($slotid);
+
+                        \mod_scheduler\event\slot_added::create_from_slot($slotobj)->trigger();
+                        $countslots++;
+
+                        //URCOURSE HACK LEFT OFF HERE MUST TEST
+                        for ($i = 0; $i < $data->appointment_repeats; $i++) {
+                            if ($data->studentid[$i] > 0) {
+
+                                $slotfinal = scheduler_slot::load_by_id($slotid, $scheduler);
+                                $noteoptions = array('trusttext' => true, 'maxfiles' => -1, 'maxbytes' => 0,
+                                   'context' => $scheduler->get_context(), 'subdirs' => false);
+                                $context = $scheduler->get_context();
+
+                                $app = null;
+                                $app = $slotfinal->create_appointment();
+                                $app->studentid = $data->studentid[$i];
+                                $app->save();
+                                $app->attended = isset($data->attended[$i]);
+                    
+                                if (isset($data->grade)) {
+                                    $selgrade = $data->grade[$i];
+                                    $app->grade = ($selgrade >= 0) ? $selgrade : null;
+                                }
+                    
+                                if ($scheduler->uses_appointmentnotes()) {
+                                    $editor = $data->appointmentnote_editor[$i];
+                                    $app->appointmentnote = file_save_draft_area_files($editor['itemid'], $context->id,
+                                                'mod_scheduler', 'appointmentnote', $app->id,
+                                                $noteoptions, $editor['text']);
+                                    $app->appointmentnoteformat = $editor['format'];
+                                }
+
+                                if ($scheduler->uses_teachernotes()) {
+                                    $editor = $data->teachernote_editor[$i];
+                                    $app->teachernote = file_save_draft_area_files($editor['itemid'], $context->id,
+                                                'mod_scheduler', 'teachernote', $app->id,
+                                                $noteoptions, $editor['text']);
+                                    $app->teachernoteformat = $editor['format'];
+                                }
+                            }
+                        }
+                        //END OF HACK
+                    }
+                    $slot->starttime += ($slot->duration + $data->break) * 60;
+                    $data->timestart += ($slot->duration + $data->break) * 60; 
                 }
-                $slot->starttime += ($slot->duration + $data->break) * 60;
-                $data->timestart += ($slot->duration + $data->break) * 60;
             }
         }
     }

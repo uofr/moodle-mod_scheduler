@@ -249,7 +249,28 @@ if ($action == 'addsession') {
     if ($mform->is_cancelled()) {
         redirect($viewurl);
     } else if ($formdata = $mform->get_data()) {
-        scheduler_action_doaddsession($scheduler, $formdata, $viewurl);
+        //URCOURSES HACK
+        $cdates = $mform->get_file_content('canceldates');
+        //Open attached file and clean dates
+        //clear any newline characters
+        $cdates = str_replace(array("\n","\r"), '', $cdates);
+        $canceldates= explode(',', $cdates);
+        //clear any empty slots
+        $canceldates = array_filter($canceldates);
+
+        //check if dates in correct format
+        $regex = '[0-9]{4}\/[0-9]{2}\/[0-9]{2}';
+        if ($canceldates != false){
+            foreach($canceldates as $canceldate){
+                if (!preg_match($regex, $canceldate)){
+                    $conflictmsg = $canceldate." not proper format (yyyy/mm/dd) skipping cell";
+                    \core\notification::warning($conflictmsg);
+                } 
+            }
+        }
+        //END of Hack
+
+        scheduler_action_doaddsession($scheduler, $formdata, $viewurl, $canceldates);
     } else {
         echo $output->header();
         echo $output->heading(get_string('addsession', 'scheduler'));

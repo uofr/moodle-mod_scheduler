@@ -497,7 +497,7 @@ class scheduler_addsession_form extends scheduler_slotform_base {
 
     protected function definition() {
 
-        global $DB;
+        global $DB, $CFG;
 
         $mform = $this->_form;
 
@@ -536,6 +536,21 @@ class scheduler_addsession_form extends scheduler_slotform_base {
         $timegroup[] = $mform->createElement('select', 'endhour', get_string('hour', 'form'), $hours);
         $timegroup[] = $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes);
         $mform->addGroup($timegroup, 'timerange', get_string('timerange', 'scheduler'), null, false);
+
+        //UR COMMUNITY HACK DATES TO EXCLUDE
+        $currentmaxbytes = get_config('moodlecourse', 'maxbytes');
+        if (isset($CFG->maxbytes)) {
+            $maxbytes = get_max_upload_sizes($CFG->maxbytes, 0, 0, $currentmaxbytes);
+        } else {
+            $maxbytes = get_max_upload_sizes(0, 0, 0, $currentmaxbytes);
+        }
+        
+        $mform->addElement('filepicker', 'canceldates', get_string('canceldates'), null,
+                   array('maxbytes' => $maxbytes, 'accepted_types' => '*'));
+
+        $mform->addHelpButton('canceldates', 'canceldates', 'scheduler');
+
+        //END of HACK
 
         // Divide into slots?
         $mform->addElement('selectyesno', 'divide', get_string('divide', 'scheduler'));
@@ -586,6 +601,77 @@ class scheduler_addsession_form extends scheduler_slotform_base {
         $mform->addElement('select', 'emaildaterel', get_string('emailreminder', 'scheduler'), $remindersel);
         $mform->setDefault('remindersel', -1);
 
+
+        //URCOURSES HACK
+        
+        // Appointments.
+        $repeatarray = array();
+        $grouparray = array();
+        $repeatarray[] = $mform->createElement('header', 'appointhead', get_string('appointmentno', 'scheduler', '{no}'));
+
+        // Choose student.
+        $students = $this->scheduler->get_available_students($this->usergroups);
+        $studentsmenu = array('0' => get_string('choosedots'));
+        if ($students) {
+            foreach ($students as $astudent) {
+                $studentsmenu[$astudent->id] = fullname($astudent);
+            }
+        }
+        $grouparray[] = $mform->createElement('select', 'studentid', '', $studentsmenu);
+        $grouparray[] = $mform->createElement('hidden', 'appointid', 0);
+
+        // Seen tickbox.
+        $grouparray[] = $mform->createElement('static', 'attendedlabel', '', get_string('seen', 'scheduler'));
+        $grouparray[] = $mform->createElement('checkbox', 'attended');
+
+        // Grade.
+        if ($this->scheduler->scale != 0) {
+            $gradechoices = $output->grading_choices($this->scheduler);
+            $grouparray[] = $mform->createElement('static', 'attendedlabel', '', get_string('grade', 'scheduler'));
+            $grouparray[] = $mform->createElement('select', 'grade', '', $gradechoices);
+        }
+
+        $repeatarray[] = $mform->createElement('group', 'studgroup', get_string('student', 'scheduler'), $grouparray, null, false);
+        
+
+        // Appointment notes, visible to teacher and/or student.
+
+        if ($this->scheduler->uses_appointmentnotes()) {
+            $repeatarray[] = $mform->createElement('editor', 'appointmentnote_editor', get_string('appointmentnote', 'scheduler'),
+                                                   array('rows' => 3, 'columns' => 60), $this->noteoptions);
+        }
+        if ($this->scheduler->uses_teachernotes()) {
+            $repeatarray[] = $mform->createElement('editor', 'teachernote_editor', get_string('teachernote', 'scheduler'),
+                                                   array('rows' => 3, 'columns' => 60), $this->noteoptions);
+        }
+
+        if (isset($this->_customdata['repeats'])) {
+            $repeatno = $this->_customdata['repeats'];
+        } else {
+            $repeatno = 1;
+        }
+
+        $repeateloptions = array();
+        $repeateloptions['appointid']['type'] = PARAM_INT;
+        $repeateloptions['studentid']['disabledif'] = array('appointid', 'neq', 0);
+        $nostudcheck = array('studentid', 'eq', 0);
+        $dividecheck = array('divide', 'eq', '1');
+        $repeateloptions['attended']['disabledif'] = $nostudcheck;
+        $repeateloptions['appointmentnote_editor']['disabledif'] = $nostudcheck;
+        $repeateloptions['teachernote_editor']['disabledif'] = $nostudcheck;
+        $repeateloptions['studentid']['disabledif'] =  $dividecheck;
+        $repeateloptions['grade']['disabledif'] = $nostudcheck;
+        $repeateloptions['deletestudent']['disabledif'] = $nostudcheck;
+        $repeateloptions['appointhead']['expanded'] = true;
+
+        $this->repeat_elements($repeatarray, $repeatno, $repeateloptions,
+                        'appointment_repeats', 'appointment_add', 1, get_string('addappointment', 'scheduler'));
+
+
+        //END OF HACK
+
+        
+       
         $this->add_action_buttons();
 
     }
