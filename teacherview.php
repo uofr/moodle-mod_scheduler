@@ -259,7 +259,7 @@ if ($action == 'addsession') {
         $canceldates = array_filter($canceldates);
 
         //check if dates in correct format
-        $regex = '[0-9]{4}\/[0-9]{2}\/[0-9]{2}';
+        $regex = '/[0-9]{4}\/[0-9]{2}\/[0-9]{2}/';
         if ($canceldates != false){
             foreach($canceldates as $canceldate){
                 if (!preg_match($regex, $canceldate)){
