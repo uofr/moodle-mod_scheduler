@@ -545,7 +545,7 @@ class scheduler_addsession_form extends scheduler_slotform_base {
             $maxbytes = get_max_upload_sizes(0, 0, 0, $currentmaxbytes);
         }
         
-        $mform->addElement('filepicker', 'canceldates', get_string('canceldates'), null,
+        $mform->addElement('filepicker', 'canceldates', get_string('canceldates', 'scheduler'), null,
                    array('maxbytes' => $maxbytes, 'accepted_types' => '*'));
 
         $mform->addHelpButton('canceldates', 'canceldates', 'scheduler');
