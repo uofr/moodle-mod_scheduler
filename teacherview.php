@@ -251,10 +251,13 @@ if ($action == 'addsession') {
     } else if ($formdata = $mform->get_data()) {
         //URCOURSES HACK
         $cdates = $mform->get_file_content('canceldates');
+        error_log(print_r($cdates, TRUE));
         //Open attached file and clean dates
         //clear any newline characters
-        $cdates = str_replace(array("\n","\r"), '', $cdates);
+        $cdates = str_replace(array("\n","\r"), ',', $cdates);
+        error_log(print_r($cdates, TRUE));
         $canceldates= explode(',', $cdates);
+        error_log(print_r($canceldates, TRUE));
         //clear any empty slots
         $canceldates = array_filter($canceldates);
 
@@ -262,6 +265,8 @@ if ($action == 'addsession') {
         $regex = '/[0-9]{4}\/[0-9]{2}\/[0-9]{2}/';
         if ($canceldates != false){
             foreach($canceldates as $canceldate){
+
+                error_log(print_r($canceldate, TRUE));
                 if (!preg_match($regex, $canceldate)){
                     $conflictmsg = $canceldate." not proper format (yyyy/mm/dd) skipping cell";
                     \core\notification::warning($conflictmsg);
