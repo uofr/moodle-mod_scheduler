@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * General library for the scheduler module.
@@ -10,11 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->libdir.'/filelib.php');
 require_once(dirname(__FILE__).'/customlib.php');
-
-require_once(dirname(__FILE__).'/model/scheduler_instance.php');
-require_once(dirname(__FILE__).'/model/scheduler_slot.php');
-require_once(dirname(__FILE__).'/model/scheduler_appointment.php');
 
 
 /* Events related functions */
@@ -29,14 +40,8 @@ require_once(dirname(__FILE__).'/model/scheduler_appointment.php');
 function scheduler_delete_calendar_events($slot) {
     global $DB;
 
-    $scheduler = $DB->get_record('scheduler', array('id' => $slot->schedulerid));
-
-    if (!$scheduler) {
-        return false;
-    }
-
-    $teachereventtype = "SSsup:{$slot->id}:{$scheduler->course}";
-    $studenteventtype = "SSstu:{$slot->id}:{$scheduler->course}";
+    $teachereventtype = "SSsup:{$slot->id}";
+    $studenteventtype = "SSstu:{$slot->id}";
 
     $teacherdeletionsuccess = $DB->delete_records('event', array('eventtype' => $teachereventtype));
     $studentdeletionsuccess = $DB->delete_records('event', array('eventtype' => $studenteventtype));
@@ -53,11 +58,11 @@ function scheduler_delete_calendar_events($slot) {
  *
  * @uses $CFG
  * @uses $USER
- * @param user $user A {@link $USER} object representing a user
- * @param course $course A {@link $COURSE} object representing a course
+ * @param $user A {@see $USER} object representing a user
+ * @param $course A {@see $COURSE} object representing a course
  * @param bool $messageselect whether to include a checkbox to select the user
  * @param bool $return whether the HTML fragment is to be returned as a string (otherwise printed)
- * @return string HTML fragment, if so selected
+ * @return string|void HTML fragment, if so selected
  */
 function scheduler_print_user($user, $course, $messageselect=false, $return=false) {
 
@@ -117,7 +122,7 @@ function scheduler_print_user($user, $course, $messageselect=false, $return=fals
     $output .= '<td class="content">';
     $output .= '<div class="username">'.fullname($user, has_capability('moodle/site:viewfullnames', $context)).'</div>';
     $output .= '<div class="info">';
-    if (!empty($user->role) and ($user->role <> $course->teacher)) {
+    if (!empty($user->role) && ($user->role <> $course->teacher)) {
         $output .= $string->role .': '. $user->role .'<br />';
     }
 
@@ -140,13 +145,13 @@ function scheduler_print_user($user, $course, $messageselect=false, $return=fals
         $output .= '<a href="'.$CFG->wwwroot.'/blog/index.php?userid='.$user->id.'">'.get_string('blogs', 'blog').'</a><br />';
     }
     // Link to notes.
-    if (!empty($CFG->enablenotes) and (has_capability('moodle/notes:manage', $context)
+    if (!empty($CFG->enablenotes) && (has_capability('moodle/notes:manage', $context)
             || has_capability('moodle/notes:view', $context))) {
         $output .= '<a href="'.$CFG->wwwroot.'/notes/index.php?course=' . $course->id. '&amp;user='.$user->id.'">'.
                     get_string('notes', 'notes').'</a><br />';
     }
 
-    if (has_capability('moodle/site:viewreports', $context) or
+    if (has_capability('moodle/site:viewreports', $context) ||
             has_capability('moodle/user:viewuseractivitiesreport', $usercontext)) {
         $output .= '<a href="'. $CFG->wwwroot .'/course/user.php?id='. $course->id .'&amp;user='. $user->id .'">'.
                     $string->activity .'</a><br />';
@@ -182,7 +187,7 @@ class scheduler_file_info extends file_info {
     protected $areas;
     /** @var string File area to browse */
     protected $filearea;
-    /** @var scheduler_instance The scheduler that this file area refers to */
+    /** @var \mod_scheduler\model\scheduler The scheduler that this file area refers to */
     protected $scheduler;
 
     /**
@@ -201,7 +206,7 @@ class scheduler_file_info extends file_info {
         $this->cm       = $cm;
         $this->areas    = $areas;
         $this->filearea = $filearea;
-        $this->scheduler = scheduler_instance::load_by_coursemodule_id($cm->id);
+        $this->scheduler = \mod_scheduler\model\scheduler::load_by_coursemodule_id($cm->id);
     }
 
     /**

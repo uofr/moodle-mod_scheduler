@@ -1,7 +1,22 @@
 <?PHP
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Main file of the scheduler package.
+ *
  * It lists all the instances of scheduler in a particular course.
  *
  * @package    mod_scheduler
@@ -37,7 +52,7 @@ $strscheduler  = get_string('modulename', 'scheduler');
 $title = $course->shortname . ': ' . $strschedulers;
 $PAGE->set_title($title);
 $PAGE->set_heading($course->fullname);
-echo $OUTPUT->header($course);
+echo $OUTPUT->header();
 
 
 // Get all the appropriate data.
@@ -72,8 +87,8 @@ foreach ($schedulers as $scheduler) {
     // Show dimmed if the mod is hidden.
     $attr = $scheduler->visible ? null : array('class' => 'dimmed');
     $link = html_writer::link($url, $scheduler->name, $attr);
-    if ($scheduler->visible or has_capability('moodle/course:viewhiddenactivities', $coursecontext)) {
-        if ($course->format == 'weeks' or $course->format == 'topics') {
+    if ($scheduler->visible || has_capability('moodle/course:viewhiddenactivities', $coursecontext)) {
+        if ($course->format == 'weeks' || $course->format == 'topics') {
             $table->data[] = array ($scheduler->section, $link);
         } else {
             $table->data[] = array ($link);
@@ -85,5 +100,5 @@ echo html_writer::table($table);
 
 // Finish the page.
 
-echo $OUTPUT->footer($course);
+echo $OUTPUT->footer();
 

@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Controller for all teacher-related views.
@@ -10,10 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-
 /**
  * Add a session (confirmed action) from data entered into the add session form
- * @param scheduler_instance $scheduler
+ * @param \mod_scheduler\model\scheduler $scheduler
  * @param mixed $formdata
  * @param moodle_url $returnurl the URL to redirect to after the action has been performed
  */
@@ -41,8 +54,8 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
     if ($data->divide) {
         $slot->duration = $data->duration;
     } else {
-        $slot->duration = $data->endhour * 60 + $data->endminute - $data->starthour * 60 - $data->startminute;
-    };
+        $slot->duration = max(1, $data->endhour * 60 + $data->endminute - $data->starthour * 60 - $data->startminute);
+    }
     $slot->notes = '';
     $slot->notesformat = FORMAT_HTML;
     $slot->timemodified = time();
@@ -138,7 +151,7 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
                         for ($i = 0; $i < $data->appointment_repeats; $i++) {
                             if ($data->studentid[$i] > 0) {
 
-                                $slotfinal = scheduler_slot::load_by_id($slotid, $scheduler);
+                                $slotfinal = \mod_scheduler\model\slot::load_by_id($slotid, $scheduler);
                                 $noteoptions = array('trusttext' => true, 'maxfiles' => -1, 'maxbytes' => 0,
                                    'context' => $scheduler->get_context(), 'subdirs' => false);
                                 $context = $scheduler->get_context();
@@ -190,7 +203,7 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
 /**
  * Send a message (confirmed action) after filling the message form
  *
- * @param scheduler_instance $scheduler
+ * @param \mod_scheduler\model\scheduler $scheduler
  * @param mixed $formdata
  * @param moodle_url $returnurl the URL to redirect to after the action has been performed
  */
@@ -241,11 +254,12 @@ function scheduler_action_dosendmessage($scheduler, $formdata, $returnurl) {
 /**
  * Delete slots (after UI button has been pushed)
  *
- * @param scheduler_slot[] $slots list of slots to be deleted
+ * @param \mod_scheduler\model\slot[] $slots list of slots to be deleted
  * @param string $action description of the action
  * @param moodle_url $returnurl the URL to redirect to after the action has been performed
  */
 function scheduler_action_delete_slots(array $slots, $action, moodle_url $returnurl) {
+
     $cnt = 0;
     foreach ($slots as $slot) {
         \mod_scheduler\event\slot_deleted::create_from_slot($slot, $action)->trigger();
@@ -271,27 +285,30 @@ function scheduler_action_delete_slots(array $slots, $action, moodle_url $return
 // Any of the following actions must issue a redirect when finished.
 switch ($action) {
     /************************************ Deleting a slot ***********************************************/
-    case 'deleteslot': {
+    case 'deleteslot':
         require_sesskey();
         $slotid = required_param('slotid', PARAM_INT);
         $slot = $scheduler->get_slot($slotid);
+        $permissions->ensure($permissions->can_edit_slot($slot));
         scheduler_action_delete_slots(array($slot), $action, $viewurl);
-    }
+        break;
     /************************************ Deleting multiple slots ***********************************************/
-    case 'deleteslots': {
+    case 'deleteslots':
         require_sesskey();
         $slotids = required_param('items', PARAM_SEQUENCE);
         $slotids = explode(",", $slotids);
         $slots = array();
         foreach ($slotids as $slotid) {
             if ($slotid > 0) {
-                $slots[] = $scheduler->get_slot($slotid);
+                $slot = $scheduler->get_slot($slotid);
+                $permissions->ensure($permissions->can_edit_slot($slot));
+                $slots[] = $slot;
             }
         }
         scheduler_action_delete_slots($slots, $action, $viewurl);
-    }
+        break;
     /************************************ Students were seen ***************************************************/
-    case 'saveseen': {
+    case 'saveseen':
         require_sesskey();
         $slotid = required_param('slotid', PARAM_INT);
         $slot = $scheduler->get_slot($slotid);
@@ -299,6 +316,7 @@ switch ($action) {
 
         if (is_array($seen)) {
             foreach ($slot->get_appointments() as $app) {
+                $permissions->ensure($permissions->can_edit_attended($app));
                 $app->attended = (in_array($app->id, $seen)) ? 1 : 0;
                 $app->absentpaid =  0;
                 $app->absentschedule = 0;
@@ -307,9 +325,9 @@ switch ($action) {
         }
         $slot->save();
         redirect($viewurl);
-    }
+        break;
     /************************************ Students were absent but paid ***************************************************/
-    case 'absentpaid': {
+    case 'absentpaid':
         require_sesskey();
         $slotid = required_param('slotid', PARAM_INT);
         $slot = $scheduler->get_slot($slotid);
@@ -325,9 +343,9 @@ switch ($action) {
         }
         $slot->save();
         redirect($viewurl);
-    }
+        break;
     /************************************ Students were absent and need to be rescheduled ***************************************************/
-    case 'absentschedule': {
+    case 'absentschedule':
         require_sesskey();
         $slotid = required_param('slotid', PARAM_INT);
         $slot = $scheduler->get_slot($slotid);
@@ -343,12 +361,13 @@ switch ($action) {
         }
         $slot->save();
         redirect($viewurl);
-    }
+        break;
     /************************************ Revoking all appointments to a slot ***************************************/
-    case 'revokeall': {
+    case 'revokeall':
         require_sesskey();
         $slotid = required_param('slotid', PARAM_INT);
         $slot = $scheduler->get_slot($slotid);
+        $permissions->ensure($permissions->can_edit_slot($slot));
 
         $oldstudents = array();
         foreach ($slot->get_appointments() as $app) {
@@ -370,58 +389,61 @@ switch ($action) {
 
         $slot->save();
         redirect($viewurl);
-    }
-
+        break;
     /************************************ Toggling to unlimited group ***************************************/
-    case 'allowgroup':{
+    case 'allowgroup':
         require_sesskey();
         $slotid = required_param('slotid', PARAM_INT);
-        $slot = new stdClass();
-        $slot->id = $slotid;
+        $slot = $scheduler->get_slot($slotid);
+        $permissions->ensure($permissions->can_edit_slot($slot));
+
         $slot->exclusivity = 0;
-        $DB->update_record('scheduler_slots', $slot);
+        $slot->save();
         redirect($viewurl);
-    }
-
+        break;
     /************************************ Toggling to single student ******************************************/
-    case 'forbidgroup':{
+    case 'forbidgroup':
         require_sesskey();
         $slotid = required_param('slotid', PARAM_INT);
-        $slot = new stdClass();
-        $slot->id = $slotid;
-        $slot->exclusivity = 1;
-        $DB->update_record('scheduler_slots', $slot);
-        redirect($viewurl);
-    }
+        $slot = $scheduler->get_slot($slotid);
+        $permissions->ensure($permissions->can_edit_slot($slot));
 
+        $slot->exclusivity = 1;
+        $slot->save();
+        redirect($viewurl);
+        break;
     /************************************ Deleting all slots ***************************************************/
-    case 'deleteall':{
+    case 'deleteall':
         require_sesskey();
-        require_capability('mod/scheduler:manageallappointments', $context);
+        $permissions->ensure($permissions->can_edit_all_slots());
         $slots = $scheduler->get_all_slots();
         scheduler_action_delete_slots($slots, $action, $viewurl);
-    }
+        break;
     /************************************ Deleting unused slots *************************************************/
-    case 'deleteunused':{
+    case 'deleteunused':
+        $permissions->ensure($permissions->can_edit_own_slots());
         require_sesskey();
         $slots = $scheduler->get_slots_without_appointment($USER->id);
         scheduler_action_delete_slots($slots, $action, $viewurl);
-    }
+        break;
     /************************************ Deleting unused slots (all teachers) ************************************/
-    case 'deleteallunused': {
+    case 'deleteallunused':
         require_sesskey();
-        require_capability('mod/scheduler:manageallappointments', $context);
+        $permissions->ensure($permissions->can_edit_all_slots());
         $slots = $scheduler->get_slots_without_appointment();
         scheduler_action_delete_slots($slots, $action, $viewurl);
-    }
+        break;
     /************************************ Deleting current teacher's slots ***************************************/
-    case 'deleteonlymine': {
+    case 'deleteonlymine':
+        $permissions->ensure($permissions->can_edit_own_slots());
         require_sesskey();
         $slots = $scheduler->get_slots_for_teacher($USER->id);
         scheduler_action_delete_slots($slots, $action, $viewurl);
-    }
+        break;
     /************************************ Mark as seen now *******************************************************/
-    case 'markasseennow': {
+    case 'markasseennow':
+        $permissions->ensure($permissions->can_edit_own_slots());
+
         require_sesskey();
         $slot = new stdClass();
         $slot->schedulerid = $scheduler->id;
@@ -453,7 +475,7 @@ switch ($action) {
         \mod_scheduler\event\slot_added::create_from_slot($slot)->trigger();
 
         redirect($viewurl);
-    }
+        break;
 }
 
 /*************************************************************************************************************/

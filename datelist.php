@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Shows a sortable list of appointments
@@ -45,7 +59,7 @@ echo $output->header();
 
 // Print top tabs.
 
-echo $output->teacherview_tabs($scheduler, $taburl, 'datelist');
+echo $output->teacherview_tabs($scheduler, $permissions, $taburl, 'datelist');
 
 
 // Find active group in case that group mode is in use.
@@ -75,7 +89,7 @@ if (has_capability('mod/scheduler:seeoverviewoutsideactivity', $context)) {
     $scopemenu = array('activity' => get_string('thisscheduler', 'scheduler'),
                     'course' => get_string('thiscourse', 'scheduler'),
                     'site' => get_string('thissite', 'scheduler'));
-    $select = $output->single_select($taburl, 'scope', $scopemenu, $scope, null, 'scopeform');
+    $select = $output->single_select($taburl, 'scope', $scopemenu, $scope, $nothing = array('' => 'choosedots'), null, array('scopeform'));
     echo html_writer::div(get_string($scopemenukey, 'scheduler', $select), 'dropdownmenu');
 }
 
@@ -93,8 +107,12 @@ if ($scope == 'activity') {
     $scopecond = ' AND c.id = :courseid';
 }
 
-$sql = "SELECT a.id AS id, ".
-               user_picture::fields('u1', array('email', 'department'), 'studentid', 'student').", ".
+$ufields = \core_user\fields::for_name()->with_userpic()->including('email', 'department');
+$studselect = $ufields->get_sql('u1', true, 'student', 'studentid', false)->selects;
+$teacherselect = $ufields->get_sql('u2', true, '', 'teacherid', false)->selects;
+
+$sql = "SELECT a.id AS id,
+               $studselect," .
                $DB->sql_fullname('u1.firstname', 'u1.lastname')." AS studentfullname,
                a.appointmentnote,
                a.appointmentnoteformat,
@@ -105,8 +123,8 @@ $sql = "SELECT a.id AS id, ".
                sc.id AS schedulerid,
                sc.scale,
                c.shortname AS courseshort,
-               c.id AS courseid, ".
-               user_picture::fields('u2', null, 'teacherid').",
+               c.id AS courseid,
+               $teacherselect,
                s.id AS sid,
                s.starttime,
                s.duration,
@@ -193,7 +211,7 @@ if ($numrecords) {
     $table->pagesize($limit, $numrecords);
 
     if (!empty($sort)) {
-        $sql .= " ORDER BY $sort";
+        $sql .= " ORDER BY".$sort;
     }
 
     $results = $DB->get_records_sql($sql, $params);

@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Controller for student view
@@ -12,10 +26,21 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/scheduler/mailtemplatelib.php');
 
-
+/**
+ * scheduler_book_slot
+ *
+ * @param \mod_scheduler\model\scheduler $scheduler
+ * @param int $slotid
+ * @param int $userid
+ * @param int $groupid
+ * @param scheduler_booking_form $mform
+ * @param mixed $formdata
+ * @param mixed $returnurl
+ * @throws mixed moodle_exception
+ */
 function scheduler_book_slot($scheduler, $slotid, $userid, $groupid, $mform, $formdata, $returnurl) {
 
-    global $DB, $COURSE, $output;
+    global $DB, $COURSE, $OUTPUT;
 
     $slot = $scheduler->get_slot($slotid);
     if (!$slot) {
@@ -101,7 +126,7 @@ function scheduler_book_slot($scheduler, $slotid, $userid, $groupid, $mform, $fo
 
 }
 
-$returnurlparas =  array('id' => $cm->id);
+$returnurlparas = array('id' => $cm->id);
 if ($scheduler->is_group_scheduling_enabled()) {
     $returnurlparas['appointgroup'] = $appointgroup;
 }
@@ -137,14 +162,13 @@ if ($action == 'bookingform') {
             $groupinfo = $mygroupsforscheduling[$appointgroup]->name;
         }
 
-        echo $output->header();
-        echo $output->heading(get_string('bookaslot', 'scheduler'));
-        echo $output->box(format_text($scheduler->intro, $scheduler->introformat));
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('bookaslot', 'scheduler'));
 
         $info = scheduler_appointment_info::make_from_slot($slot, true, true, $groupinfo);
-        echo $output->render($info);
+        echo $OUTPUT->render($info);
         $mform->display();
-        echo $output->footer();
+        echo $OUTPUT->footer();
         exit();
     }
 
@@ -183,14 +207,13 @@ if ($action == 'viewbooking') {
         throw new moodle_exception('nopermissions');
     }
 
-    echo $output->header();
-    echo $output->heading(get_string('bookingdetails', 'scheduler'));
-    echo $output->mod_intro($scheduler);
+    echo $OUTPUT->header();
+    echo $OUTPUT->heading(get_string('bookingdetails', 'scheduler'));
     $info = scheduler_appointment_info::make_from_appointment($slot, $appointment);
-    echo $output->render($info);
+    echo $OUTPUT->render($info);
 
-    echo $output->continue_button($returnurl);
-    echo $output->footer();
+    echo $OUTPUT->continue_button($returnurl);
+    echo $OUTPUT->footer();
     exit();
 
 }
@@ -228,13 +251,13 @@ if ($action == 'editbooking') {
         $mform->save_booking_data($formdata, $appointment);
         redirect($returnurl);
     } else {
-        echo $output->header();
-        echo $output->heading(get_string('editbooking', 'scheduler'));
-        echo $output->box(format_text($scheduler->intro, $scheduler->introformat));
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('editbooking', 'scheduler'));
+        echo $OUTPUT->box(format_text($scheduler->intro, $scheduler->introformat));
         $info = scheduler_appointment_info::make_from_slot($slot);
-        echo $output->render($info);
+        echo $OUTPUT->render($info);
         $mform->display();
-        echo $output->footer();
+        echo $OUTPUT->footer();
         exit();
     }
 
@@ -287,7 +310,7 @@ if ($action == 'cancelbooking') {
 /**
  * Send a message asking for a reschedule
  *
- * @param scheduler_instance $scheduler
+ * @param \mod_scheduler\model\scheduler $scheduler
  * @param mixed $formdata
  * @param moodle_url $returnurl the URL to redirect to after the action has been performed
  */

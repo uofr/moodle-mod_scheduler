@@ -19,7 +19,7 @@ $id = required_param('id', PARAM_INT);
 $action = required_param('action', PARAM_ALPHA);
 $cm = get_coursemodule_from_id('scheduler', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$scheduler = scheduler_instance::load_by_coursemodule_id($id);
+$scheduler = \mod_scheduler\model\scheduler::load_by_coursemodule_id($id);
 
 require_login($course, true, $cm);
 require_sesskey();

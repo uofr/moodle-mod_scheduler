@@ -76,7 +76,7 @@ abstract class mvc_record_model extends mvc_model {
      * If not possible, returns the property from the internal record.
      * If even that is not possible, fails with an exception.
      *
-     * @param str $key
+     * @param string $key
      * @return mixed
      */
     public function __get($key) {
@@ -95,7 +95,7 @@ abstract class mvc_record_model extends mvc_model {
      * Attempts to call a set_$key method to set the property.
      * If not possible, sets the property directly in the internal record.
      *
-     * @param str $key
+     * @param string $key
      * @return mixed
      */
     public function __set($key, $value) {
@@ -391,7 +391,7 @@ class mvc_child_list {
             $childrecs = $DB->get_records($this->childtable, array($this->childfield => $this->get_parent_id()));
             $cnt = 0;
             foreach ($childrecs as $rec) {
-                $app = $this->childfactory->create_child_from_record($rec, $this->parentmodel);
+                $app = $this->childfactory->create_child_from_record($rec);
                 $this->children[$rec->id] = $app;
                 $cnt++;
             }
@@ -462,7 +462,7 @@ class mvc_child_list {
 
     /**
      * Create a new, empty child record.
-     * @return mvc_child_record_model the new record
+     * @return mvc_model the new record
      */
     public function create_child() {
         $this->load();

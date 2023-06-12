@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Prints the screen that displays a single student to a teacher.
@@ -12,13 +26,11 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/scheduler/locallib.php');
 
-if (!has_capability('mod/scheduler:manage', $context)) {
-    require_capability('mod/scheduler:manageallappointments', $context);
-}
-
 $appointmentid = required_param('appointmentid', PARAM_INT);
 list($slot, $appointment) = $scheduler->get_slot_appointment($appointmentid);
 $studentid = $appointment->studentid;
+
+$permissions->ensure($permissions->can_see_appointment($appointment));
 
 $urlparas = array('what' => 'viewstudent',
     'id' => $scheduler->cmid,
@@ -49,8 +61,8 @@ if ($subpage == 'thisappointment') {
     $returnurl = new moodle_url($taburl, array('page' => 'thisappointment'));
 
     $distribute = ($slot->get_appointment_count() > 1);
-    $gradeedit = ($slot->teacherid == $USER->id) || get_config('mod_scheduler', 'allteachersgrading');
-    $mform = new scheduler_editappointment_form($appointment, $actionurl, $gradeedit, $distribute);
+    $gradeedit = $permissions->can_edit_grade($appointment);
+    $mform = new scheduler_editappointment_form($appointment, $actionurl, $permissions, $distribute);
     $mform->set_data($mform->prepare_appointment_data($appointment));
 
     if ($mform->is_cancelled()) {
@@ -61,7 +73,7 @@ if ($subpage == 'thisappointment') {
     }
 }
 
-echo $output->header();
+echo $OUTPUT->header();
 
 // Print user summary.
 
@@ -85,12 +97,12 @@ $totalgradeinfo = new scheduler_totalgrade_info($scheduler, $scheduler->get_grad
 if ($subpage == 'thisappointment') {
 
     $ai = scheduler_appointment_info::make_for_teacher($slot, $appointment);
-    echo $output->render($ai);
+    echo $OUTPUT->render($ai);
 
     $mform->display();
 
     if ($scheduler->uses_grades()) {
-        echo $output->render($totalgradeinfo);
+        echo $OUTPUT->render($totalgradeinfo);
     }
 
 } else if ($subpage == 'otherappointments') {
@@ -107,19 +119,19 @@ if ($subpage == 'thisappointment') {
         $table->add_slot($appt->get_slot(), $appt, null, false);
     }
 
-    echo $output->render($table);
+    echo $OUTPUT->render($table);
 
     if ($scheduler->uses_grades()) {
         $totalgradeinfo->showtotalgrade = true;
         $totalgradeinfo->totalgrade = $scheduler->get_user_grade($appointment->studentid);
-        echo $output->render($totalgradeinfo);
+        echo $OUTPUT->render($totalgradeinfo);
     }
 
 } else if ($subpage == 'otherstudents') {
     // Print table of other students in the same slot.
 
     $ai = scheduler_appointment_info::make_from_slot($slot, false);
-    echo $output->render($ai);
+    echo $OUTPUT->render($ai);
 
     $studenturl = new moodle_url($taburl, array('page' => 'thisappointment'));
     $table = new scheduler_slot_table($scheduler, true, $studenturl);
@@ -133,9 +145,9 @@ if ($subpage == 'thisappointment') {
         $table->add_slot($otherappointment->get_slot(), $otherappointment, null, false);
     }
 
-    echo $output->render($table);
+    echo $OUTPUT->render($table);
 }
 
-echo $output->continue_button(new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->cmid)));
-echo $output->footer($course);
+echo $OUTPUT->continue_button(new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->cmid)));
+echo $OUTPUT->footer();
 exit;

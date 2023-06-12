@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Contains various sub-screens that a teacher can see.
@@ -10,14 +24,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use \mod_scheduler\model\scheduler;
+
 /**
  * Print a selection box of existing slots to be scheduler in
  *
- * @param scheduler_instance $scheduler
+ * @param scheduler $scheduler
  * @param int $studentid student to schedule
  * @param int $groupid group to schedule
  */
-function scheduler_print_schedulebox(scheduler_instance $scheduler, $studentid, $groupid = 0) {
+function scheduler_print_schedulebox(scheduler $scheduler, $studentid, $groupid = 0) {
     global $output;
 
     $availableslots = $scheduler->get_slots_available_to_student($studentid);
@@ -29,8 +45,8 @@ function scheduler_print_schedulebox(scheduler_instance $scheduler, $studentid, 
         $startdatecnv = $output->userdate($slot->starttime);
         $starttimecnv = $output->usertime($slot->starttime);
 
-        $startdatestr = ($startdatemem != '' and $startdatemem == $startdatecnv) ? "-----------------" : $startdatecnv;
-        $starttimestr = ($starttimemem != '' and $starttimemem == $starttimecnv) ? '' : $starttimecnv;
+        $startdatestr = ($startdatemem != '' && $startdatemem == $startdatecnv) ? "-----------------" : $startdatecnv;
+        $starttimestr = ($starttimemem != '' && $starttimemem == $starttimecnv) ? '' : $starttimecnv;
 
         $startdatemem = $startdatecnv;
         $starttimemem = $starttimecnv;
@@ -53,7 +69,7 @@ function scheduler_print_schedulebox(scheduler_instance $scheduler, $studentid, 
 
     if ($availableslots) {
         echo $output->box_start();
-        echo $output->heading(get_string('chooseexisting', 'scheduler'), 3);
+        echo $output->heading(get_string('chooseexisting', 'scheduler'));
         echo $output->render($chooser);
         echo $output->box_end();
     }
@@ -123,15 +139,17 @@ $PAGE->set_url($viewurl);
 
 if ($action != 'view') {
     require_once($CFG->dirroot.'/mod/scheduler/slotforms.php');
-    include($CFG->dirroot.'/mod/scheduler/teacherview.controller.php');
+    require_once($CFG->dirroot.'/mod/scheduler/teacherview.controller.php');
 }
 
 /************************************ View : New single slot form ****************************************/
 if ($action == 'addslot') {
+    $permissions->ensure($permissions->can_edit_own_slots());
+
     $actionurl = new moodle_url($baseurl, array('what' => 'addslot'));
 
     if (!$scheduler->has_available_teachers()) {
-        print_error('needteachers', 'scheduler', viewurl);
+        throw new moodle_exception('needteachers', 'scheduler', $viewurl);
     }
 
     $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee);
@@ -202,7 +220,10 @@ if ($action == 'updateslot') {
     else{
         $slotid = required_param('slotid', PARAM_INT);
         $slot = $scheduler->get_slot($slotid);
-        if ($slot->starttime % 300 !== 0 || $slot->duration % 5 !== 0) {
+        $permissions->ensure($permissions->can_edit_slot($slot));
+
+
+    if ($slot->starttime % 300 !== 0 || $slot->duration % 5 !== 0) {
             $timeoptions = array('step' => 1, 'optional' => false);
         } else {
             $timeoptions = array('step' => 5, 'optional' => false);
@@ -230,7 +251,7 @@ if ($action == 'updateslot') {
             echo $output->header();
             echo $output->heading(get_string('updatesingleslot', 'scheduler'));
             $mform->display();
-            echo $output->footer($course);
+            echo $output->footer();
             die;
         }
     }
@@ -238,10 +259,12 @@ if ($action == 'updateslot') {
 /************************************ Add session multiple slots form ****************************************/
 if ($action == 'addsession') {
 
+    $permissions->ensure($permissions->can_edit_own_slots());
+
     $actionurl = new moodle_url($baseurl, array('what' => 'addsession'));
 
     if (!$scheduler->has_available_teachers()) {
-        print_error('needteachers', 'scheduler', $viewurl);
+        throw new moodle_exception('needteachers', 'scheduler', $viewurl);
     }
 
     $mform = new scheduler_addsession_form($actionurl, $scheduler, $cm, $groupsicansee);
@@ -282,6 +305,8 @@ if ($action == 'addsession') {
 
 /************************************ Schedule a student form ***********************************************/
 if ($action == 'schedule') {
+    $permissions->ensure($permissions->can_edit_own_slots());
+
     echo $output->header();
 
     if ($subaction == 'dochooseslot') {
@@ -328,6 +353,8 @@ if ($action == 'schedule') {
 }
 /************************************ Schedule a whole group in form ***********************************************/
 if ($action == 'schedulegroup') {
+
+    $permissions->ensure($permissions->can_edit_own_slots());
 
     $groupid = required_param('groupid', PARAM_INT);
     $group = $DB->get_record('groups', array('id' => $groupid), '*', MUST_EXIST);
@@ -386,6 +413,8 @@ if ($action == 'schedulegroup') {
 
 /************************************ Send message to students ****************************************/
 if ($action == 'sendmessage') {
+    $permissions->ensure($permissions->can_edit_own_slots());
+
     require_once($CFG->dirroot.'/mod/scheduler/message_form.php');
 
     $template = optional_param('template', 'none', PARAM_ALPHA);
@@ -447,7 +476,7 @@ if ($DB->count_records('scheduler_slots', array('schedulerid' => $scheduler->id)
 
 echo $output->header();
 
-echo $output->teacherview_tabs($scheduler, $taburl, $subpage, $inactive);
+echo $output->teacherview_tabs($scheduler, $permissions, $taburl, $subpage, $inactive);
 if ($groupmode) {
     if ($subpage == 'allappointments') {
         groups_print_activity_menu($cm, $taburl);
@@ -464,9 +493,6 @@ if ($groupmode) {
         echo html_writer::div($message, 'groupmodeyourgroups');
     }
 }
-
-// Print intro.
-echo $output->mod_intro($scheduler);
 
 
 if ($subpage == 'allappointments') {
@@ -489,7 +515,7 @@ if ($offset == -1) {
     }
 }
 if ($offset * $pagesize >= $sqlcount && $sqlcount > 0) {
-    $offset = floor(($sqlcount-1) / $pagesize);
+    $offset = floor(($sqlcount - 1) / $pagesize);
 }
 
 $slots = $scheduler->get_slots_for_teacher($teacherid, $slotgroup, $offset * $pagesize, $pagesize);
@@ -532,20 +558,20 @@ if($candelete){
         $delselected->formid = 'delselected';
         $delbuttons[] = $delselected;
 
-        if (has_capability('mod/scheduler:manageallappointments', $context) && $subpage == 'allappointments') {
-            $delbuttons[] = $commandbar->action_link(
-                            new moodle_url($actionurl, array('what' => 'deleteall')),
-                            'deleteallslots', 't/delete', 'confirmdelete-all');
-            $delbuttons[] = $commandbar->action_link(
-                            new moodle_url($actionurl, array('what' => 'deleteallunused')),
-                            'deleteallunusedslots', 't/delete', 'confirmdelete-unused');
-        }
+    if ($permissions->can_edit_all_slots() && $subpage == 'allappointments') {
         $delbuttons[] = $commandbar->action_link(
-                        new moodle_url($actionurl, array('what' => 'deleteunused')),
-                        'deleteunusedslots', 't/delete', 'confirmdelete-myunused');
+                        new moodle_url($actionurl, array('what' => 'deleteall')),
+                        'deleteallslots', 't/delete', 'confirmdelete-all');
         $delbuttons[] = $commandbar->action_link(
-                        new moodle_url($actionurl, array('what' => 'deleteonlymine')),
-                        'deletemyslots', 't/delete', 'confirmdelete-mine');
+                        new moodle_url($actionurl, array('what' => 'deleteallunused')),
+                        'deleteallunusedslots', 't/delete', 'confirmdelete-unused');
+    }
+    $delbuttons[] = $commandbar->action_link(
+                    new moodle_url($actionurl, array('what' => 'deleteunused')),
+                    'deleteunusedslots', 't/delete', 'confirmdelete-myunused');
+    $delbuttons[] = $commandbar->action_link(
+                    new moodle_url($actionurl, array('what' => 'deleteonlymine')),
+                    'deletemyslots', 't/delete', 'confirmdelete-mine');
 
         $commandbar->add_group(get_string('deletecommands', 'scheduler'), $delbuttons);
     }
@@ -562,7 +588,7 @@ if ($slots) {
 
     foreach ($slots as $slot) {
 
-        $editable = ($USER->id == $slot->teacherid || has_capability('mod/scheduler:manageallappointments', $context));
+        $editable = $permissions->can_edit_slot($slot);
 
         $studlist = new scheduler_student_list($slotman->scheduler);
         $studlist->expandable = false;
@@ -592,15 +618,14 @@ if ($slots) {
 
         $studlist->actionurl = new moodle_url($actionurl, array('what' => 'saveseen', 'slotid' => $slot->id));
         foreach ($slot->get_appointments() as $app) {
-            $studlist->add_student($app, false, $app->is_attended(), $app->is_absentpaid(), $app->is_absentschedule(), true, $scheduler->uses_studentdata());
+            $studlist->add_student($app, false, $app->is_attended(), $app->is_absentpaid(), $app->is_absentschedule(), true, $scheduler->uses_studentdata(),
+                                   $permissions->can_edit_attended($app));
         }
 
         $slotman->add_slot($slot, $studlist, $editable, $canadd, $candelete, $canrevoke);
     }
 
     echo $output->render($slotman);
-    
-    
 
     if ($sqlcount > $pagesize) {
         echo $output->paging_bar($sqlcount, $offset, $pagesize, $actionurl, 'offset');
@@ -716,7 +741,7 @@ if ($students === 0) {
 
             $groupcnt = 0;
             foreach ($groupsicanschedule as $group) {
-                $members = groups_get_members($group->id, user_picture::fields('u'), 'u.lastname, u.firstname');
+                $members = groups_get_members($group->id, 'u.*', 'u.lastname, u.firstname');
                 if (empty($members)) {
                     continue;
                 }
