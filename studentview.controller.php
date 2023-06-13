@@ -40,7 +40,7 @@ require_once($CFG->dirroot.'/mod/scheduler/mailtemplatelib.php');
  */
 function scheduler_book_slot($scheduler, $slotid, $userid, $groupid, $mform, $formdata, $returnurl) {
 
-    global $DB, $COURSE, $OUTPUT;
+    global $DB, $COURSE, $output;
 
     $slot = $scheduler->get_slot($slotid);
     if (!$slot) {
@@ -162,13 +162,13 @@ if ($action == 'bookingform') {
             $groupinfo = $mygroupsforscheduling[$appointgroup]->name;
         }
 
-        echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('bookaslot', 'scheduler'));
+        echo $output->header();
+        echo $output->heading(get_string('bookaslot', 'scheduler'));
 
         $info = scheduler_appointment_info::make_from_slot($slot, true, true, $groupinfo);
-        echo $OUTPUT->render($info);
+        echo $output->render($info);
         $mform->display();
-        echo $OUTPUT->footer();
+        echo $output->footer();
         exit();
     }
 
@@ -207,13 +207,13 @@ if ($action == 'viewbooking') {
         throw new moodle_exception('nopermissions');
     }
 
-    echo $OUTPUT->header();
-    echo $OUTPUT->heading(get_string('bookingdetails', 'scheduler'));
+    echo $output->header();
+    echo $output->heading(get_string('bookingdetails', 'scheduler'));
     $info = scheduler_appointment_info::make_from_appointment($slot, $appointment);
-    echo $OUTPUT->render($info);
+    echo $output->render($info);
 
-    echo $OUTPUT->continue_button($returnurl);
-    echo $OUTPUT->footer();
+    echo $output->continue_button($returnurl);
+    echo $output->footer();
     exit();
 
 }
@@ -251,13 +251,13 @@ if ($action == 'editbooking') {
         $mform->save_booking_data($formdata, $appointment);
         redirect($returnurl);
     } else {
-        echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('editbooking', 'scheduler'));
-        echo $OUTPUT->box(format_text($scheduler->intro, $scheduler->introformat));
+        echo $output->header();
+        echo $output->heading(get_string('editbooking', 'scheduler'));
+        echo $output->box(format_text($scheduler->intro, $scheduler->introformat));
         $info = scheduler_appointment_info::make_from_slot($slot);
-        echo $OUTPUT->render($info);
+        echo $output->render($info);
         $mform->display();
-        echo $OUTPUT->footer();
+        echo $output->footer();
         exit();
     }
 
@@ -304,7 +304,6 @@ if ($action == 'cancelbooking') {
     redirect($returnurl);
 
 }
-
 
 /******************************** ADDED for student to send a message saying they need to reschedule ******************************/
 /**
