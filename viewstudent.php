@@ -73,7 +73,7 @@ if ($subpage == 'thisappointment') {
     }
 }
 
-echo $OUTPUT->header();
+echo $output->header();
 
 // Print user summary.
 
@@ -97,12 +97,12 @@ $totalgradeinfo = new scheduler_totalgrade_info($scheduler, $scheduler->get_grad
 if ($subpage == 'thisappointment') {
 
     $ai = scheduler_appointment_info::make_for_teacher($slot, $appointment);
-    echo $OUTPUT->render($ai);
+    echo $output->render($ai);
 
     $mform->display();
 
     if ($scheduler->uses_grades()) {
-        echo $OUTPUT->render($totalgradeinfo);
+        echo $output->render($totalgradeinfo);
     }
 
 } else if ($subpage == 'otherappointments') {
@@ -119,19 +119,19 @@ if ($subpage == 'thisappointment') {
         $table->add_slot($appt->get_slot(), $appt, null, false);
     }
 
-    echo $OUTPUT->render($table);
+    echo $output->render($table);
 
     if ($scheduler->uses_grades()) {
         $totalgradeinfo->showtotalgrade = true;
         $totalgradeinfo->totalgrade = $scheduler->get_user_grade($appointment->studentid);
-        echo $OUTPUT->render($totalgradeinfo);
+        echo $output->render($totalgradeinfo);
     }
 
 } else if ($subpage == 'otherstudents') {
     // Print table of other students in the same slot.
 
     $ai = scheduler_appointment_info::make_from_slot($slot, false);
-    echo $OUTPUT->render($ai);
+    echo $output->render($ai);
 
     $studenturl = new moodle_url($taburl, array('page' => 'thisappointment'));
     $table = new scheduler_slot_table($scheduler, true, $studenturl);
@@ -145,9 +145,9 @@ if ($subpage == 'thisappointment') {
         $table->add_slot($otherappointment->get_slot(), $otherappointment, null, false);
     }
 
-    echo $OUTPUT->render($table);
+    echo $output->render($table);
 }
 
-echo $OUTPUT->continue_button(new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->cmid)));
-echo $OUTPUT->footer();
+echo $output->continue_button(new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->cmid)));
+echo $output->footer();
 exit;

@@ -39,7 +39,7 @@ $taburl = new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->cm
                          'what' => 'viewstatistics', 'subpage' => $subpage));
 $PAGE->set_url($taburl);
 
-echo $OUTPUT->header();
+echo $output->header();
 
 // Display navigation tabs.
 
@@ -133,7 +133,7 @@ switch ($subpage) {
         $str .= '<strong>'.get_string('availableslotsnotowned', 'scheduler').'</strong>: ' . $freenotowned . '<br/>';
         $str .= '<strong>'.get_string('availableslotsall', 'scheduler').'</strong>: ' . ($freeowned + $freenotowned) . '<br/>';
 
-        echo $OUTPUT->box($str);
+        echo $output->box($str);
 
         break;
     case 'studentbreakdown':
@@ -169,7 +169,7 @@ switch ($subpage) {
             }
             echo html_writer::table($table);
         } else {
-            echo $OUTPUT->box(get_string('nostudents', 'scheduler'), 'center', '70%');
+            echo $output->box(get_string('nostudents', 'scheduler'), 'center', '70%');
         }
         break;
     case 'staffbreakdown':
@@ -289,7 +289,7 @@ switch ($subpage) {
         }
 }
 echo '<br/>';
-echo $OUTPUT->continue_button("$CFG->wwwroot/mod/scheduler/view.php?id=".$cm->id);
+echo $output->continue_button("$CFG->wwwroot/mod/scheduler/view.php?id=".$cm->id);
 // Finish the page.
-echo $OUTPUT->footer();
+echo $output->footer();
 exit;
