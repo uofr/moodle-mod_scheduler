@@ -737,7 +737,7 @@ class scheduler_absentpaid_field extends scheduler_export_field {
     }
 
     public function get_value(slot $slot, $appointment) {
-        if (! $appointment instanceof scheduler_appointment) {
+        if (! $appointment instanceof appointment) {
             return '';
         }
         $str = $appointment->is_absentpaid() ? get_string('yes') : get_string('no');
@@ -764,7 +764,7 @@ class scheduler_absentschedule_field extends scheduler_export_field {
     }
 
     public function get_value(slot $slot, $appointment) {
-        if (! $appointment instanceof scheduler_appointment) {
+        if (! $appointment instanceof appointment) {
             return '';
         }
         $str = $appointment->is_absentschedule() ? get_string('yes') : get_string('no');

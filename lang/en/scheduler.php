@@ -268,6 +268,8 @@ $string['field-grade'] = 'Grade';
 $string['field-groupssingle'] = 'Groups';
 $string['field-groupssingle-label'] = 'Groups (one column)';
 $string['field-groupsmulti'] = 'Groups (several columns)';
+$string['field-absentpaid'] = 'Absent Paid';
+$string['field-absentschedule'] = 'Absent Reschedule';
 $string['fileformat'] = 'File format';
 $string['fileformat_help'] = 'The following file formats are available:
      <ul>
