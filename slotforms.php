@@ -330,7 +330,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
      *         or an empty array if everything is OK (true allowed for backwards compatibility too).
      */
     public function validation($data, $files) {
-        global $OUTPUT;
+        global $output;
 
         $errors = parent::validation($data, $files);
 
@@ -375,15 +375,15 @@ class scheduler_editslot_form extends scheduler_slotform_base {
                 $cl->add_conflicts($conflicts);
 
                 $msg = get_string('slotwarning', 'scheduler');
-                $msg .= $OUTPUT->render($cl);
-                $msg .= $OUTPUT->doc_link('mod/scheduler/conflict', '', true);
+                $msg .= $output->render($cl);
+                $msg .= $output->doc_link('mod/scheduler/conflict', '', true);
 
                 $errors['starttime'] = $msg;
             }
-        }  
+        }
         return $errors;
     }
-    
+
     /**
      * Fill the form data from an existing slot
      *
