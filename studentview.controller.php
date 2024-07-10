@@ -341,7 +341,7 @@ if ($action == 'reschedule') {
         $teacher2 = $t;
     }
     $format = FORMAT_HTML;
-    $htmlmessage = "<p>".fullname($USER->id)." I need to reschedule the lesson on: ".mod_scheduler_renderer::userdate($slot->starttime)."</p> <br> <a href=".$actionurl.">Click Here to Edit Slot</a>";
+    $htmlmessage = "<p>".fullname($USER)." I need to reschedule the lesson on: ".mod_scheduler_renderer::userdate($slot->starttime)."</p> <br> <a href=".$actionurl.">Click Here to Edit Slot</a>";
 
     $message = new \core\message\message();
     $message->component = 'moodle';
