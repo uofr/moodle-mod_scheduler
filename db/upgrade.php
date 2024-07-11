@@ -401,18 +401,5 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2022120200, 'scheduler');
     }
 
-    if ($oldversion < 2023052401) {
-
-        // Changing nullability of field studentattend on table scheduler_appointment to null.
-        $table = new xmldb_table('scheduler_appointment');
-        $field = new xmldb_field('studentattend', XMLDB_TYPE_INTEGER, '4', null, false, null, null, 'attended');
-
-        // Launch change of nullability for field studentattend.
-        $dbman->change_field_notnull($table, $field);
-
-        // Scheduler savepoint reached.
-        upgrade_mod_savepoint(true, 2023052401, 'scheduler');
-    }
-
     return true;
 }
