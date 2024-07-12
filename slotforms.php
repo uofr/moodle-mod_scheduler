@@ -205,7 +205,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         
         
 
-        global $DB, $OUTPUT;
+        global $DB, $output;
         $pluginconfig = get_config('scheduler');
 
 
@@ -273,7 +273,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
 
         // Grade.
         if ($this->scheduler->scale != 0) {
-            $gradechoices = $OUTPUT->grading_choices($this->scheduler);
+            $gradechoices = $output->grading_choices($this->scheduler);
             $grouparray[] = $mform->createElement('static', 'attendedlabel', '', get_string('grade', 'scheduler'));
             $grouparray[] = $mform->createElement('select', 'grade', '', $gradechoices);
         }
@@ -820,7 +820,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         $mform->setType('notes', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
 
         // Appointments.
-       $studentapps=$DB->get_records('scheduler_appointment', array('slotid' => $this->slotid), $sort='', $fields='id, studentid,attended','absentpaid','absentschedule');
+       $studentapps = $DB->get_records('scheduler_appointment', array('slotid' => $this->slotid), '', 'id,studentid,attended,absentpaid,absentschedule');
        $repeatno = count($studentapps);
       
         $i=0;
