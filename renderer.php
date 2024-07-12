@@ -566,6 +566,8 @@ class mod_scheduler_renderer extends plugin_renderer_base {
             foreach ($studentlist->students as $student) {
                 $class = 'otherstudent';
                 $checkbox = '';
+                $checkbox2 = '';
+                $checkbox3 = '';
                 if ($studentlist->checkboxname) {
                     if ($student->editattended) {
                     //ADDED
@@ -629,7 +631,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 if ($studentlist->showgrades && $student->grade) {
                     $grade = $this->format_grade($studentlist->scheduler, $student->grade, true);
                 }
-                $o .= html_writer::div($checkbox .$checkbox2.$checkbox3. $picture . ' ' . $name . $studicons . ' ' . $grade, $class);
+                $o .= html_writer::div($checkbox . $checkbox2 . $checkbox3 . $picture . ' ' . $name . $studicons . ' ' . $grade, $class);
             }
 
             if ($editable) {
