@@ -149,7 +149,7 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
 
                         //URCOURSE HACK LEFT OFF HERE MUST TEST
                         for ($i = 0; $i < $data->appointment_repeats; $i++) {
-                            if ($data->studentid[$i] > 0) {
+                            if (property_exists($data, 'studentid') && $data->studentid[$i] > 0) {
 
                                 $slotfinal = \mod_scheduler\model\slot::load_by_id($slotid, $scheduler);
                                 $noteoptions = array('trusttext' => true, 'maxfiles' => -1, 'maxbytes' => 0,
