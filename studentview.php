@@ -125,12 +125,12 @@ if (count($pastslots) > 0) {
 
         // ADDDED.
         // If student can mark attendance.
-        $student_can_mark = false;
+        $studentcanmark = false;
 
         $moddate = $pastslot->starttime + 172800;
 
         if ($canmarkattend && ($pastslot->starttime <= time()  && time() <= $moddate)) {
-            $student_can_mark = true;
+            $studentcanmark = true;
         }
 
         // END OF ADDED.
@@ -146,7 +146,7 @@ if (count($pastslots) > 0) {
             $others = null;
         }
         $hasdetails = $scheduler->uses_studentdata();
-        $slottable->add_slot($pastslot, $appointment, $others, false, false, $hasdetails, $student_can_mark, $studentcancancel);
+        $slottable->add_slot($pastslot, $appointment, $others, false, false, $hasdetails, $studentcanmark, $studentcancancel);
     }
 
     echo $output->heading(get_string(''));
@@ -165,13 +165,13 @@ if (count($upcomingslots) > 0) {
         $appointment = $slot->get_student_appointment($USER->id);
 
         // ADDDED.
-        $student_can_mark = false;
+        $studentcanmark = false;
         // If student has the ability to mark if attend and if the meeting was within the last 24 hrs.
 
         $moddate = $slot->starttime + 172800;
 
         if ($canmarkattend && ($slot->starttime<= time()  && time() <= $moddate)) {
-            $student_can_mark = true;
+            $studentcanmark = true;
         }
 
         // END OF ADDED.
@@ -183,7 +183,7 @@ if (count($upcomingslots) > 0) {
                 $gradehidden = !$scheduler->uses_grades() ||
                                ($scheduler->get_gradebook_info($otherapp->studentid)->hidden <> 0) ||
                                (!$showothergrades && $otherapp->studentid <> $USER->id);
-                $others->add_student($otherapp, $otherapp->studentid == $USER->id, false, false,false, !$gradehidden);
+                $others->add_student($otherapp, $otherapp->studentid == $USER->id, false, false, false, !$gradehidden);
             }
         } else {
             $others = null;
@@ -195,7 +195,7 @@ if (count($upcomingslots) > 0) {
         if ($scheduler->is_group_scheduling_enabled()) {
             $cancancel = $cancancel && ($appointgroup >= 0);
         }
-        $slottable->add_slot($slot, $appointment, $others, $cancancel, $canedit, $canview, $student_can_mark, $studentcancancel);
+        $slottable->add_slot($slot, $appointment, $others, $cancancel, $canedit, $canview, $studentcanmark, $studentcancancel);
     }
 
     echo $output->heading(
