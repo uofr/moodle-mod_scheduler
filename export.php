@@ -94,7 +94,7 @@ if (!$data || $preview) {
                         $data->includeemptyslots,
                         $pageperteacher,
                         $data->meetingstart,
-                        $data->meetingend 
+                        $data->meetingend
                     );
 
         $limit = 20;

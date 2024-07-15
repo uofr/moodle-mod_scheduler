@@ -89,7 +89,7 @@ if (has_capability('mod/scheduler:seeoverviewoutsideactivity', $context)) {
     $scopemenu = array('activity' => get_string('thisscheduler', 'scheduler'),
                     'course' => get_string('thiscourse', 'scheduler'),
                     'site' => get_string('thissite', 'scheduler'));
-    $select = $output->single_select($taburl, 'scope', $scopemenu, $scope, $nothing = array('' => 'choosedots'), null, array('scopeform'));
+    $select = $output->single_select($taburl, 'scope', $scopemenu, $scope, $nothing = ['' => 'choosedots'], null, ['scopeform']);
     echo html_writer::div(get_string($scopemenukey, 'scheduler', $select), 'dropdownmenu');
 }
 

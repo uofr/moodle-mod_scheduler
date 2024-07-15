@@ -206,7 +206,7 @@ class sessions {
 
             $session = new stdClass();
             $session->course = $this->get_column_data($row, $mapping['course']);
-            if (empty($session->course)) { 
+            if (empty($session->course)) {
                 \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessioncourseinvalid', 'scheduler'));
                 continue;
             }
@@ -250,25 +250,25 @@ class sessions {
             //check if am or pm placed
             $amsplit = explode(" ",$fromsplit[1]);
 
-            if(strlen($amsplit[1]) > 1){
+            if (strlen($amsplit[1]) > 1) {
                 //convert to 24 hour
                 $time24  = date("H:i", strtotime($from));
                 $time24split = explode(':', $time24);
 
                 $session->sestime['starthour'] = $time24split[0];
                 $session->sestime['startminute'] = $time24split[1];
-            }else{
+            } else {
                 $session->sestime['starthour'] = $fromsplit[0];
                 $session->sestime['startminute'] = $fromsplit[1];
             }
-            
+
             $to = $this->get_column_data($row, $mapping['time']);
             if (empty($to)) {
                 \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionendinvalid', 'scheduler'));
                 continue;
             }
 
-            //ADD DURATION 
+            //ADD DURATION
             $duration = $this->get_column_data($row, $mapping['duration']);
             if (empty($from)) {
                 \mod_scheduler_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'scheduler'));
@@ -276,14 +276,14 @@ class sessions {
             }
 
             $session->duration = clean_param($duration, PARAM_INT);
-            
+
             $studentname = format_text($this->get_column_data($row, $mapping['studentname']),FORMAT_PLAIN);
             $studentname = explode(",",$studentname);
             $firstname = ltrim($studentname[1]," ");
 
             $session->studentfirstname = $firstname;
             $session->studentlastname = $studentname[0];
-           
+
             $session->statusset = 0;
 
             $sessions[] = $session;
@@ -340,7 +340,7 @@ class sessions {
             $programfield= $DB->get_record_sql($sql,array(),MUST_EXIST);
 
             $course = $DB->get_record_sql("SELECT id,shortname FROM mdl_course WHERE id = '{$programfield->instanceid}'");
-            if ($course) {  
+            if ($course) {
                 // Check course has activities.
                 if ($DB->record_exists('scheduler', array(
                     'course' => $course->id
@@ -349,10 +349,8 @@ class sessions {
                     $schedulerdb = $DB->get_records('scheduler', array('course' => $course->id, 'name'=>$session->scheduler), 'id', 'id');
                     $value = reset($schedulerdb);
                     $schedulerdb = current( $schedulerdb);
-                    
-                    if(! empty($schedulerdb)) {
 
-
+                    if (!empty($schedulerdb)) {
                         $scheduler = \scheduler_instance::load_by_id($schedulerdb->id);
 
                         // Build the session data.
@@ -364,16 +362,15 @@ class sessions {
 
                         // get teacherid from course
                         $teacher = $DB->get_record_sql(" SELECT c.id, c.shortname, u.id, u.username, u.firstname, u.lastname
-                                        FROM mdl_course c 
-                                        LEFT OUTER JOIN mdl_context cx ON c.id = cx.instanceid 
-                                        LEFT OUTER JOIN mdl_role_assignments ra ON cx.id = ra.contextid AND ra.roleid = '3' 
-                                        LEFT OUTER JOIN mdl_user u ON ra.userid = u.id 
+                                        FROM mdl_course c
+                                        LEFT OUTER JOIN mdl_context cx ON c.id = cx.instanceid
+                                        LEFT OUTER JOIN mdl_role_assignments ra ON cx.id = ra.contextid AND ra.roleid = '3'
+                                        LEFT OUTER JOIN mdl_user u ON ra.userid = u.id
                                         WHERE cx.contextlevel = '50' AND c.id =".$course->id.";");
 
 
                         //check if action is to add or to delete
-                        if(strtolower($session->action) == "add"){
-      
+                        if (strtolower($session->action) == "add") {
                             //format slot for DB add
                             $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id);
 
@@ -384,17 +381,17 @@ class sessions {
                                             'activity' => $session->studentfirstname." ".$session->studentlastname." for ".userdate($session->sessiondate )
                                 ))));
                                 unset($slot);
-                            } 
-                        
+                            }
+
                             if (! empty($slot)) {
-                                    
+
                                 //Not the best method... with user id would be better
                                 $student = $DB->get_record_sql(" SELECT  u.id, u.firstname, u.lastname
                                 FROM mdl_user u
                                 WHERE u.firstname = '".$session->studentfirstname."' AND u.lastname='".$session->studentlastname."';");
 
                                 //Need a check to see if it is even a student in the course
-                                if($this->student_course($course->id, $student->id)){
+                                if ($this->student_course($course->id, $student->id)) {
                                     //get new slot id
                                     $slotid = $this->add_slot($slot,$scheduler);
 
@@ -410,23 +407,23 @@ class sessions {
                                 }else{
                                     mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidstudent','scheduler', ['name' => $session->studentfirstname." ".$session->studentlastname, 'course' => $session->course]));
                                 }
-                            } 
-                        }else if(strtolower($session->action) == "delete"){
+                            }
+                        }else if (strtolower($session->action) == "delete") {
                             //format slot for DB add
                             $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id);
 
                             $slotid = $this->session_exists($slot);
                             // Check if exists if not error.
                             if ($slotid!= false) {
-                                $slot->id=$slotid;
+                                $slot->id = $slotid;
                                 $result = $this->delete_slot($slot, $scheduler);
                                 unset($slot);
-                                if($result ==true){
+                                if ($result == true) {
                                     $deletecount++;
                                 }else{
                                     //throw error as not matching
                                     mod_scheduler_notifyqueue::notify_problem($result." ".$session->studentfirstname." ".$session->studentlastname.": ".$session->course.": ".userdate($session->sessiondate ));
-                                }     
+                                }
                             } else{
                                 //throw error as not matching
                                 mod_scheduler_notifyqueue::notify_problem(get_string('error:invaliddelete', 'scheduler', ['name' => $session->studentfirstname." ".$session->studentlastname, 'course' => $session->course, 'date'=>userdate($session->sessiondate )]));
@@ -439,7 +436,7 @@ class sessions {
                     mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidschedulername','scheduler', $session->scheduler));
                     }
                 } else {
-                    mod_scheduler_notifyqueue::notify_problem(get_string('error:coursehasnoattendance','scheduler', $session->course));     
+                    mod_scheduler_notifyqueue::notify_problem(get_string('error:coursehasnoattendance','scheduler', $session->course));
                 }
             } else {
                 mod_scheduler_notifyqueue::notify_problem(get_string('error:coursenotfound', 'scheduler', $session->course));
@@ -463,7 +460,7 @@ class sessions {
     /**
      * Check if student is in the course
      *
-     * @param int $courseid 
+     * @param int $courseid
      * @param int $studentid
      * @return boolean
      */
@@ -473,10 +470,11 @@ class sessions {
         $students = get_role_users(5 , $context);
 
         foreach($students as $student){
-            if($student->id == $studentid)
-                return TRUE;
+            if ($student->id == $studentid) {
+                return true;
+            }
         }
-        return FALSE;
+        return false;
     }
 
     /**
@@ -500,7 +498,7 @@ class sessions {
         unset($check->hideuntil);
         $check = (array) $check;
 
-        if ($record = $DB->get_record('scheduler_slots', $check, $fields='id', $strictness=IGNORE_MISSING)) {
+        if ($record = $DB->get_record('scheduler_slots', $check, $fields = 'id', $strictness = IGNORE_MISSING)) {
             return $record->id;
         }
         return false;
@@ -508,7 +506,7 @@ class sessions {
 
 
 /**
- * Create the slot to be added to the DB 
+ * Create the slot to be added to the DB
  * @param stdClass $formdata moodleform - attendance form.
  * @param int $schedulerid id of scheduler in DB
  * @param int $teacherid of teacher in scheduler
@@ -523,7 +521,7 @@ function construct_slot_data_for_add($formdata, $schedulerid, $teacherid) {
     $duration = $formdata->duration;
 
     $sess = array();
-    
+
     $sess = new stdClass();
     //Start with schedulerid
     $sess->schedulerid = $schedulerid;
@@ -563,7 +561,7 @@ public function add_slot($sess, $scheduler) {
         global $DB;
 
         $context = get_context_instance(CONTEXT_COURSE, $scheduler->course);
-      
+
         $sess->id = $DB->insert_record('scheduler_slots', $sess);
 
         //Need to add potential file slot into draft area? for notes, appointment notes, teachernote, studentnote
@@ -575,7 +573,7 @@ public function add_slot($sess, $scheduler) {
         // Trigger a session added event.
         $slotobj = $scheduler->get_slot($sess->id);
         \mod_scheduler\event\slot_added::create_from_slot($slotobj)->trigger();
-       
+
         return $sess->id;
 }
 
@@ -589,22 +587,22 @@ public function delete_slot($slot, $scheduler) {
 
     global $DB;
 
-    $context = get_context_instance(CONTEXT_COURSE, $scheduler->course); 
+    $context = get_context_instance(CONTEXT_COURSE, $scheduler->course);
     $result = true;
 
-    //clear calendar 
+    //clear calendar
     //for teachers calendar
     $tcal = "SSsup:{$slot->id}:{$scheduler->course}";
     $result = $DB->delete_records('event', array('eventtype' => $tcal, "timestart" => $slot->starttime));
 
-    if(!$result){
+    if (!$result) {
         return get_string('error:deletecalendart', 'scheduler');
     }
     //for student calendar
     $scal = "SSstu:{$slot->id}:{$scheduler->course}";
     $result = $DB->delete_records('event', array('eventtype' => $scal,"timestart" => $slot->starttime));
 
-    if(!$result){
+    if (!$result) {
         return get_string('error:deletecalendars', 'scheduler');
     }
 
@@ -615,8 +613,8 @@ public function delete_slot($slot, $scheduler) {
 
 
     //need to get all scheduler appointments
-    $appointments = $DB->get_records("scheduler_appointment", array("slotid"=>$slot->id), $sort='', $fields='*');
-    
+    $appointments = $DB->get_records("scheduler_appointment", array("slotid" => $slot->id), $sort = '', $fields = '*');
+
 
     foreach($appointments as $appointment){
         //clear appointment storage
@@ -633,7 +631,7 @@ public function delete_slot($slot, $scheduler) {
 
     //delete slot
      $result = $DB->delete_records("scheduler_slots", array('id' => $slot->id));
-     if(!$result){
+     if (!$result) {
         return get_string('error:deleteslot', 'scheduler');
     }
     return $result;
@@ -700,16 +698,16 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
      */
     public function add_appointment($sess,$context) {
         global $DB;
-      
+
         $sess->id = $DB->insert_record('scheduler_appointment', $sess);
-       
+
 
         //Need to add potential file slot into draft area? appointment notes, teachernote, studentnote
         $description = file_save_draft_area_files(0,
             $context->id, 'mod_scheduler', 'appointmentnote', $sess->id,
             array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
             $sess->appointmentnote);
-        
+
         $description = file_save_draft_area_files(0,
             $context->id, 'mod_scheduler', 'teachernote', $sess->id,
             array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
@@ -719,7 +717,7 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
             $context->id, 'mod_scheduler', 'studentnote', $sess->id,
             array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
             $sess->studentnote);
-       
+
         return $sess->id;
     }
 

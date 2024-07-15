@@ -30,11 +30,11 @@ require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/scheduler/lib.php');
 require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
 
-//ADDED
+// ADDED.
 require_once($CFG->dirroot . '/mod/scheduler/import/sessions_confirm.php');
 require_once($CFG->dirroot . '/mod/scheduler/import/sessions_form.php');
 require_once($CFG->dirroot . '/mod/scheduler/import/sessions_process.php');
-//END OF ADDED
+// END OF ADDED.
 
 admin_externalpage_setup('managemodules');
 $pagetitle = get_string('importsessions', 'scheduler');
