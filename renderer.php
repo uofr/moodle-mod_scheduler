@@ -575,7 +575,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 $checkbox3 = '';
                 if ($studentlist->checkboxname) {
                     if ($student->editattended) {
-                    // ADDED.
+                        // ADDED.
                         if ($studentlist->checkboxdisable) {
                             $checkbox  = html_writer::start_tag('span', array("data-toggle" => "tooltip",  "title" => "Present"));
                             $checkbox .= html_writer::checkbox(
@@ -587,7 +587,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                             );
                             $checkbox .= html_writer::end_tag('span');
 
-                            $checkbox2  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent"));
+                            $checkbox2  = html_writer::start_tag('span', array("data-toggle => "tooltip",  "title" => "Absent"));
                             $checkbox2 .= html_writer::checkbox(
                                 $studentlist->checkboxname2,
                                 $student->entryid,
@@ -597,7 +597,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                             );
                             $checkbox2 .= html_writer::end_tag('span');
 
-                            $checkbox3  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent Reschedule"));
+                            $checkbox3  = html_writer::start_tag('span', array("data-toggle" => "tooltip",  "title" => "Absent Reschedule"));
                             $checkbox3 .= html_writer::checkbox(
                                 $studentlist->checkboxname3,
                                 $student->entryid,
@@ -607,7 +607,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                             );
                             $checkbox3 .= html_writer::end_tag('span');
                         } else {
-                            $checkbox  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Present"));
+                            $checkbox  = html_writer::start_tag('span', array("data-toggle" => "tooltip",  "title" => "Present"));
                             $checkbox .= html_writer::checkbox(
                                 $studentlist->checkboxname,
                                 $student->entryid,
@@ -617,7 +617,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                             );
                             $checkbox .= html_writer::end_tag('span');
 
-                            $checkbox2  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent"));
+                            $checkbox2  = html_writer::start_tag('span', array("data-toggle" => "tooltip",  "title" => "Absent"));
                             $checkbox2 .= html_writer::checkbox(
                                 $studentlist->checkboxname2,
                                 $student->entryid,
@@ -627,13 +627,13 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                             );
                             $checkbox2 .= html_writer::end_tag('span');
 
-                            $checkbox3  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent Reschedule"));
+                            $checkbox3  = html_writer::start_tag('span', array("data-toggle" => "tooltip",  "title" => "Absent Reschedule"));
                             $checkbox3 .= html_writer::checkbox(
                                 $studentlist->checkboxname3,
                                 $student->entryid,
                                 $student->checkedabsentschedule,
                                 'AR',
-                                ['class' => 'absentschedule', 'disabled'=>'disabled']
+                                ['class' => 'absentschedule', 'disabled' => 'disabled']
                             );
                             $checkbox3 .= html_writer::end_tag('span');
                         }
@@ -671,7 +671,9 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 if ($studentlist->showgrades && $student->grade) {
                     $grade = $this->format_grade($studentlist->scheduler, $student->grade, true);
                 }
-                $o .= html_writer::div($checkbox . $checkbox2 . $checkbox3 . $picture . ' ' . $name . $studicons . ' ' . $grade, $class);
+                $o .= html_writer::div(
+                    $checkbox . $checkbox2 . $checkbox3 . $picture . ' ' . $name . $studicons . ' ' . $grade, $class
+                );
             }
 
             if ($editable) {
@@ -712,8 +714,6 @@ class mod_scheduler_renderer extends plugin_renderer_base {
         $canappoint = false;
 
         foreach ($booker->slots as $slot) {
-
-
             $rowdata = array();
 
             $startdate = $this->userdate($slot->starttime);
@@ -832,12 +832,11 @@ class mod_scheduler_renderer extends plugin_renderer_base {
 
             $rowdata = array();
 
-            $selectbox="";
+            $selectbox = "";
             if ($slot->canadd || $slot->candelete) {
                 $selectbox = html_writer::checkbox('selectedslot[]', $slot->slotid, false, '', array('class' => 'slotselect'));
             }
-                $rowdata[] = $slot->editable ? $selectbox : '';
-
+            $rowdata[] = $slot->editable ? $selectbox : '';
 
             $startdate = $this->userdate($slot->starttime);
             $starttime = $this->usertime($slot->starttime);

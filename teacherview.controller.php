@@ -61,7 +61,6 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
     $slot->timemodified = time();
 
 
-
     for ($d = 0; $d <= $fordays; $d ++) {
         $starttime = $startfrom + ($d * DAYSECS);
         $eventdate = usergetdate($starttime);
@@ -82,17 +81,15 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
             // URCOURSES HACK.
             // Check if date matches any included in cancel dates file.
             $createslot = true;
-            if ($canceldates != false){
-
-
-
-                if( in_array($eventdate['year'].'/'.sprintf("%02d",$eventdate['mon']).'/'.sprintf("%02d",$eventdate['mday']), $canceldates)){
+            if ($canceldates != false) {
+                $needle = $eventdate['year'].'/'.sprintf("%02d",$eventdate['mon']).'/'.sprintf("%02d",$eventdate['mday']);
+                if (in_array($needle, $canceldates)) {
                     $createslot = false;
                 }
             }
 
-            if($createslot){
-            //END of HACK
+            if ($createslot) {
+            // END of HACK.
                 // This corrects around midnight bug.
                 if ($data->timestart > $data->timeend) {
                     $data->timeend += DAYSECS;
@@ -147,7 +144,7 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
                         \mod_scheduler\event\slot_added::create_from_slot($slotobj)->trigger();
                         $countslots++;
 
-                        //URCOURSE HACK LEFT OFF HERE MUST TEST
+                        // URCOURSE HACK LEFT OFF HERE MUST TEST.
                         for ($i = 0; $i < $data->appointment_repeats; $i++) {
                             if (property_exists($data, 'studentid') && $data->studentid[$i] > 0) {
 
@@ -184,7 +181,7 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
                                 }
                             }
                         }
-                        //END OF HACK
+                        // END OF HACK
                     }
                     $slot->starttime += ($slot->duration + $data->break) * 60;
                     $data->timestart += ($slot->duration + $data->break) * 60;
@@ -315,7 +312,7 @@ switch ($action) {
             foreach ($slot->get_appointments() as $app) {
                 $permissions->ensure($permissions->can_edit_attended($app));
                 $app->attended = (in_array($app->id, $seen)) ? 1 : 0;
-                $app->absentpaid =  0;
+                $app->absentpaid = 0;
                 $app->absentschedule = 0;
                 $app->timemodified = time();
             }
@@ -333,8 +330,8 @@ switch ($action) {
         if (is_array($absentpaid)) {
             foreach ($slot->get_appointments() as $app) {
                 $app->absentpaid = (in_array($app->id, $absentpaid)) ? 1 : 0;
-                $app->absentschedule =  0;
-                $app->attended =  0;
+                $app->absentschedule = 0;
+                $app->attended = 0;
                 $app->timemodified = time();
             }
         }
