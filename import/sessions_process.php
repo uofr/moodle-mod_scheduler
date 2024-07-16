@@ -371,14 +371,18 @@ class sessions {
                         // Check if action is to add or to delete.
                         if (strtolower($session->action) == "add") {
                             // Format slot for DB add.
-                            $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id);
+                            $slot = $this->construct_slot_data_for_add($session, $schedulerdb->id, $teacher->id);
 
                             // Check for duplicate sessions.
                             if ($this->session_exists($slot) != false) {
-                                mod_scheduler_notifyqueue::notify_message(get_string('sessionduplicate', 'scheduler', (array(
-                                            'course' => $session->course,
-                                            'activity' => $session->studentfirstname." ".$session->studentlastname." for ".userdate($session->sessiondate )
-                                ))));
+                                $notifymessageactivity = $session->studentfirstname;
+                                $notifymessageactivity .= " " . $session->studentlastname;
+                                $notifymessageactivity .= " for " . userdate($session->sessiondate);
+                                $notifymessage = get_string('sessionduplicate', 'scheduler', [
+                                    'course' => $session->course,
+                                    'activity' => $notifymessageactivity
+                                ]);
+                                mod_scheduler_notifyqueue::notify_message($notifymessage);
                                 unset($slot);
                             }
 
