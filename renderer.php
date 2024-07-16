@@ -587,7 +587,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                             );
                             $checkbox .= html_writer::end_tag('span');
 
-                            $checkbox2  = html_writer::start_tag('span', array("data-toggle => "tooltip",  "title" => "Absent"));
+                            $checkbox2  = html_writer::start_tag('span', array("data-toggle" => "tooltip",  "title" => "Absent"));
                             $checkbox2 .= html_writer::checkbox(
                                 $studentlist->checkboxname2,
                                 $student->entryid,
