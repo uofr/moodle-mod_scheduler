@@ -215,6 +215,7 @@ $capabilities = array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
+            'manager' => CAP_ALLOW
         )
     ),
 
