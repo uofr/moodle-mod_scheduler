@@ -408,7 +408,13 @@ class sessions {
                                     $this->add_appointment($appointment, $context);
                                     $okcount ++;
                                 } else {
-                                    mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidstudent', 'scheduler', ['name' => $session->studentfirstname." ".$session->studentlastname, 'course' => $session->course]));
+                                    $notifyproblemname = $session->studentfirstname." ".$session->studentlastname;
+                                    $notifyproblem = get_string(
+                                        'error:invalidstudent',
+                                        'scheduler',
+                                        ['name' => $notifyproblemname, 'course' => $session->course]
+                                    );
+                                    mod_scheduler_notifyqueue::notify_problem($notifyproblem);
                                 }
                             }
                         } else if (strtolower($session->action) == "delete") {
@@ -417,7 +423,7 @@ class sessions {
 
                             $slotid = $this->session_exists($slot);
                             // Check if exists if not error.
-                            if ($slotid!= false) {
+                            if ($slotid != false) {
                                 $slot->id = $slotid;
                                 $result = $this->delete_slot($slot, $scheduler);
                                 unset($slot);
