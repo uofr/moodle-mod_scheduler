@@ -157,7 +157,7 @@ if ($action == 'addslot') {
     if ($mform->is_cancelled()) {
         redirect($viewurl);
     } else if ($formdata = $mform->get_data()) {
-        
+
         $slot = $mform->save_slot(0, $formdata);
 
         \mod_scheduler\event\slot_added::create_from_slot($slot)->trigger();
@@ -288,7 +288,7 @@ if ($action == 'addsession') {
                 if (!preg_match($regex, $canceldate)){
                     $conflictmsg = $canceldate." not proper format (yyyy/mm/dd) skipping cell";
                     \core\notification::warning($conflictmsg);
-                } 
+                }
             }
         }
         //END of Hack

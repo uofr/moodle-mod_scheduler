@@ -170,7 +170,7 @@ if (count($upcomingslots) > 0) {
 
         $moddate = $slot->starttime + 172800;
 
-        if ($canmarkattend && ($slot->starttime<= time()  && time() <= $moddate)) {
+        if ($canmarkattend && ($slot->starttime <= time()  && time() <= $moddate)) {
             $studentcanmark = true;
         }
 

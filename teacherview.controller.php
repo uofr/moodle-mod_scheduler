@@ -79,12 +79,12 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
             $data->timeend = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'],
                                             $data->endhour, $data->endminute);
 
-            //URCOURSES HACK
-            //check if date matches any included in cancel dates file
+            // URCOURSES HACK.
+            // Check if date matches any included in cancel dates file.
             $createslot = true;
             if ($canceldates != false){
 
-        
+
 
                 if( in_array($eventdate['year'].'/'.sprintf("%02d",$eventdate['mon']).'/'.sprintf("%02d",$eventdate['mday']), $canceldates)){
                     $createslot = false;
@@ -161,12 +161,12 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
                                 $app->studentid = $data->studentid[$i];
                                 $app->save();
                                 $app->attended = isset($data->attended[$i]);
-                    
+
                                 if (isset($data->grade)) {
                                     $selgrade = $data->grade[$i];
                                     $app->grade = ($selgrade >= 0) ? $selgrade : null;
                                 }
-                    
+
                                 if ($scheduler->uses_appointmentnotes()) {
                                     $editor = $data->appointmentnote_editor[$i];
                                     $app->appointmentnote = file_save_draft_area_files($editor['itemid'], $context->id,
@@ -187,7 +187,7 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
                         //END OF HACK
                     }
                     $slot->starttime += ($slot->duration + $data->break) * 60;
-                    $data->timestart += ($slot->duration + $data->break) * 60; 
+                    $data->timestart += ($slot->duration + $data->break) * 60;
                 }
             }
         }
@@ -277,9 +277,6 @@ function scheduler_action_delete_slots(array $slots, $action, moodle_url $return
     \core\notification::add($message, $messagetype);
     redirect($returnurl);
 }
-
-// Require valid session key for all actions.
-//require_sesskey();
 
 // We first have to check whether some action needs to be performed.
 // Any of the following actions must issue a redirect when finished.

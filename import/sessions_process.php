@@ -368,10 +368,9 @@ class sessions {
                                         LEFT OUTER JOIN mdl_user u ON ra.userid = u.id
                                         WHERE cx.contextlevel = '50' AND c.id =".$course->id.";");
 
-
                         // Check if action is to add or to delete.
                         if (strtolower($session->action) == "add") {
-                            //format slot for DB add
+                            // Format slot for DB add.
                             $slot = $this->construct_slot_data_for_add($session,$schedulerdb->id, $teacher->id);
 
                             // Check for duplicate sessions.
@@ -392,15 +391,15 @@ class sessions {
 
                                 // Need a check to see if it is even a student in the course.
                                 if ($this->student_course($course->id, $student->id)) {
-                                    //get new slot id
+                                    // Get new slot id.
                                     $slotid = $this->add_slot($slot,$scheduler);
 
                                     //Add to calendar
                                     $this->update_calendar($scheduler,$slot,$teacher,$student);
 
-                                    //format appointments for DB add
+                                    // Format appointments for DB add.
                                     $appointment = $this->construct_appointment_data_for_add($session, $slotid, $student->id);
-                                    //add appointment
+                                    // Add appointment.
                                     $context = get_context_instance(CONTEXT_COURSE, $course->id);
                                     $this->add_appointment($appointment,$context);
                                     $okcount ++;
@@ -420,15 +419,15 @@ class sessions {
                                 unset($slot);
                                 if ($result == true) {
                                     $deletecount++;
-                                }else{
+                                } else {
                                     // Throw error as not matching.
                                     mod_scheduler_notifyqueue::notify_problem($result." ".$session->studentfirstname." ".$session->studentlastname.": ".$session->course.": ".userdate($session->sessiondate ));
                                 }
-                            } else{
+                            } else {
                                 // Throw error as not matching.
                                 mod_scheduler_notifyqueue::notify_problem(get_string('error:invaliddelete', 'scheduler', ['name' => $session->studentfirstname." ".$session->studentlastname, 'course' => $session->course, 'date'=>userdate($session->sessiondate )]));
                             }
-                        }else{
+                        } else {
                             // Throw error as not matching.
                             mod_scheduler_notifyqueue::notify_problem(get_string('error:invalidaction', 'scheduler', ['name' => $session->studentfirstname." ".$session->studentlastname, 'course' => $session->course, 'action'=>$session->action]));
                         }
@@ -523,29 +522,29 @@ function construct_slot_data_for_add($formdata, $schedulerid, $teacherid) {
     $sess = array();
 
     $sess = new stdClass();
-    //Start with schedulerid
+    // Start with schedulerid.
     $sess->schedulerid = $schedulerid;
-    //Starttime
+    // Starttime.
     $sess->starttime = $sessiondate;
-    //Duration
+    // Duration.
     $sess->duration = $duration;
-    //Teacherid
+    // Teacherid.
     $sess->teacherid = $teacherid;
-    //Appointment Location
+    // Appointment Location.
     $sess->appointmentlocation = "";
-    //Reuse
+    // Reuse.
     $sess->reuse = 0;
-    //timemodified
+    // Timemodified.
     $sess->timemodified = time();
-    //notes
+    // Notes.
     $sess->notes = "";
-    //notesmodified
+    // Notesmodified.
     $sess->notesformat = 1;
-    //exculsity
+    // Exculsity.
     $sess->exclusivity = 1;
-    //emaildate
+    // Emaildate.
     $sess->emaildate = 0;
-    //hideuntil
+    // Hideuntil.
     $sess->hideuntil = time();
 
     return $sess;
@@ -590,15 +589,15 @@ public function delete_slot($slot, $scheduler) {
     $context = get_context_instance(CONTEXT_COURSE, $scheduler->course);
     $result = true;
 
-    //clear calendar
-    //for teachers calendar
+    // Clear calendar.
+    // For teachers calendar.
     $tcal = "SSsup:{$slot->id}:{$scheduler->course}";
     $result = $DB->delete_records('event', array('eventtype' => $tcal, "timestart" => $slot->starttime));
 
     if (!$result) {
         return get_string('error:deletecalendart', 'scheduler');
     }
-    //for student calendar
+    // For student calendar.
     $scal = "SSstu:{$slot->id}:{$scheduler->course}";
     $result = $DB->delete_records('event', array('eventtype' => $scal,"timestart" => $slot->starttime));
 
@@ -606,30 +605,30 @@ public function delete_slot($slot, $scheduler) {
         return get_string('error:deletecalendars', 'scheduler');
     }
 
-    //clear slot note
+    // Clear slot note.
     $fs = get_file_storage();
     $cid = $scheduler->get_context()->id;
     $fs->delete_area_files($cid, 'mod_scheduler', 'slotnote', $slot->id);
 
 
-    //need to get all scheduler appointments
+    // Need to get all scheduler appointments.
     $appointments = $DB->get_records("scheduler_appointment", array("slotid" => $slot->id), $sort = '', $fields = '*');
 
 
-    foreach($appointments as $appointment){
-        //clear appointment storage
+    foreach ($appointments as $appointment) {
+        // Clear appointment storage.
         $fs->delete_area_files($cid, 'mod_scheduler', 'appointmentnote', $appointment->id);
         $fs->delete_area_files($cid, 'mod_scheduler', 'teachernote', $appointment->id);
         $fs->delete_area_files($cid, 'mod_scheduler', 'studentnote', $appointment->id);
 
-        //delete appointment
+        // Delete appointment.
         $result = $DB->delete_records("scheduler_appointment", array('id' => $appointment->id));
-        if(!$result){
+        if (!$result) {
             return get_string('error:deleteappointment', 'scheduler');
         }
     }
 
-    //delete slot
+    // Delete slot.
      $result = $DB->delete_records("scheduler_slots", array('id' => $slot->id));
      if (!$result) {
         return get_string('error:deleteslot', 'scheduler');
@@ -668,23 +667,23 @@ function construct_appointment_data_for_add($formdata, $slotid, $studentid) {
 
     $sess = array();
     $sess = new stdClass();
-    //Start with slotid
+    // Start with slotid.
     $sess->slotid = $slotid;
-    //student id
-    $sess->studentid= $studentid;
-    //attended
+    // Student id.
+    $sess->studentid = $studentid;
+    // Attended.
     $sess->attended = 0;
-    //student attended
+    // Student attended.
     $sess->studentattend = 0;
-    //Grade can be null
-    //appointmentnote can be null
+    // Grade can be null/
+    // Appointmentnote can be null.
     $sess->appointmentnote = "";
     $sess->appointmentnoteformat = 1;
-    //teachernote can be null
+    // Teachernote can be null.
     $sess->teachernote = "";
     $sess->teachernoteformat = 1;
-    //studentnote can be null
-    $sess->studentnote= "";
+    // Studentnote can be null.
+    $sess->studentnote = "";
     $sess->studentnoteformat = 1;
 
     return $sess;

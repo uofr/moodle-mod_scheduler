@@ -190,7 +190,7 @@ abstract class scheduler_slotform_base extends moodleform {
  */
 class scheduler_editslot_form extends scheduler_slotform_base {
 
-    
+
 
     /**
      * @var int id of the slot being edited
@@ -202,8 +202,8 @@ class scheduler_editslot_form extends scheduler_slotform_base {
      */
     protected function definition() {
 
-        
-        
+
+
 
         global $DB, $output;
         $pluginconfig = get_config('scheduler');
@@ -467,7 +467,7 @@ class scheduler_editslot_form extends scheduler_slotform_base {
         }
 
         $editor = $data->notes_editor;
-       
+
         $slot->notes = file_save_draft_area_files($editor['itemid'], $context->id, 'mod_scheduler', 'slotnote', $slotid,
                 $this->noteoptions, $editor['text']);
         $slot->notesformat = $editor['format'];
@@ -590,7 +590,7 @@ class scheduler_addsession_form extends scheduler_slotform_base {
         } else {
             $maxbytes = get_max_upload_sizes(0, 0, 0, $currentmaxbytes);
         }
-        
+
         $mform->addElement('filepicker', 'canceldates', get_string('canceldates', 'scheduler'), null,
                    array('maxbytes' => $maxbytes, 'accepted_types' => '*'));
 
@@ -649,7 +649,7 @@ class scheduler_addsession_form extends scheduler_slotform_base {
 
 
         //URCOURSES HACK
-        
+
         // Appointments.
         $repeatarray = array();
         $grouparray = array();
@@ -678,7 +678,7 @@ class scheduler_addsession_form extends scheduler_slotform_base {
         }
 
         $repeatarray[] = $mform->createElement('group', 'studgroup', get_string('student', 'scheduler'), $grouparray, null, false);
-        
+
 
         // Appointment notes, visible to teacher and/or student.
 
@@ -716,8 +716,8 @@ class scheduler_addsession_form extends scheduler_slotform_base {
 
         //END OF HACK
 
-        
-       
+
+
         $this->add_action_buttons();
 
     }
@@ -765,7 +765,7 @@ class scheduler_addsession_form extends scheduler_slotform_base {
     }
 }
 
-//ADDDED FOR LIMITED EDITING OF INSTRUCTOR 
+//ADDDED FOR LIMITED EDITING OF INSTRUCTOR
 
 /**
  * Slot edit with limited options form
@@ -793,7 +793,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         $timeoptions = null;
         if (isset($this->_customdata['timeoptions'])) {
             $timeoptions = $this->_customdata['timeoptions'];
-            
+
         }
 
         // Start date/time of the slot.
@@ -822,15 +822,15 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         // Appointments.
        $studentapps = $DB->get_records('scheduler_appointment', array('slotid' => $this->slotid), '', 'id,studentid,attended,absentpaid,absentschedule');
        $repeatno = count($studentapps);
-      
+
         $i=0;
         foreach ($studentapps as $app){
-    
+
             $mform->addElement('header', 'appointhead', get_string('appointmentno', 'scheduler', $i+1));
 
             // Choose student.
             $students = $this->scheduler->get_available_students($this->usergroups);
-            
+
             if ($students) {
                 foreach ($students as $astudent) {
                     if($astudent->id == $app->studentid)
@@ -856,7 +856,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
             else
                 $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'),'', array('disabled' => 'disabled'));
 
-           
+
             // Grade.
             if ($this->scheduler->scale != 0) {
                 $gradechoices = $OUTPUT->grading_choices($this->scheduler);
@@ -874,7 +874,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
                                                     array('rows' => 3, 'columns' => 60), $this->noteoptions);
 
             }
-        
+
             $i++;
         }
 
@@ -1026,7 +1026,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         $slot->notesformat = $editor['format'];
 
         $currentapps = $slot->get_appointments();
-      
+
         for ($i = 0; $i < $data->appointment_repeats; $i++) {
             if ($data->studentid[$i] > 0) {
                 $app = null;
@@ -1038,7 +1038,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
                     $app->studentid = $data->studentid[$i];
                     $app->save();
                 }
-            
+
                 $app->attended = isset($data->attended[$i]);
 
                 if (isset($data->grade)) {

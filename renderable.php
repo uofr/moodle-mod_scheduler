@@ -109,13 +109,18 @@ class scheduler_slot_table implements renderable {
         // ADDDED.
         $slot->attendcheck = "";
         if ($canattend) { // Add markable checkbox.
-            $slot->attendcheck = html_writer::checkbox($appointmentmodel->id, $appointmentmodel->id, $appointmentmodel->studentattend, '',
-            array('class' => 'studentattendselect'));
-            $this->studentattended = TRUE;
+            $slot->attendcheck = html_writer::checkbox(
+                $appointmentmodel->id,
+                $appointmentmodel->id,
+                $appointmentmodel->studentattend,
+                '',
+                ['class' => 'studentattendselect']
+            );
+            $this->studentattended = true;
         } else { // Display a disable box to show if student marked or not.
             $slot->attendcheck = html_writer::checkbox("test", "test", false, '',
             array('class' => 'studentattendselect', 'disabled' => 'disabled'));
-            $this->studentattended = TRUE;
+            $this->studentattended = true;
         }
         $slot->studentcancancel = $studentcancancel;
         // END of ADDED.

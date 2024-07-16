@@ -24,9 +24,6 @@
  */
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
-//use core_text;
-//use csv_import_reader;
-//use moodleform;
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir . '/csvlib.class.php');
 
@@ -40,7 +37,7 @@ require_once($CFG->libdir . '/csvlib.class.php');
  */
 class sessions_form extends moodleform {
 
-    
+
     /**
      * Define the form - called by parent constructor
      */

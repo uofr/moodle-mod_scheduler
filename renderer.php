@@ -406,7 +406,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
             $table->head[]  = get_string('location', 'scheduler');
             $table->align[] = 'left';
         }
-        //ADDED 
+        //ADDED
         if ($slottable->studentattended) {
             $table->head[]  = get_string('studentstableattend', 'scheduler');
             $table->align[] = 'left';
@@ -463,7 +463,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 $attendedpix = $this->pix_icon($iconid, get_string($iconhelp, 'scheduler'), 'mod_scheduler');
                 $rowdata[] = $attendedpix;
             }
-            
+
 
             if ($slottable->showslot) {
                 $rowdata[] = $this->user_profile_link($slottable->scheduler, $slot->teacher);
@@ -473,7 +473,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 $rowdata[] = format_string($slot->location);
             }
 
-            //ADDED 
+            //ADDED
             if ($slottable->studentattended) {
                 $rowdata[] = $slot->attendcheck;
             }
@@ -509,15 +509,15 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                     $button = new single_button($buttonurl, get_string('viewbooking', 'scheduler'));
                     $actions .= $this->render($button);
                 }
-                if ($slot->cancancel  && $slot->studentcancancel) { //ADDED AS CABABLILTIES TO CANCEL 
+                if ($slot->cancancel  && $slot->studentcancancel) { //ADDED AS CABABLILTIES TO CANCEL
                     $buttonurl = new moodle_url($slottable->actionurl,
                                      array('what' => 'cancelbooking', 'slotid' => $slot->slotid));
                     $button = new single_button($buttonurl, get_string('cancelbooking', 'scheduler'));
                     $actions .= $this->render($button);
                 }
-                
-                //ADDED STUDENT CAN RESCHEDULE Should add it as a capabiltiy
-                if ($slot->cancancel ){ //check if within right time slot
+
+                // ADDED STUDENT CAN RESCHEDULE Should add it as a capabiltiy.
+                if ($slot->cancancel ){ // Check if within right time slot.
 
                     $buttonurl = new moodle_url($slottable->actionurl,
                                         array('what' => 'reschedule', 'slotid' => $slot->slotid, 'appointmentid' => $slot->appointmentid, 'teacherid'=>$slot->teacher->id));
@@ -571,7 +571,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 if ($studentlist->checkboxname) {
                     if ($student->editattended) {
                     //ADDED
-                        if($studentlist->checkboxdisable){
+                        if ($studentlist->checkboxdisable) {
                             $checkbox  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Present"));
                             $checkbox .= html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, 'P',array('class' => 'studentselect'));
                             $checkbox .= html_writer::end_tag('span');
@@ -583,8 +583,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                             $checkbox3  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Absent Reschedule"));
                             $checkbox3 .= html_writer::checkbox($studentlist->checkboxname3, $student->entryid, $student->checkedabsentschedule, 'AR',array('class' => 'absentschedule'));
                             $checkbox3 .= html_writer::end_tag('span');
-                        }
-                        else{
+                        } else {
                             $checkbox  = html_writer::start_tag('span', array("data-toggle"=>"tooltip",  "title"=>"Present"));
                             $checkbox .= html_writer::checkbox($studentlist->checkboxname, $student->entryid, $student->checked, 'P',array('class' => 'studentselect', 'disabled'=>'disabled'));
                             $checkbox .= html_writer::end_tag('span');
@@ -760,7 +759,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
      * Render a slot manager.
      *
      * @param scheduler_slot_manager $slotman
-     * 
+     *
      * @return string
      */
     public function render_scheduler_slot_manager(scheduler_slot_manager $slotman) {
@@ -793,11 +792,11 @@ class mod_scheduler_renderer extends plugin_renderer_base {
             $rowdata = array();
 
             $selectbox="";
-            if($slot->canadd || $slot->candelete){
+            if ($slot->canadd || $slot->candelete) {
                 $selectbox = html_writer::checkbox('selectedslot[]', $slot->slotid, false, '', array('class' => 'slotselect'));
             }
                 $rowdata[] = $slot->editable ? $selectbox : '';
-            
+
 
             $startdate = $this->userdate($slot->starttime);
             $starttime = $this->usertime($slot->starttime);
@@ -835,7 +834,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
             $actions = '';
 
             if ($slot->editable) {
-                if($slot->candelete){
+                if ($slot->candelete) {
                     $url = new moodle_url($slotman->actionurl, array('what' => 'deleteslot', 'slotid' => $slot->slotid));
                     $confirmdelete = new confirm_action(get_string('confirmdelete-one', 'scheduler'));
                     $actions .= $this->action_icon($url, new pix_icon('t/delete', get_string('delete')), $confirmdelete);
