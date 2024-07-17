@@ -149,7 +149,6 @@ if (count($pastslots) > 0) {
         $slottable->add_slot($pastslot, $appointment, $others, false, false, $hasdetails, $studentcanmark, $studentcancancel);
     }
 
-    echo $output->heading(get_string(''));
     echo $output->heading(
         get_string('attendedslots', 'scheduler') . ":  " . count($pastslots) . " " . get_string('completed', 'scheduler')
     );
