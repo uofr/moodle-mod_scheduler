@@ -701,10 +701,11 @@ if ($students === 0) {
         $picture = $output->user_picture($student);
         $name = $output->user_profile_link($scheduler, $student);
         $actions = array();
-        $actions[] = new action_menu_link_secondary(
-                        new moodle_url($actionurl, array('what' => 'schedule', 'studentid' => $student->id)),
-                        new pix_icon('e/insert_date', '', 'moodle'),
-                        get_string('scheduleinslot', 'scheduler') );
+        // MODIFIED: Removed ability for instructors to schedule in slot.
+        // $actions[] = new action_menu_link_secondary(
+        //                 new moodle_url($actionurl, array('what' => 'schedule', 'studentid' => $student->id)),
+        //                 new pix_icon('e/insert_date', '', 'moodle'),
+        //                 get_string('scheduleinslot', 'scheduler') );
         $actions[] = new action_menu_link_secondary(
                         new moodle_url($actionurl, array('what' => 'markasseennow', 'studentid' => $student->id)),
                         new pix_icon('t/approve', '', 'moodle'),
@@ -755,10 +756,11 @@ if ($students === 0) {
                     }
                     $name .= ' ['. implode(', ', $groupmembers) . ']';
                     $actions = array();
-                    $actions[] = new action_menu_link_secondary(
-                                    new moodle_url($actionurl, array('what' => 'schedulegroup', 'groupid' => $group->id)),
-                                    new pix_icon('e/insert_date', '', 'moodle'),
-                                    get_string('scheduleinslot', 'scheduler') );
+                    // MODIFIED: Removed ability for instructors to schedule in slot.
+                    // $actions[] = new action_menu_link_secondary(
+                    //                 new moodle_url($actionurl, array('what' => 'schedulegroup', 'groupid' => $group->id)),
+                    //                 new pix_icon('e/insert_date', '', 'moodle'),
+                    //                 get_string('scheduleinslot', 'scheduler') );
 
                     $grouptable->add_line($picture, $name, array(), $actions);
                     $groupcnt++;
