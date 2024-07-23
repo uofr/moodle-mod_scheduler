@@ -797,9 +797,10 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         }
 
         // Start date/time of the slot.
-        $mform->addElement('date_time_selector', 'starttime', get_string('date', 'scheduler'), $timeoptions);
-        $mform->setDefault('starttime', time());
-        $mform->addHelpButton('starttime', 'choosingslotstart', 'scheduler');
+        // MODIFIED: Removed ability for instructor to change the appointment date.
+        // $mform->addElement('date_time_selector', 'starttime', get_string('date', 'scheduler'), $timeoptions);
+        // $mform->setDefault('starttime', time());
+        // $mform->addHelpButton('starttime', 'choosingslotstart', 'scheduler');
 
         // Duration of the slot.
         //$this->add_duration_field();
