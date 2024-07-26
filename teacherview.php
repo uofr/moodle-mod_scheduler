@@ -148,7 +148,7 @@ if ($action == 'addslot') {
     $actionurl = new moodle_url($baseurl, array('what' => 'addslot'));
 
     if (!$scheduler->has_available_teachers()) {
-        throw new moodle_exception('needteachers', 'scheduler', viewurl);
+        throw new moodle_exception('needteachers', 'scheduler', $viewurl);
     }
 
     $mform = new scheduler_editslot_form($actionurl, $scheduler, $cm, $groupsicansee);
@@ -468,8 +468,7 @@ if ($slots) {
     $delbuttons = array();
 
     $delselectedurl = new moodle_url($actionurl, array('what' => 'deleteslots'));
-    $PAGE->requires->yui_module('moodle-mod_scheduler-delselected', 'M.mod_scheduler.delselected.init',
-                                array($delselectedurl->out(false)) );
+    $PAGE->requires->js_call_amd('mod_scheduler/delselected', 'init', [$delselectedurl->out(false)]);
     $delselected = $commandbar->action_link($delselectedurl, 'deleteselection', 't/delete',
                                             'confirmdelete-selected', 'delselected');
     $delselected->formid = 'delselected';
