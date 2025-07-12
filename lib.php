@@ -382,8 +382,6 @@ function scheduler_supports($feature) {
             return true;
         case FEATURE_GROUPINGS:
             return true;
-        case FEATURE_GROUPMEMBERSONLY:
-            return true;
         case FEATURE_MOD_INTRO:
             return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
@@ -787,4 +785,15 @@ function mod_scheduler_core_calendar_provide_event_action(
         1,
         true
     );
+}
+
+/**
+ * Get icon mapping for font-awesome.
+ *
+ * @return  array
+ */
+function mod_scheduler_get_fontawesome_icon_map() {
+    return [
+        'mod_scheduler:t/no' => 'fa-thumbs-down',
+    ];
 }
