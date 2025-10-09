@@ -559,17 +559,17 @@ if($candelete){
         $delbuttons[] = $delselected;
 
     if ($permissions->can_edit_all_slots() && $subpage == 'allappointments') {
-        $delbuttons[] = $commandbar->action_link(
+        $delbuttons[] = $commandbar->action_menu_link(
                         new moodle_url($actionurl, array('what' => 'deleteall')),
                         'deleteallslots', 't/delete', 'confirmdelete-all');
-        $delbuttons[] = $commandbar->action_link(
+        $delbuttons[] = $commandbar->action_menu_link(
                         new moodle_url($actionurl, array('what' => 'deleteallunused')),
                         'deleteallunusedslots', 't/delete', 'confirmdelete-unused');
     }
-    $delbuttons[] = $commandbar->action_link(
+    $delbuttons[] = $commandbar->action_menu_link(
                     new moodle_url($actionurl, array('what' => 'deleteunused')),
                     'deleteunusedslots', 't/delete', 'confirmdelete-myunused');
-    $delbuttons[] = $commandbar->action_link(
+    $delbuttons[] = $commandbar->action_menu_link(
                     new moodle_url($actionurl, array('what' => 'deleteonlymine')),
                     'deletemyslots', 't/delete', 'confirmdelete-mine');
 
