@@ -41,6 +41,7 @@ $string['scheduler:attend'] = 'Attend students';
 $string['scheduler:canadd'] = 'Can add new appointment slots';
 $string['scheduler:candelete'] = 'Can delete an appointment';
 $string['scheduler:canrevoke'] = 'Can revoke an appointment';
+$string['scheduler:caneditexclusivity'] = 'Can edit exclusivity';
 $string['scheduler:canscheduletootherteachers'] = 'Schedule appointments for other staff members';
 $string['scheduler:canseeotherteachersbooking'] = 'See and browse other teachers booking';
 $string['scheduler:disengage'] = 'This capability is deprecated and does nothing';

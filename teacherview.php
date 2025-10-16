@@ -458,8 +458,9 @@ if ($action == 'sendmessage') {
 //ADDED Advanced student capabilties
 $canadd = has_capability('mod/scheduler:canadd', $context);
 $candelete = has_capability('mod/scheduler:candelete', $context);
-$canrevoke= has_capability('mod/scheduler:canrevoke', $context);
-$unlimitedediting= has_capability('mod/scheduler:unlimitedediting', $context);
+$canrevoke = has_capability('mod/scheduler:canrevoke', $context);
+$caneditexclusivity = has_capability('mod/scheduler:caneditexclusivity', $context);
+$unlimitedediting = has_capability('mod/scheduler:unlimitedediting', $context);
 //END of ADDED
 
 // Print top tabs.
@@ -623,7 +624,7 @@ if ($slots) {
                                    $permissions->can_edit_attended($app));
         }
 
-        $slotman->add_slot($slot, $studlist, $editable, $canadd, $candelete, $canrevoke);
+        $slotman->add_slot($slot, $studlist, $editable, $canadd, $candelete, $canrevoke, $caneditexclusivity);
     }
 
     echo $output->render($slotman);

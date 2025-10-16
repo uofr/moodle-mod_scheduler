@@ -456,8 +456,9 @@ class scheduler_slot_manager implements renderable {
      * * @param bool $canadd
      * @param bool $candelete
      * @param bool $canrevoke
+     * @param bool $caneditexclusivity
      */
-    public function add_slot(slot $slotmodel, scheduler_student_list $students, $editable, $canadd, $candelete, $canrevoke) {
+    public function add_slot(slot $slotmodel, scheduler_student_list $students, $editable, $canadd, $candelete, $canrevoke, $caneditexclusivity) {
         $slot = new stdClass();
         $slot->slotid = $slotmodel->id;
         $slot->starttime = $slotmodel->starttime;
@@ -474,6 +475,7 @@ class scheduler_slot_manager implements renderable {
         $slot->canadd = $canadd;
         $slot->candelete = $candelete;
         $slot->canrevoke = $canrevoke;
+        $slot->caneditexclusivity = $caneditexclusivity;
 
         $this->slots[] = $slot;
     }

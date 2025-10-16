@@ -110,6 +110,17 @@ $capabilities = array(
         )
     ),
 
+    'mod/scheduler:caneditexclusivity' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
     'mod/scheduler:unlimitedediting' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,

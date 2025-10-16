@@ -935,10 +935,14 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 }
             }
             if ($groupact) {
-                $url = new moodle_url($slotman->actionurl, $groupact);
-                $actions .= $this->action_icon($url, new pix_icon($groupicon, get_string($groupalt, 'scheduler')));
+                if ($slot->caneditexclusivity) {
+                    $url = new moodle_url($slotman->actionurl, $groupact);
+                    $actions .= $this->action_icon($url, new pix_icon($groupicon, get_string($groupalt, 'scheduler')));
+                }
             } else {
-                $actions .= $this->pix_icon($groupicon, get_string($groupalt, 'scheduler'));
+                if ($slot->caneditexclusivity) {
+                    $actions .= $this->pix_icon($groupicon, get_string($groupalt, 'scheduler'));
+                }
             }
 
             if ($slot->editable && $slot->isappointed && $slot->canrevoke) {
