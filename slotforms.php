@@ -804,9 +804,9 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         //$this->add_duration_field();
 
         // Ignore conflict checkbox.
-        $mform->addElement('checkbox', 'ignoreconflicts', get_string('ignoreconflicts', 'scheduler'));
-        $mform->setDefault('ignoreconflicts', false);
-        $mform->addHelpButton('ignoreconflicts', 'ignoreconflicts', 'scheduler');
+        // $mform->addElement('checkbox', 'ignoreconflicts', get_string('ignoreconflicts', 'scheduler'));
+        // $mform->setDefault('ignoreconflicts', false);
+        // $mform->addHelpButton('ignoreconflicts', 'ignoreconflicts', 'scheduler');
 
         // Send e-mail reminder?
         $mform->addElement('date_selector', 'emaildate', get_string('emailreminderondate', 'scheduler'),
@@ -917,24 +917,24 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         //     $errors['starttime'] = get_string('startpast', 'scheduler');
         // }
 
-        if (!isset($data['ignoreconflicts'])) {
-            /* Avoid overlapping slots by warning the user */
-            $conflicts = $this->scheduler->get_conflicts(
-                            $data['starttime'], $data['starttime'] + $data['duration'] * 60,
-                            $data['teacherid'], 0, SCHEDULER_ALL, $this->slotid);
+        // if (!isset($data['ignoreconflicts'])) {
+        //     /* Avoid overlapping slots by warning the user */
+        //     $conflicts = $this->scheduler->get_conflicts(
+        //                     $data['starttime'], $data['starttime'] + $data['duration'] * 60,
+        //                     $data['teacherid'], 0, SCHEDULER_ALL, $this->slotid);
 
-            if (count($conflicts) > 0) {
+        //     if (count($conflicts) > 0) {
 
-                $cl = new scheduler_conflict_list();
-                $cl->add_conflicts($conflicts);
+        //         $cl = new scheduler_conflict_list();
+        //         $cl->add_conflicts($conflicts);
 
-                $msg = get_string('slotwarning', 'scheduler');
-                $msg .= $OUTPUT->render($cl);
-                $msg .= $OUTPUT->doc_link('mod/scheduler/conflict', '', true);
+        //         $msg = get_string('slotwarning', 'scheduler');
+        //         $msg .= $OUTPUT->render($cl);
+        //         $msg .= $OUTPUT->doc_link('mod/scheduler/conflict', '', true);
 
-                $errors['starttime'] = $msg;
-            }
-        }
+        //         $errors['starttime'] = $msg;
+        //     }
+        // }
         return $errors;
     }
 
