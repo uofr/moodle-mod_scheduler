@@ -134,10 +134,18 @@ class appointment extends mvc_child_record_model {
         return (boolean) $this->data->absentpaid;
     }
 
+    public function get_absentpaid() {
+        return (boolean) $this->data->absentpaid;
+    }
+
     /**
      * Was student absent and lesson needs to rescheduled
      */
     public function is_absentschedule() {
+        return (boolean) $this->data->absentschedule;
+    }
+
+    public function get_absentschedule() {
         return (boolean) $this->data->absentschedule;
     }
 
