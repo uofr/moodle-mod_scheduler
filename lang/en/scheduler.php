@@ -49,6 +49,7 @@ $string['scheduler:manage'] = 'Manage your slots and appointments';
 $string['scheduler:unlimitedediting'] = 'Unlimited editing can delete, add and fully edit appointments. Limited Editing only changes date and duration of appointment';
 $string['scheduler:manageallappointments'] = 'Manage all scheduler data';
 $string['scheduler:studentcancancel'] = 'Student can cancel appointment';
+$string['scheduler:studentcanreschedule'] = 'Student can reschedule appointment';
 $string['scheduler:studentcanmark'] = 'Student can mark their own attendence for appointment';
 $string['scheduler:viewslots'] = 'See slots that are open for booking (in student screen)';
 $string['scheduler:viewfullslots'] = 'See slots even if they are fully booked (in student screen)';

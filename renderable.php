@@ -88,9 +88,10 @@ class scheduler_slot_table implements renderable {
      * @param bool $canview whether the user can view the appointment
      * @param bool ADDDED $canattend whether the user can mark if appointment is attended
      * @param bool ADDDED $studentcancancel whether the user can cancel an appointment
+     * @param bool ADDED $studentcanreschedule whether the user can reschedule an appointment
      */
     public function add_slot(slot $slotmodel, appointment $appointmentmodel, $otherstudents,
-      $cancancel = false, $canedit = false, $canview = false, $canattend = false, $studentcancancel = false) {
+      $cancancel = false, $canedit = false, $canview = false, $canattend = false, $studentcancancel = false, $studentcanreschedule = false) {
         $slot = new stdClass();
         $slot->slotid = $slotmodel->id;
         if ($this->showstudent) {
@@ -123,6 +124,7 @@ class scheduler_slot_table implements renderable {
             $this->studentattended = true;
         }
         $slot->studentcancancel = $studentcancancel;
+        $slot->studentcanreschedule = $studentcanreschedule;
         // END of ADDED.
 
         if ($this->scheduler->uses_appointmentnotes()) {

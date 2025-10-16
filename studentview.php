@@ -49,6 +49,7 @@ $canseefull = has_capability('mod/scheduler:viewfullslots', $context);
 // ADDED Line For Student mark attendance.
 $canmarkattend = has_capability('mod/scheduler:studentcanmark', $context);
 $studentcancancel = has_capability('mod/scheduler:studentcancancel', $context);
+$studentcanreschedule = has_capability('mod/scheduler:studentcanreschedule', $context);
 // END of ADDED.
 
 if ($scheduler->is_group_scheduling_enabled()) {
@@ -145,7 +146,7 @@ if (count($pastslots) > 0) {
             $others = null;
         }
         $hasdetails = $scheduler->uses_studentdata();
-        $slottable->add_slot($pastslot, $appointment, $others, false, false, $hasdetails, $studentcanmark, $studentcancancel);
+        $slottable->add_slot($pastslot, $appointment, $others, false, false, $hasdetails, $studentcanmark, $studentcancancel, $studentcanreschedule);
     }
 
     echo $output->heading(
@@ -193,7 +194,7 @@ if (count($upcomingslots) > 0) {
         if ($scheduler->is_group_scheduling_enabled()) {
             $cancancel = $cancancel && ($appointgroup >= 0);
         }
-        $slottable->add_slot($slot, $appointment, $others, $cancancel, $canedit, $canview, $studentcanmark, $studentcancancel);
+        $slottable->add_slot($slot, $appointment, $others, $cancancel, $canedit, $canview, $studentcanmark, $studentcancancel, $studentcanreschedule);
     }
 
     echo $output->heading(

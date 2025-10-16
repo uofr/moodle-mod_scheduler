@@ -518,7 +518,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                 }
 
                 // ADDED STUDENT CAN RESCHEDULE Should add it as a capabiltiy.
-                if ($slot->cancancel) { // Check if within right time slot.
+                if ($slot->cancancel && $slot->studentcanreschedule) { // Check if within right time slot.
                     $buttonurl = new moodle_url(
                         $slottable->actionurl,
                         [

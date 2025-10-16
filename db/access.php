@@ -60,6 +60,13 @@ $capabilities = array(
             'student' => CAP_ALLOW,
         )
     ),
+    'mod/scheduler:studentcanreschedule' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_ALLOW,
+        )
+    ),
     'mod/scheduler:attend' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
