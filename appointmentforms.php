@@ -92,9 +92,7 @@ class scheduler_editappointment_form extends moodleform {
 
         //CHANGE add if time is <=24 then show
         $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'));
-        if (!$this->permissions->can_edit_attended($this->appointment)) {
-            $mform->freeze('attended');
-        }
+        $mform->freeze('attended');
 
         // Grade.
         if ($scheduler->uses_grades()) {
@@ -182,7 +180,7 @@ class scheduler_editappointment_form extends moodleform {
         $scheduler = $appointment->get_scheduler();
         $cid = $scheduler->context->id;
         $appointment->set_data($formdata);
-        $appointment->attended = isset($formdata->attended);
+        $appointment->attended = isset($formdata->attended) && $formdata->attended == 1;
         if ($scheduler->uses_appointmentnotes() && isset($formdata->appointmentnote_editor)) {
             $editor = $formdata->appointmentnote_editor;
             $appointment->appointmentnote = file_save_draft_area_files($editor['itemid'], $cid,
