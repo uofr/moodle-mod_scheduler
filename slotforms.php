@@ -913,9 +913,9 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         }*/
 
         // Avoid empty slots starting in the past.
-        if ($numappointments == 0 && $data['starttime'] < time()) {
-            $errors['starttime'] = get_string('startpast', 'scheduler');
-        }
+        // if ($numappointments == 0 && $data['starttime'] < time()) {
+        //     $errors['starttime'] = get_string('startpast', 'scheduler');
+        // }
 
         if (!isset($data['ignoreconflicts'])) {
             /* Avoid overlapping slots by warning the user */
