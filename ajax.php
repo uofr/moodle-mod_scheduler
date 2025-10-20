@@ -52,7 +52,7 @@ switch ($action) {
 
         $permissions->ensure($permissions->can_edit_attended($app));
 
-        if($app->absentpaid || $app->absentschedule){
+        if ($app->absentpaid || $app->absentschedule) {
             $app->absentpaid = false;
             $app->absentschedule = false;
         }
@@ -68,12 +68,12 @@ switch ($action) {
         $slot = $scheduler->get_slot($slotid);
         $app = $slot->get_appointment($appid);
         $newseen = required_param('seen', PARAM_BOOL);
-    
+
         if ($USER->id != $slot->teacherid) {
             require_capability('mod/scheduler:manageallappointments', $scheduler->context);
         }
-    
-        if($app->attended || $app->absentschedule){
+
+        if ($app->attended || $app->absentschedule) {
             $app->attended = false;
             $app->absentschedule = false;
         }
@@ -89,12 +89,12 @@ switch ($action) {
         $slot = $scheduler->get_slot($slotid);
         $app = $slot->get_appointment($appid);
         $newseen = required_param('seen', PARAM_BOOL);
-        
+
         if ($USER->id != $slot->teacherid) {
             require_capability('mod/scheduler:manageallappointments', $scheduler->context);
         }
-        
-        if($app->absentpaid || $app->attended){
+
+        if ($app->absentpaid || $app->attended) {
             $app->absentpaid = false;
             $app->attended = false;
         }
