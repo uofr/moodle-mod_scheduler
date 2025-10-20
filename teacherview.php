@@ -603,20 +603,24 @@ if ($slots) {
         $studlist->buttontext = get_string('saveseen', 'scheduler');
         $studlist->buttontext2 = get_string('absentpaid', 'scheduler');
         $studlist->buttontext2 = get_string('absentschedule', 'scheduler');
-        //check if date can be selected
-        if(!$unlimitedediting){
-            //ADDDED
-            //if the meeting was within the last 24 hrs.
+
+        // Check if date can be selected.
+        if (!$unlimitedediting) {
+            // ADDDED
+            // If the meeting was within the last 24 hrs.
             $moddate = $slot->starttime + 172800;
 
-            if(($slot->starttime<= time()  && time() <= $moddate))
+            if (($slot->starttime<= time()  && time() <= $moddate)) {
                 $studlist->checkboxdisable = TRUE;
-            else
+            }
+            else {
                 $studlist->checkboxdisable = FALSE;
-            //END OF ADDED
+            }
+            // END OF ADDED
         }
-        else
+        else {
             $studlist->checkboxdisable = TRUE;
+        }
 
         $studlist->actionurl = new moodle_url($actionurl, array('what' => 'saveseen', 'slotid' => $slot->id));
         foreach ($slot->get_appointments() as $app) {
@@ -704,10 +708,12 @@ if ($students === 0) {
         $name = $output->user_profile_link($scheduler, $student);
         $actions = array();
         // MODIFIED: Removed ability for instructors to schedule in slot.
-        // $actions[] = new action_menu_link_secondary(
-        //                 new moodle_url($actionurl, array('what' => 'schedule', 'studentid' => $student->id)),
-        //                 new pix_icon('e/insert_date', '', 'moodle'),
-        //                 get_string('scheduleinslot', 'scheduler') );
+        if ($unlimitedediting) {
+            $actions[] = new action_menu_link_secondary(
+                            new moodle_url($actionurl, array('what' => 'schedule', 'studentid' => $student->id)),
+                            new pix_icon('e/insert_date', '', 'moodle'),
+                            get_string('scheduleinslot', 'scheduler') );
+        }
         $actions[] = new action_menu_link_secondary(
                         new moodle_url($actionurl, array('what' => 'markasseennow', 'studentid' => $student->id)),
                         new pix_icon('t/approve', '', 'moodle'),
@@ -759,10 +765,12 @@ if ($students === 0) {
                     $name .= ' ['. implode(', ', $groupmembers) . ']';
                     $actions = array();
                     // MODIFIED: Removed ability for instructors to schedule in slot.
-                    // $actions[] = new action_menu_link_secondary(
-                    //                 new moodle_url($actionurl, array('what' => 'schedulegroup', 'groupid' => $group->id)),
-                    //                 new pix_icon('e/insert_date', '', 'moodle'),
-                    //                 get_string('scheduleinslot', 'scheduler') );
+                    if ($unlimitedediting) {
+                        $actions[] = new action_menu_link_secondary(
+                                        new moodle_url($actionurl, array('what' => 'schedulegroup', 'groupid' => $group->id)),
+                                        new pix_icon('e/insert_date', '', 'moodle'),
+                                        get_string('scheduleinslot', 'scheduler') );
+                    }
 
                     $grouptable->add_line($picture, $name, array(), $actions);
                     $groupcnt++;
