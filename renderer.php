@@ -583,7 +583,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                                 $student->entryid,
                                 $student->checked,
                                 'P',
-                                ['class' => 'studentselect']
+                                ['class' => 'studentselect attendancebox', 'autocomplete' => 'off', 'data-action' => 'saveseen']
                             );
                             $checkbox .= html_writer::end_tag('span');
 
@@ -593,7 +593,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                                 $student->entryid,
                                 $student->checkedabsentpaid,
                                 'A',
-                                ['class' => 'absentpaid']
+                                ['class' => 'absentpaid attendancebox', 'autocomplete' => 'off', 'data-action' => 'absentpaid']
                             );
                             $checkbox2 .= html_writer::end_tag('span');
 
@@ -603,7 +603,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                                 $student->entryid,
                                 $student->checkedabsentschedule,
                                 'AR',
-                                ['class' => 'absentschedule']
+                                ['class' => 'absentschedule attendancebox', 'autocomplete' => 'off', 'data-action' => 'absentschedule']
                             );
                             $checkbox3 .= html_writer::end_tag('span');
                         } else {
@@ -613,7 +613,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                                 $student->entryid,
                                 $student->checked,
                                 'P',
-                                ['class' => 'studentselect', 'disabled'=>'disabled']
+                                ['class' => 'studentselect attendancebox', 'disabled'=>'disabled', 'autocomplete' => 'off', 'data-action' => 'saveseen']
                             );
                             $checkbox .= html_writer::end_tag('span');
 
@@ -623,7 +623,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                                 $student->entryid,
                                 $student->checkedabsentpaid,
                                 'A',
-                                ['class' => 'absentpaid', 'disabled'=>'disabled']
+                                ['class' => 'absentpaid attendancebox', 'disabled'=>'disabled', 'autocomplete' => 'off', 'data-action' => 'absentpaid']
                             );
                             $checkbox2 .= html_writer::end_tag('span');
 
@@ -633,7 +633,7 @@ class mod_scheduler_renderer extends plugin_renderer_base {
                                 $student->entryid,
                                 $student->checkedabsentschedule,
                                 'AR',
-                                ['class' => 'absentschedule', 'disabled' => 'disabled']
+                                ['class' => 'absentschedule attendancebox', 'disabled' => 'disabled', 'autocomplete' => 'off', 'data-action' => 'absentschedule']
                             );
                             $checkbox3 .= html_writer::end_tag('span');
                         }
