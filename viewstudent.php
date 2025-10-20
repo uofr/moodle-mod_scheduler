@@ -68,6 +68,7 @@ if ($subpage == 'thisappointment') {
     if ($mform->is_cancelled()) {
         redirect($returnurl);
     } else if ($formdata = $mform->get_data()) {
+        $formdata->attended = $slot->is_attended();
         $mform->save_appointment_data($formdata, $appointment);
         redirect($returnurl);
     }
