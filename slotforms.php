@@ -851,10 +851,10 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
             $moddate = $this->_customdata['timestamp'] + 172800;
 
             if (($this->_customdata['timestamp']<= time()  && time() <= $moddate)) {
-                //$mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'));
+                $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'));
             }
             else {
-                //$mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'),'', array('disabled' => 'disabled'));
+                $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'),'', array('disabled' => 'disabled'));
             }
 
 
