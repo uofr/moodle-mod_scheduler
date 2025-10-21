@@ -66,14 +66,14 @@ class scheduler_editappointment_form extends moodleform {
      * @param scheduler_permissions $permissions
      * @param bool $distribute whether to distribute grades to all group members
      */
-    public function __construct(appointment $appointment, $action, scheduler_permissions $permissions, $distribute) {
+    public function __construct(appointment $appointment, $action, scheduler_permissions $permissions, $distribute, $customdata) {
         $this->appointment = $appointment;
         $this->distribute = $distribute;
         $this->permissions = $permissions;
         $this->noteoptions = array('trusttext' => true, 'maxfiles' => -1, 'maxbytes' => 0,
                                    'context' => $permissions->get_context(),
                                    'subdirs' => false, 'collapsed' => true);
-        parent::__construct($action, null);
+        parent::__construct($action, $customdata);
     }
 
     /**
@@ -89,9 +89,16 @@ class scheduler_editappointment_form extends moodleform {
         $candistribute = false;
 
         // Seen tickbox.
+        $starttime = $this->_customdata['starttime'];
+        $moddate = $starttime + 172800;
+        $now = time();
 
         //CHANGE add if time is <=24 then show
-        $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'));
+        if ($starttime <= $now && $now <= $moddate) {
+            $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'));
+        } else {
+            $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'), '', ['disabled' => 'disabled']);
+        }
         if (!$this->permissions->can_edit_attended($this->appointment)) {
             $mform->freeze('attended');
         }

@@ -62,7 +62,8 @@ if ($subpage == 'thisappointment') {
 
     $distribute = ($slot->get_appointment_count() > 1);
     $gradeedit = $permissions->can_edit_grade($appointment);
-    $mform = new scheduler_editappointment_form($appointment, $actionurl, $permissions, $distribute);
+    $starttime = $slot->starttime;
+    $mform = new scheduler_editappointment_form($appointment, $actionurl, $permissions, $distribute, ['starttime' => $starttime]);
     $mform->set_data($mform->prepare_appointment_data($appointment));
 
     if ($mform->is_cancelled()) {
