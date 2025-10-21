@@ -183,6 +183,10 @@ class scheduler_editappointment_form extends moodleform {
         $cid = $scheduler->context->id;
         $appointment->set_data($formdata);
         $appointment->attended = isset($formdata->attended) && $formdata->attended == 1;
+        if ($appointment->attended) {
+            $appointment->absentpaid = false;
+            $appointment->absentschedule = false;
+        }
         if ($scheduler->uses_appointmentnotes() && isset($formdata->appointmentnote_editor)) {
             $editor = $formdata->appointmentnote_editor;
             $appointment->appointmentnote = file_save_draft_area_files($editor['itemid'], $cid,
