@@ -91,10 +91,10 @@ class scheduler_editappointment_form extends moodleform {
         // Seen tickbox.
 
         //CHANGE add if time is <=24 then show
-        // $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'));
-        // if (!$this->permissions->can_edit_attended($this->appointment)) {
-        //     $mform->freeze('attended');
-        // }
+        $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'));
+        if (!$this->permissions->can_edit_attended($this->appointment)) {
+            $mform->freeze('attended');
+        }
 
         // Grade.
         if ($scheduler->uses_grades()) {
