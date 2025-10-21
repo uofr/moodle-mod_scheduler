@@ -1041,6 +1041,10 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
                 }
 
                 $app->attended = isset($data->attended[$i]);
+                if ($app->attended) {
+                    $app->absentpaid = false;
+                    $app->absentschedule = false;
+                }
 
                 if (isset($data->grade)) {
                     $selgrade = $data->grade[$i];
