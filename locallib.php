@@ -50,8 +50,18 @@ function scheduler_delete_calendar_events($slot) {
     // This return may not be meaningful if the delete records functions do not return anything meaningful.
 }
 
+/**
+ * Check if the appointment is editable based on the start time.
+ * 
+ * @param int $starttime - Appointmnet start timestamp.
+ * @return bool true if appointment is editable, false if it is locked.
+ */
+function scheduler_is_lesson_editable($starttime) {
+    $now = time();
+    $moddate = $starttime + 172800;
 
-
+    return ($starttime <= $now && $now <= $moddate);
+}
 
 /**
  * Prints a summary of a user in a nice little box.

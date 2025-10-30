@@ -607,19 +607,16 @@ if ($slots) {
         // Check if date can be selected.
         if (!$unlimitedediting) {
             // ADDDED
-            // If the meeting was within the last 24 hrs.
-            $moddate = $slot->starttime + 172800;
-
-            if (($slot->starttime<= time()  && time() <= $moddate)) {
-                $studlist->checkboxdisable = TRUE;
+            if (scheduler_is_lesson_editable($slot->starttime)) {
+                $studlist->checkboxdisable = true;
             }
             else {
-                $studlist->checkboxdisable = FALSE;
+                $studlist->checkboxdisable = false;
             }
             // END OF ADDED
         }
         else {
-            $studlist->checkboxdisable = TRUE;
+            $studlist->checkboxdisable = true;
         }
 
         $studlist->actionurl = new moodle_url($actionurl, array('what' => 'saveseen', 'slotid' => $slot->id));

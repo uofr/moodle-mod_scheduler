@@ -847,10 +847,8 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
             $mform->setDefault('studentid', $app->studentid);
 
             // Seen tickbox.
-            //ADDED DATE CHECK
-            $moddate = $this->_customdata['timestamp'] + 172800;
-
-            if (($this->_customdata['timestamp']<= time()  && time() <= $moddate)) {
+            // ADDED DATE CHECK
+            if (scheduler_is_lesson_editable($this->_customdata['timestamp'])) {
                 $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'));
             }
             else {

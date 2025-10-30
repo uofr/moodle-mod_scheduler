@@ -126,13 +126,9 @@ if (count($pastslots) > 0) {
         // ADDDED.
         // If student can mark attendance.
         $studentcanmark = false;
-
-        $moddate = $pastslot->starttime + 172800;
-
-        if ($canmarkattend && ($pastslot->starttime <= time()  && time() <= $moddate)) {
+        if ($canmarkattend && scheduler_is_lesson_editable($pastslot->starttime)) {
             $studentcanmark = true;
         }
-
         // END OF ADDED.
 
         if ($pastslot->is_groupslot() && has_capability('mod/scheduler:seeotherstudentsresults', $context)) {
@@ -164,15 +160,11 @@ if (count($upcomingslots) > 0) {
         $appointment = $slot->get_student_appointment($USER->id);
 
         // ADDDED.
-        $studentcanmark = false;
         // If student has the ability to mark if attend and if the meeting was within the last 24 hrs.
-
-        $moddate = $slot->starttime + 172800;
-
-        if ($canmarkattend && ($slot->starttime <= time()  && time() <= $moddate)) {
+        $studentcanmark = false;
+        if ($canmarkattend && scheduler_is_lesson_editable($slot->starttime)) {
             $studentcanmark = true;
         }
-
         // END OF ADDED.
 
         if ($slot->is_groupslot() && has_capability('mod/scheduler:seeotherstudentsbooking', $context)) {
