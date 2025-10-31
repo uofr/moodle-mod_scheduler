@@ -53,14 +53,68 @@ function scheduler_delete_calendar_events($slot) {
 /**
  * Check if the appointment is editable based on the start time.
  * 
- * @param int $starttime - Appointmnet start timestamp.
+ * @param int $appointmenttime - Appointmnet start timestamp.
  * @return bool true if appointment is editable, false if it is locked.
  */
-function scheduler_is_lesson_editable($starttime) {
-    $now = time();
-    $moddate = $starttime + 172800;
+function scheduler_is_lesson_editable($appointmenttime) {
+    $clock = \core\di::get(\core\clock::class)->now();
+    $now = $clock->getTimestamp();
+    $format = 'Y-m-d h:i:sa';
+    $start = '2025-08-17 12:00:00am';
+    $length = '2 weeks';
+    $endmod = '+2 weeks';
+    $duemod = '+15 days';
+    $duehour = 12;
+    $dueminute = 30;
+    $numperiods = 26;
 
-    return ($starttime <= $now && $now <= $moddate);
+    if ($appointmenttime >= $now) {
+        return false;
+    }
+
+    $calendar = scheduler_get_pay_calendar(
+        $format,
+        $start,
+        $length,
+        $endmod,
+        $duemod,
+        $duehour,
+        $dueminute,
+        $numperiods
+    );
+
+    $due = scheduler_get_due($appointmenttime, $calendar);
+
+    return $now < $due;
+}
+
+function scheduler_get_pay_calendar($format, $start, $length, $endmod, $duemod, $duehour, $dueminute, $recurrences) {
+    $calendar = [];
+
+    $calendarstart = \DateTimeImmutable::createFromFormat($format, $start);
+    $interval = \DateInterval::createFromDateString($length);
+    $period = new \DatePeriod($calendarstart, $interval, $recurrences);
+
+    foreach ($period as $periodstart) {
+        $periodend = $periodstart->modify($endmod);
+        $perioddue = $periodstart->modify($duemod)->setTime($duehour, $dueminute);
+        $calendar[] = [$periodstart, $periodend, $perioddue];
+    }
+
+    return $calendar;
+}
+
+function scheduler_get_due($appointmenttime, $calendar) {
+    foreach ($calendar as $payperiod) {
+        list($periodstart, $periodend, $perioddue) = $payperiod;
+        $start = $periodstart->getTimestamp();
+        $end = $periodend->getTimestamp();
+        if ($appointmenttime >= $start && $appointmenttime < $end) {
+            return $perioddue->getTimestamp();
+        }
+    }
+
+    return 0;
 }
 
 /**
