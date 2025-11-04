@@ -70,13 +70,14 @@ function scheduler_is_lesson_editable($appointmenttime, $calendar) {
 }
 
 function scheduler_get_pay_calendar() {
+    $startdate = get_config('mod_scheduler', 'calendarstart');
+    $start = "$startdate 12:00:00am";
     $format = 'Y-m-d h:i:sa';
-    $start = '2025-08-17 12:00:00am';
     $length = '2 weeks';
     $endmod = '+2 weeks';
     $duemod = '+15 days';
-    $duehour = 12;
-    $dueminute = 30;
+    $duehour = get_config('mod_scheduler', 'duehour');
+    $dueminute = get_config('mod_scheduler', 'dueminute');
     $recurrences = 26;
 
     $calendar = [];

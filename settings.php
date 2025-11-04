@@ -29,13 +29,13 @@ if ($ADMIN->fulltree) {
     require_once($CFG->dirroot.'/mod/scheduler/lib.php');
 
 
-//Add top menu page for imports
+    //Add top menu page for imports
     $tabmenu = scheduler_print_settings_tabs();
+    $settings->add(new \admin_setting_heading('general', get_string('settings'), get_string('settings', 'mod_scheduler')));
 
     $settings->add(new admin_setting_heading('scheduler_header', '', $tabmenu));
 
     $plugininfos = core_plugin_manager::instance()->get_plugins_of_type('local');
-
 
     $settings->add(new admin_setting_configcheckbox('mod_scheduler/allteachersgrading',
                      get_string('allteachersgrading', 'scheduler'),
@@ -71,5 +71,26 @@ if ($ADMIN->fulltree) {
                     get_string('revealteachernotes', 'scheduler'),
                     get_string('revealteachernotes_desc', 'scheduler'),
                     0));
+
+    $settings->add(new \admin_setting_heading(
+        'calendar',
+        get_string('calendar', 'mod_scheduler'),
+        get_string('calendar_desc', 'mod_scheduler')
+    ));
+
+    $settings->add(new \mod_scheduler\settings\admin_setting_datetext(
+        'mod_scheduler/calendarstart',
+        get_string('calendarstart', 'mod_scheduler'),
+        get_string('calendarstart_desc', 'mod_scheduler'),
+        '2025-08-17'
+    ));
+
+    $settings->add(new \admin_setting_configtime(
+        'mod_scheduler/duehour',
+        'dueminute',
+        get_string('duetime', 'mod_scheduler'),
+        get_string('duetime_desc', 'mod_scheduler'),
+        ['h' => 12, 'm' => 30]
+    ));
 
 }
