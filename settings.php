@@ -28,9 +28,6 @@ if ($ADMIN->fulltree) {
 
     require_once($CFG->dirroot.'/mod/scheduler/lib.php');
 
-
-    //Add top menu page for imports
-    $tabmenu = scheduler_print_settings_tabs();
     $settings->add(new \admin_setting_heading('general', get_string('settings'), get_string('settings', 'mod_scheduler')));
 
     $settings->add(new admin_setting_heading('scheduler_header', '', $tabmenu));
