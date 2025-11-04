@@ -823,6 +823,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
        $repeatno = count($studentapps);
 
         $i=0;
+        $calendar = scheduler_get_pay_calendar();
         foreach ($studentapps as $app){
 
             $mform->addElement('header', 'appointhead', get_string('appointmentno', 'scheduler', $i+1));
@@ -848,7 +849,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
 
             // Seen tickbox.
             // ADDED DATE CHECK
-            if (scheduler_is_lesson_editable($this->_customdata['timestamp'])) {
+            if (scheduler_is_lesson_editable($this->_customdata['timestamp'], $calendar)) {
                 $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'));
             }
             else {

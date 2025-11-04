@@ -587,6 +587,7 @@ if ($slots) {
 
     $slotman = new scheduler_slot_manager($scheduler, $actionurl);
     $slotman->showteacher = ($subpage == 'allappointments');
+    $calendar = scheduler_get_pay_calendar();
 
     foreach ($slots as $slot) {
 
@@ -607,7 +608,7 @@ if ($slots) {
         // Check if date can be selected.
         if (!$unlimitedediting) {
             // ADDDED
-            if (scheduler_is_lesson_editable($slot->starttime)) {
+            if (scheduler_is_lesson_editable($slot->starttime, $calendar)) {
                 $studlist->checkboxdisable = true;
             }
             else {

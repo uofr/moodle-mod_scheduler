@@ -68,6 +68,8 @@ if ($scheduler->is_group_scheduling_enabled()) {
 
 require_once($CFG->dirroot.'/mod/scheduler/studentview.controller.php');
 
+$calendar = scheduler_get_pay_calendar();
+
 echo $output->header();
 
 
@@ -126,7 +128,7 @@ if (count($pastslots) > 0) {
         // ADDDED.
         // If student can mark attendance.
         $studentcanmark = false;
-        if ($canmarkattend && scheduler_is_lesson_editable($pastslot->starttime)) {
+        if ($canmarkattend && scheduler_is_lesson_editable($pastslot->starttime, $calendar)) {
             $studentcanmark = true;
         }
         // END OF ADDED.
@@ -162,7 +164,7 @@ if (count($upcomingslots) > 0) {
         // ADDDED.
         // If student has the ability to mark if attend and if the meeting was within the last 24 hrs.
         $studentcanmark = false;
-        if ($canmarkattend && scheduler_is_lesson_editable($slot->starttime)) {
+        if ($canmarkattend && scheduler_is_lesson_editable($slot->starttime, $calendar)) {
             $studentcanmark = true;
         }
         // END OF ADDED.

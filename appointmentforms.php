@@ -90,7 +90,8 @@ class scheduler_editappointment_form extends moodleform {
 
         // Seen tickbox.
         // CHANGE add if time is <= 24 then show
-        if (scheduler_is_lesson_editable($this->_customdata['starttime'])) {
+        $calendar = scheduler_get_pay_calendar();
+        if (scheduler_is_lesson_editable($this->_customdata['starttime'], $calendar)) {
             $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'));
         } else {
             $mform->addElement('checkbox', 'attended', get_string('attended', 'scheduler'), '', ['disabled' => 'disabled']);

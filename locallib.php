@@ -56,9 +56,20 @@ function scheduler_delete_calendar_events($slot) {
  * @param int $appointmenttime - Appointmnet start timestamp.
  * @return bool true if appointment is editable, false if it is locked.
  */
-function scheduler_is_lesson_editable($appointmenttime) {
+function scheduler_is_lesson_editable($appointmenttime, $calendar) {
     $clock = \core\di::get(\core\clock::class)->now();
     $now = $clock->getTimestamp();
+
+    if ($appointmenttime >= $now) {
+        return false;
+    }
+
+    $due = scheduler_get_due($appointmenttime, $calendar);
+
+    return $now < $due;
+}
+
+function scheduler_get_pay_calendar() {
     $format = 'Y-m-d h:i:sa';
     $start = '2025-08-17 12:00:00am';
     $length = '2 weeks';
@@ -66,29 +77,8 @@ function scheduler_is_lesson_editable($appointmenttime) {
     $duemod = '+15 days';
     $duehour = 12;
     $dueminute = 30;
-    $numperiods = 26;
+    $recurrences = 26;
 
-    if ($appointmenttime >= $now) {
-        return false;
-    }
-
-    $calendar = scheduler_get_pay_calendar(
-        $format,
-        $start,
-        $length,
-        $endmod,
-        $duemod,
-        $duehour,
-        $dueminute,
-        $numperiods
-    );
-
-    $due = scheduler_get_due($appointmenttime, $calendar);
-
-    return $now < $due;
-}
-
-function scheduler_get_pay_calendar($format, $start, $length, $endmod, $duemod, $duehour, $dueminute, $recurrences) {
     $calendar = [];
 
     $calendarstart = \DateTimeImmutable::createFromFormat($format, $start);
