@@ -76,8 +76,13 @@ function scheduler_get_pay_calendar() {
     $length = '2 weeks';
     $endmod = '+2 weeks';
     $duemod = '+15 days';
+    $exceptionmod = '+1 day';
     $duehour = get_config('mod_scheduler', 'duehour');
     $dueminute = get_config('mod_scheduler', 'dueminute');
+    $exceptiondates = get_config('mod_scheduler', 'calendarexception');
+    $exceptionlist = array_map(function($d) {
+        return trim($d);
+    }, explode(',', $exceptiondates));
     $recurrences = 26;
 
     $calendar = [];
@@ -89,6 +94,9 @@ function scheduler_get_pay_calendar() {
     foreach ($period as $periodstart) {
         $periodend = $periodstart->modify($endmod);
         $perioddue = $periodstart->modify($duemod)->setTime($duehour, $dueminute);
+        if (in_array($perioddue->format('Y-m-d'), $exceptionlist)) {
+            $perioddue = $perioddue->modify($exceptionmod);
+        }
         $calendar[] = [$periodstart, $periodend, $perioddue];
     }
 

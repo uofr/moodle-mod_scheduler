@@ -82,6 +82,13 @@ if ($ADMIN->fulltree) {
         '2025-08-17'
     ));
 
+    $settings->add(new \mod_scheduler\settings\admin_setting_datelist(
+        'mod_scheduler/calendarexception',
+        get_string('calendarexception', 'mod_scheduler'),
+        get_string('calendarexception_desc', 'mod_scheduler'),
+        ''
+    ));
+
     $settings->add(new \admin_setting_configtime(
         'mod_scheduler/duehour',
         'dueminute',
