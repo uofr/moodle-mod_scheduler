@@ -34,8 +34,8 @@ require_once($CFG->dirroot . '/mod/scheduler/backup/moodle2/restore_scheduler_st
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_scheduler_activity_task extends restore_activity_task {
-
+class restore_scheduler_activity_task extends restore_activity_task
+{
     /**
      * Define (add) particular settings this activity can have
      */
@@ -74,7 +74,6 @@ class restore_scheduler_activity_task extends restore_activity_task {
         $rules[] = new restore_decode_rule('SCHEDULERINDEX', '/mod/scheduler/index.php?id=$1', 'course');
 
         return $rules;
-
     }
 
     /**

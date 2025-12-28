@@ -27,7 +27,7 @@ namespace mod_scheduler\model;
 defined('MOODLE_INTERNAL') || die();
 
 // Elements from lib.php needed for grade functionality.
-require_once($CFG->dirroot.'/mod/scheduler/lib.php');
+require_once($CFG->dirroot . '/mod/scheduler/lib.php');
 
 /**
  * A class for representing a scheduler appointment.
@@ -35,8 +35,8 @@ require_once($CFG->dirroot.'/mod/scheduler/lib.php');
  * @copyright  2011 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class appointment extends mvc_child_record_model {
-
+class appointment extends mvc_child_record_model
+{
     /**
      * get_table
      *
@@ -86,7 +86,6 @@ class appointment extends mvc_child_record_model {
         $fs->delete_area_files($cid, 'mod_scheduler', 'appointmentnote', $this->get_id());
         $fs->delete_area_files($cid, 'mod_scheduler', 'teachernote', $this->get_id());
         $fs->delete_area_files($cid, 'mod_scheduler', 'studentnote', $this->get_id());
-
     }
 
     /**
@@ -124,7 +123,7 @@ class appointment extends mvc_child_record_model {
      * Has this student attended?
      */
     public function is_attended() {
-        return (boolean) $this->data->attended;
+        return (bool) $this->data->attended;
     }
 
     /**
@@ -145,10 +144,10 @@ class appointment extends mvc_child_record_model {
         if (!$this->get_scheduler()->uses_studentnotes()) {
             return 0;
         }
+
         $ctx = $this->get_scheduler()->context->id;
         $fs = get_file_storage();
         $files = $fs->get_area_files($ctx, 'mod_scheduler', 'studentfiles', $this->id, "filename", false);
         return count($files);
     }
-
 }

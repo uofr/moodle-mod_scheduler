@@ -30,8 +30,8 @@ namespace mod_scheduler\model;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class mvc_model_factory {
-
+abstract class mvc_model_factory
+{
     /**
      * Create a new instance of a record, with no data.
      *
@@ -50,5 +50,4 @@ abstract class mvc_model_factory {
         $new->load($id);
         return $new;
     }
-
 }

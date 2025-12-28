@@ -33,8 +33,8 @@ namespace mod_scheduler\event;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class booking_form_viewed extends scheduler_base {
-
+class booking_form_viewed extends scheduler_base
+{
     /**
      * Create this event on a given scheduler.
      *

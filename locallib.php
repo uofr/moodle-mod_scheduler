@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/filelib.php');
-require_once(dirname(__FILE__).'/customlib.php');
+require_once($CFG->libdir . '/filelib.php');
+require_once(dirname(__FILE__) . '/customlib.php');
 
 
 /* Events related functions */
@@ -64,7 +64,7 @@ function scheduler_delete_calendar_events($slot) {
  * @param bool $return whether the HTML fragment is to be returned as a string (otherwise printed)
  * @return string HTML fragment, if so selected
  */
-function scheduler_print_user($user, $course, $messageselect=false, $return=false) {
+function scheduler_print_user($user, $course, $messageselect = false, $return = false) {
 
     global $CFG, $USER, $OUTPUT;
 
@@ -82,7 +82,6 @@ function scheduler_print_user($user, $course, $messageselect=false, $return=fals
     }
 
     if (empty($string)) {     // Cache all the strings for the rest of the page.
-
         $string = new stdClass();
         $string->email       = get_string('email');
         $string->lastaccess  = get_string('lastaccess');
@@ -104,7 +103,6 @@ function scheduler_print_user($user, $course, $messageselect=false, $return=fals
         $datestring->secs    = get_string('secs');
         $datestring->year    = get_string('year');
         $datestring->years   = get_string('years');
-
     }
 
     // Get the hidden field list.
@@ -120,10 +118,10 @@ function scheduler_print_user($user, $course, $messageselect=false, $return=fals
     $output .= $OUTPUT->user_picture($user, ['size' => 100]);
     $output .= '</td>';
     $output .= '<td class="content">';
-    $output .= '<div class="username">'.fullname($user, has_capability('moodle/site:viewfullnames', $context)).'</div>';
+    $output .= '<div class="username">' . fullname($user, has_capability('moodle/site:viewfullnames', $context)) . '</div>';
     $output .= '<div class="info">';
     if (!empty($user->role) && ($user->role <> $course->teacher)) {
-        $output .= $string->role .': '. $user->role .'<br />';
+        $output .= $string->role . ': ' . $user->role . '<br />';
     }
 
     $extrafields = scheduler_get_user_fields($user, $context);
@@ -133,33 +131,41 @@ function scheduler_print_user($user, $course, $messageselect=false, $return=fals
 
     if (!isset($hiddenfields['lastaccess'])) {
         if ($user->lastaccess) {
-            $output .= $string->lastaccess .': '. userdate($user->lastaccess);
-            $output .= '&nbsp; ('. format_time(time() - $user->lastaccess, $datestring) .')';
+            $output .= $string->lastaccess . ': ' . userdate($user->lastaccess);
+            $output .= '&nbsp; (' . format_time(time() - $user->lastaccess, $datestring) . ')';
         } else {
-            $output .= $string->lastaccess .': '. $string->never;
+            $output .= $string->lastaccess . ': ' . $string->never;
         }
     }
+
     $output .= '</div></td><td class="links">';
     // Link to blogs.
     if ($CFG->bloglevel > 0) {
-        $output .= '<a href="'.$CFG->wwwroot.'/blog/index.php?userid='.$user->id.'">'.get_string('blogs', 'blog').'</a><br />';
-    }
-    // Link to notes.
-    if (!empty($CFG->enablenotes) && (has_capability('moodle/notes:manage', $context)
-            || has_capability('moodle/notes:view', $context))) {
-        $output .= '<a href="'.$CFG->wwwroot.'/notes/index.php?course=' . $course->id. '&amp;user='.$user->id.'">'.
-                    get_string('notes', 'notes').'</a><br />';
+        $output .= '<a href="' . $CFG->wwwroot . '/blog/index.php?userid=' . $user->id . '">' . get_string('blogs', 'blog') .
+            '</a><br />';
     }
 
-    if (has_capability('moodle/site:viewreports', $context) ||
-            has_capability('moodle/user:viewuseractivitiesreport', $usercontext)) {
-        $output .= '<a href="'. $CFG->wwwroot .'/course/user.php?id='. $course->id .'&amp;user='. $user->id .'">'.
-                    $string->activity .'</a><br />';
+    // Link to notes.
+    if (
+        !empty($CFG->enablenotes) && (has_capability('moodle/notes:manage', $context)
+            || has_capability('moodle/notes:view', $context))
+    ) {
+        $output .= '<a href="' . $CFG->wwwroot . '/notes/index.php?course=' . $course->id . '&amp;user=' . $user->id . '">' .
+                    get_string('notes', 'notes') . '</a><br />';
     }
-    $output .= '<a href="'. $CFG->wwwroot .'/user/profile.php?id='. $user->id .'">'. $string->fullprofile .'...</a>';
+
+    if (
+        has_capability('moodle/site:viewreports', $context) ||
+        has_capability('moodle/user:viewuseractivitiesreport', $usercontext)
+    ) {
+        $output .= '<a href="' . $CFG->wwwroot . '/course/user.php?id=' . $course->id . '&amp;user=' . $user->id . '">' .
+                    $string->activity . '</a><br />';
+    }
+
+    $output .= '<a href="' . $CFG->wwwroot . '/user/profile.php?id=' . $user->id . '">' . $string->fullprofile . '...</a>';
 
     if (!empty($messageselect)) {
-        $output .= '<br /><input type="checkbox" name="user'.$user->id.'" /> ';
+        $output .= '<br /><input type="checkbox" name="user' . $user->id . '" /> ';
     }
 
     $output .= '</td></tr></table>';
@@ -178,7 +184,8 @@ function scheduler_print_user($user, $course, $messageselect=false, $return=fals
  * @copyright  2011 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_file_info extends file_info {
+class scheduler_file_info extends file_info
+{
     /** @var stdClass Course object */
     protected $course;
     /** @var stdClass Course module object */
@@ -281,8 +288,9 @@ class scheduler_file_info extends file_info {
             $sql .= ' AND filename <> :emptyfilename';
             $params['emptyfilename'] = '.';
         }
-        list($sql2, $params2) = $this->build_search_files_sql($extensions, 'f');
-        $sql .= ' '.$sql2;
+
+        [$sql2, $params2] = $this->build_search_files_sql($extensions, 'f');
+        $sql .= ' ' . $sql2;
         $params = array_merge($params, $params2);
 
         $rs = $DB->get_recordset_sql($sql, $params);
@@ -293,14 +301,17 @@ class scheduler_file_info extends file_info {
                     $children[] = $child;
                 }
             }
+
             if ($countonly !== false && count($children) >= $countonly) {
                 break;
             }
         }
+
         $rs->close();
         if ($countonly !== false) {
             return count($children);
         }
+
         return $children;
     }
 

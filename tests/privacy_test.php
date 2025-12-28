@@ -36,7 +36,7 @@ use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\writer;
 
-require_once($CFG->dirroot.'/mod/scheduler/locallib.php');
+require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
 
 /**
  * Data provider testcase class.
@@ -45,8 +45,8 @@ require_once($CFG->dirroot.'/mod/scheduler/locallib.php');
  * @copyright  2018 Henning Bostelmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class privacy_test extends provider_testcase {
-
+final class privacy_test extends provider_testcase
+{
     /**
      * @var int course_module id used for testing
      */
@@ -114,6 +114,7 @@ final class privacy_test extends provider_testcase {
             $this->allstudents[] = $stud;
             $options['slotstudents'][$c] = [$stud];
         }
+
         $options['slottimes'][4] = time() + 10 * DAYSECS;
         $options['slottimes'][5] = time() + 11 * DAYSECS;
         $options['slotstudents'][5] = [
@@ -243,7 +244,6 @@ final class privacy_test extends provider_testcase {
 
         $this->assert_appointment_status($this->schedulerid, $this->student1->id, false);
         $this->assert_appointment_status($this->schedulerid, $this->student2->id, true);
-
     }
 
     /**

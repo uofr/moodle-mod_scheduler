@@ -24,10 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/scheduler/locallib.php');
+require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
 
 $appointmentid = required_param('appointmentid', PARAM_INT);
-list($slot, $appointment) = $scheduler->get_slot_appointment($appointmentid);
+[$slot, $appointment] = $scheduler->get_slot_appointment($appointmentid);
 $studentid = $appointment->studentid;
 
 $permissions->ensure($permissions->can_see_appointment($appointment));
@@ -45,17 +45,18 @@ $pages = ['thisappointment'];
 if ($slot->get_appointment_count() > 1) {
     $pages[] = 'otherstudents';
 }
+
 if (count($appts) > 1) {
     $pages[] = 'otherappointments';
 }
 
-if (!in_array($subpage, $pages) ) {
+if (!in_array($subpage, $pages)) {
     $subpage = 'thisappointment';
 }
 
 // Process edit form before page output starts.
 if ($subpage == 'thisappointment') {
-    require_once($CFG->dirroot.'/mod/scheduler/appointmentforms.php');
+    require_once($CFG->dirroot . '/mod/scheduler/appointmentforms.php');
 
     $actionurl = new moodle_url($taburl, ['page' => 'thisappointment']);
     $returnurl = new moodle_url($taburl, ['page' => 'thisappointment']);
@@ -85,9 +86,10 @@ $row  = [];
 
 if (count($pages) > 1) {
     foreach ($pages as $tabpage) {
-        $tabname = get_string('tab-'.$tabpage, 'scheduler');
+        $tabname = get_string('tab-' . $tabpage, 'scheduler');
         $row[] = new tabobject($tabpage, new moodle_url($taburl, ['subpage' => $tabpage]), $tabname);
     }
+
     $tabrows[] = $row;
     print_tabs($tabrows, $subpage);
 }
@@ -95,7 +97,6 @@ if (count($pages) > 1) {
 $totalgradeinfo = new scheduler_totalgrade_info($scheduler, $scheduler->get_gradebook_info($appointment->studentid));
 
 if ($subpage == 'thisappointment') {
-
     $ai = scheduler_appointment_info::make_for_teacher($slot, $appointment);
     echo $output->render($ai);
 
@@ -104,7 +105,6 @@ if ($subpage == 'thisappointment') {
     if ($scheduler->uses_grades()) {
         echo $output->render($totalgradeinfo);
     }
-
 } else if ($subpage == 'otherappointments') {
     // Print table of other appointments of the same student.
 
@@ -126,7 +126,6 @@ if ($subpage == 'thisappointment') {
         $totalgradeinfo->totalgrade = $scheduler->get_user_grade($appointment->studentid);
         echo $output->render($totalgradeinfo);
     }
-
 } else if ($subpage == 'otherstudents') {
     // Print table of other students in the same slot.
 

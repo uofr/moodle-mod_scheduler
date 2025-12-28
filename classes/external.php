@@ -42,8 +42,8 @@ use mod_scheduler\model\scheduler;
  * @copyright  2022 University of Glasgow
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class external extends external_api {
-
+class external extends external_api
+{
     /**
      * studentid parameters
      *
@@ -95,7 +95,6 @@ class external extends external_api {
         }
 
         return $students;
-
     }
 
     /**
@@ -113,5 +112,4 @@ class external extends external_api {
             ])
         );
     }
-
 }

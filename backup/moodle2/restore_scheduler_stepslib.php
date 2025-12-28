@@ -28,8 +28,8 @@
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_scheduler_activity_structure_step extends restore_activity_structure_step {
-
+class restore_scheduler_activity_structure_step extends restore_activity_structure_step
+{
     /**
      * define_structure
      *
@@ -47,8 +47,10 @@ class restore_scheduler_activity_structure_step extends restore_activity_structu
             $slot = new restore_path_element('scheduler_slot', '/activity/scheduler/slots/slot');
             $paths[] = $slot;
 
-            $appointment = new restore_path_element('scheduler_appointment',
-                                                    '/activity/scheduler/slots/slot/appointments/appointment');
+            $appointment = new restore_path_element(
+                'scheduler_appointment',
+                '/activity/scheduler/slots/slot/appointments/appointment'
+            );
             $paths[] = $appointment;
         }
 

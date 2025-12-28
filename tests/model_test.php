@@ -39,8 +39,8 @@ require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class model_test extends \advanced_testcase {
-
+final class model_test extends \advanced_testcase
+{
     /**
      * @var int Course_modules id used for testing
      */
@@ -75,6 +75,7 @@ final class model_test extends \advanced_testcase {
             $options['slottimes'][$c] = time() + ($c + 1) * DAYSECS;
             $options['slotstudents'][$c] = [$this->getDataGenerator()->create_user()->id];
         }
+
         $options['slottimes'][4] = time() + 10 * DAYSECS;
         $options['slottimes'][5] = time() + 11 * DAYSECS;
         $options['slotstudents'][5] = [
@@ -103,8 +104,7 @@ final class model_test extends \advanced_testcase {
 
         $instance = scheduler::load_by_coursemodule_id($this->moduleid);
 
-        $this->assertEquals( $dbdata->name, $instance->get_name());
-
+        $this->assertEquals($dbdata->name, $instance->get_name());
     }
 
     /**
@@ -150,7 +150,5 @@ final class model_test extends \advanced_testcase {
         $this->assertEquals(fullname($user), fullname($appobj->get_student()));
         $this->assertTrue($appobj->is_attended());
         $this->assertEquals(-7, $appobj->grade);
-
     }
-
 }

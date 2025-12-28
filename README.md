@@ -2,8 +2,8 @@ moodle-mod_scheduler
 ====================
 
 
-[![Latest Release](https://img.shields.io/github/v/release/bostelm/moodle-mod_scheduler?sort=semver&color=orange)](https://github.com/bostelm/moodle-mod_scheduler/releases)
-[![Moodle plugin CI](https://github.com/bostelm/moodle-mod_scheduler/actions/workflows/moodle-plugin-ci.yml/badge.svg)](https://github.com/bostelm/moodle-mod_scheduler/actions/workflows/moodle-plugin-ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/learnweb/moodle-mod_scheduler?sort=semver&color=orange)](https://github.com/learnweb/moodle-mod_scheduler/releases)
+[![Moodle plugin CI](https://github.com/learnweb/moodle-mod_scheduler/actions/workflows/moodle-plugin-ci.yml/badge.svg)](https://github.com/learnweb/moodle-mod_scheduler/actions/workflows/moodle-plugin-ci.yml)
 
 Appointment 
 Scheduler for Moodle

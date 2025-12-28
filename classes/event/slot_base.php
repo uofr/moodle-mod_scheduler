@@ -30,8 +30,8 @@ namespace mod_scheduler\event;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class slot_base extends \core\event\base {
-
+abstract class slot_base extends \core\event\base
+{
     /**
      * @var \mod_scheduler\model\slot the slot associated with this event
      */
@@ -75,6 +75,7 @@ abstract class slot_base extends \core\event\base {
         if ($this->is_restored()) {
             throw new \coding_exception('get_slot() is intended for event observers only');
         }
+
         return $this->slot;
     }
 

@@ -24,9 +24,11 @@
  */
 
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
+
+use Behat\Gherkin\Node\TableNode;
+
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
-use Behat\Behat\Context\Step\Given as Given, Behat\Behat\Context\Step\When as When, Behat\Gherkin\Node\TableNode as TableNode;
 /**
  * Scheduler-related steps definitions.
  *
@@ -35,8 +37,8 @@ use Behat\Behat\Context\Step\Given as Given, Behat\Behat\Context\Step\When as Wh
  * @copyright  2015 Henning Bostelmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class behat_mod_scheduler extends behat_base {
-
+class behat_mod_scheduler extends behat_base
+{
     /**
      * Adds a series of slots to the scheduler
      *
@@ -49,8 +51,11 @@ class behat_mod_scheduler extends behat_base {
      * @param TableNode $fielddata
      */
     public function i_add_a_slot_days_ahead_at_in_scheduler_and_i_fill_the_form_with(
-                              $daysahead, $time, $activityname, TableNode $fielddata) {
-
+        $daysahead,
+        $time,
+        $activityname,
+        TableNode $fielddata
+    ) {
         $hours = floor($time / 100);
         $mins  = $time - 100 * $hours;
         $startdate = time() + $daysahead * DAYSECS;
@@ -76,6 +81,7 @@ class behat_mod_scheduler extends behat_base {
                 $rows[] = $row;
             }
         }
+
         $this->execute('behat_forms::i_set_the_following_fields_to_these_values', new TableNode($rows));
 
         $this->execute('behat_general::i_click_on', ['Save changes', 'button']);
@@ -93,8 +99,11 @@ class behat_mod_scheduler extends behat_base {
      * @param TableNode $fielddata
      */
     public function i_add_slots_days_ahead_in_scheduler_and_i_fill_the_form_with(
-                        $slotcount, $daysahead, $activityname, TableNode $fielddata) {
-
+        $slotcount,
+        $daysahead,
+        $activityname,
+        TableNode $fielddata
+    ) {
         $startdate = time() + $daysahead * DAYSECS;
 
         $this->execute('behat_navigation::i_am_on_page_instance', [$this->escape($activityname), 'Activity']);
@@ -118,7 +127,6 @@ class behat_mod_scheduler extends behat_base {
         $this->execute('behat_forms::i_set_the_following_fields_to_these_values', new TableNode($rows));
 
         $this->execute('behat_general::i_click_on', ['Save changes', 'button']);
-
     }
 
     /**
@@ -129,18 +137,24 @@ class behat_mod_scheduler extends behat_base {
      * @Given /^I add the upcoming events block globally$/
      */
     public function i_add_the_upcoming_events_block_globally() {
+        global $CFG;
+        if ($CFG->version > 2026042000) {
+            // Moodle 5.2 onwards has "Home" not enabled by default.
+            set_config('enablemyhome', 1);
+            set_config('defaulthomepage', 1);
+        }
 
         $this->execute('behat_data_generators::the_following_entities_exist', ['users',
                         new TableNode([
                             ['username', 'firstname', 'lastname', 'email'],
                             ['globalmanager1', 'GlobalManager', '1', 'globalmanager1@example.com'],
-                        ]), ] );
+                        ]), ]);
 
         $this->execute('behat_data_generators::the_following_entities_exist', ['system role assigns',
                         new TableNode([
                             ['user', 'role'],
                             ['globalmanager1', 'manager'],
-                        ]), ] );
+                        ]), ]);
 
         $this->execute('behat_auth::i_log_in_as', 'globalmanager1');
         $this->execute('behat_general::i_am_on_site_homepage');
@@ -151,10 +165,9 @@ class behat_mod_scheduler extends behat_base {
         $this->execute('behat_general::click_link', 'Configure Upcoming events block');
         $this->execute('behat_forms::i_set_the_following_fields_to_these_values', new TableNode([
                             ['Page contexts', 'Display throughout the entire site'],
-                        ]) );
+                        ]));
         $this->execute('behat_general::i_click_on', ['Save changes', 'button']);
         $this->execute('behat_auth::i_log_out');
-
     }
 
     /**
@@ -171,7 +184,7 @@ class behat_mod_scheduler extends behat_base {
         $this->execute('behat_general::i_click_on', [$downarrowtarget, 'xpath_element']);
 
         $xpathtarget = "(//descendant::ul[@class='form-autocomplete-suggestions'][$listnumber]//"
-                       ."*[contains(concat('|', string(.), '|'),'|$item|')])";
+                       . "*[contains(concat('|', string(.), '|'),'|$item|')])";
         $this->execute('behat_general::i_click_on', [$xpathtarget, 'xpath_element']);
     }
 }

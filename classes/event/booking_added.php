@@ -33,8 +33,8 @@ namespace mod_scheduler\event;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class booking_added extends slot_base {
-
+class booking_added extends slot_base
+{
     /**
      * Create this event on a given scheduler.
      *
@@ -71,6 +71,6 @@ class booking_added extends slot_base {
      */
     public function get_description() {
         return "The user with id '$this->userid' has booked into the slot with id  '{$this->objectid}'"
-                ." in the scheduler with course module id '$this->contextinstanceid'.";
+                . " in the scheduler with course module id '$this->contextinstanceid'.";
     }
 }

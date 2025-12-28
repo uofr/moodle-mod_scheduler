@@ -30,8 +30,8 @@ namespace mod_scheduler\model;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mvc_child_list {
-
+class mvc_child_list
+{
     /**
      * @var array list of child records
      */
@@ -75,8 +75,12 @@ class mvc_child_list {
      * @param string $childfield name of parent id field in child table
      * @param mvc_model_factory $factory factory for child records
      */
-    public function __construct(mvc_record_model $parent, $childtable, $childfield,
-                                mvc_model_factory $factory) {
+    public function __construct(
+        mvc_record_model $parent,
+        $childtable,
+        $childfield,
+        mvc_model_factory $factory
+    ) {
         $this->children = null;
         $this->childcount = -1;
         $this->childfield = $childfield;
@@ -113,6 +117,7 @@ class mvc_child_list {
                 $this->children[$rec->id] = $app;
                 $cnt++;
             }
+
             $this->childcount = $cnt;
         }
     }
@@ -132,6 +137,7 @@ class mvc_child_list {
                 break;
             }
         }
+
         return $found;
     }
 
@@ -172,9 +178,11 @@ class mvc_child_list {
                 $child->save();
             }
         }
+
         foreach ($this->childrenfordeletion as $delchild) {
             $delchild->delete();
         }
+
         $this->childrenfordeletion = [];
     }
 
@@ -196,8 +204,9 @@ class mvc_child_list {
      */
     public function remove_child(mvc_child_record_model $child) {
         if (is_null($this->children) || !in_array($child, $this->children)) {
-            throw new \coding_exception ('Child record to remove not found in list');
+            throw new \coding_exception('Child record to remove not found in list');
         }
+
         $key = array_search($child, $this->children, true);
         unset($this->children[$key]);
         $this->childrenfordeletion[] = $child;
