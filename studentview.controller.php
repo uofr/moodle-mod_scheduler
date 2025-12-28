@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/scheduler/mailtemplatelib.php');
+require_once($CFG->dirroot . '/mod/scheduler/mailtemplatelib.php');
 
 /**
  * scheduler_book_slot
@@ -57,6 +57,7 @@ function scheduler_book_slot($scheduler, $slotid, $userid, $groupid, $mform, $fo
         if (!$scheduler->is_group_scheduling_enabled()) {
             throw new moodle_exception('error');
         }
+
         $groupmembers = $scheduler->get_available_students($groupid);
         $requiredcapacity = count($groupmembers);
         $userstobook = array_keys($groupmembers);
@@ -80,6 +81,7 @@ function scheduler_book_slot($scheduler, $slotid, $userid, $groupid, $mform, $fo
         foreach ($slot->get_appointments() as $app) {
             $existingstudents[] = $app->studentid;
         }
+
         $userstobook = array_diff($userstobook, $existingstudents);
 
         $remaining = $slot->count_remaining_appointments();
@@ -117,26 +119,35 @@ function scheduler_book_slot($scheduler, $slotid, $userid, $groupid, $mform, $fo
         if ($scheduler->allownotifications) {
             $student = $DB->get_record('user', ['id' => $appointment->studentid], '*', MUST_EXIST);
             $teacher = $DB->get_record('user', ['id' => $slot->teacherid], '*', MUST_EXIST);
-            scheduler_messenger::send_slot_notification($slot, 'bookingnotification', 'applied',
-                    $student, $teacher, $teacher, $student, $COURSE);
+            scheduler_messenger::send_slot_notification(
+                $slot,
+                'bookingnotification',
+                'applied',
+                $student,
+                $teacher,
+                $teacher,
+                $student,
+                $COURSE
+            );
         }
     }
+
     $slot->save();
     redirect($returnurl);
-
 }
 
 $returnurlparas = ['id' => $cm->id];
 if ($scheduler->is_group_scheduling_enabled()) {
     $returnurlparas['appointgroup'] = $appointgroup;
 }
+
 $returnurl = new moodle_url('/mod/scheduler/view.php', $returnurlparas);
 
 
 /******************************************** Show the booking form *******************************************/
 
 if ($action == 'bookingform') {
-    require_once($CFG->dirroot.'/mod/scheduler/bookingform.php');
+    require_once($CFG->dirroot . '/mod/scheduler/bookingform.php');
 
     require_sesskey();
     require_capability('mod/scheduler:appoint', $context);
@@ -171,13 +182,11 @@ if ($action == 'bookingform') {
         echo $output->footer();
         exit();
     }
-
 }
 
 /************************************************ Book a slot  ************************************************/
 
 if ($action == 'bookslot') {
-
     require_sesskey();
     require_capability('mod/scheduler:appoint', $context);
 
@@ -195,13 +204,13 @@ if ($action == 'bookslot') {
 /******************************************** Show details of booking *******************************************/
 
 if ($action == 'viewbooking') {
-    require_once($CFG->dirroot.'/mod/scheduler/bookingform.php');
+    require_once($CFG->dirroot . '/mod/scheduler/bookingform.php');
 
     require_sesskey();
     require_capability('mod/scheduler:appoint', $context);
 
     $appointmentid = required_param('appointmentid', PARAM_INT);
-    list($slot, $appointment) = $scheduler->get_slot_appointment($appointmentid);
+    [$slot, $appointment] = $scheduler->get_slot_appointment($appointmentid);
 
     if ($appointment->studentid != $USER->id) {
         throw new moodle_exception('nopermissions');
@@ -215,13 +224,12 @@ if ($action == 'viewbooking') {
     echo $output->continue_button($returnurl);
     echo $output->footer();
     exit();
-
 }
 
 /******************************************** Edit a booking *******************************************/
 
 if ($action == 'editbooking') {
-    require_once($CFG->dirroot.'/mod/scheduler/bookingform.php');
+    require_once($CFG->dirroot . '/mod/scheduler/bookingform.php');
 
     require_sesskey();
     require_capability('mod/scheduler:appoint', $context);
@@ -231,11 +239,12 @@ if ($action == 'editbooking') {
     }
 
     $appointmentid = required_param('appointmentid', PARAM_INT);
-    list($slot, $appointment) = $scheduler->get_slot_appointment($appointmentid);
+    [$slot, $appointment] = $scheduler->get_slot_appointment($appointmentid);
 
     if ($appointment->studentid != $USER->id) {
         throw new moodle_exception('nopermissions');
     }
+
     if (!$slot->is_in_bookable_period()) {
         throw new moodle_exception('nopermissions');
     }
@@ -260,14 +269,12 @@ if ($action == 'editbooking') {
         echo $output->footer();
         exit();
     }
-
 }
 
 
 /******************************** Cancel a booking (for the current student or a group) ******************************/
 
 if ($action == 'cancelbooking') {
-
     require_sesskey();
     require_capability('mod/scheduler:appoint', $context);
 
@@ -295,12 +302,21 @@ if ($action == 'cancelbooking') {
             if ($scheduler->allownotifications) {
                 $student = $DB->get_record('user', ['id' => $USER->id]);
                 $teacher = $DB->get_record('user', ['id' => $slot->teacherid]);
-                scheduler_messenger::send_slot_notification($slot, 'bookingnotification', 'cancelled',
-                                                            $student, $teacher, $teacher, $student, $COURSE);
+                scheduler_messenger::send_slot_notification(
+                    $slot,
+                    'bookingnotification',
+                    'cancelled',
+                    $student,
+                    $teacher,
+                    $teacher,
+                    $student,
+                    $COURSE
+                );
             }
+
             \mod_scheduler\event\booking_removed::create_from_slot($slot)->trigger();
         }
     }
-    redirect($returnurl);
 
+    redirect($returnurl);
 }

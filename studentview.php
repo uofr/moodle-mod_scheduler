@@ -37,6 +37,7 @@ $urlparas = [
 if ($appointgroup >= 0) {
     $urlparas['appointgroup'] = $appointgroup;
 }
+
 $actionurl = new moodle_url('/mod/scheduler/view.php', $urlparas);
 
 
@@ -59,7 +60,7 @@ if ($scheduler->is_group_scheduling_enabled()) {
 }
 
 
-require_once($CFG->dirroot.'/mod/scheduler/studentview.controller.php');
+require_once($CFG->dirroot . '/mod/scheduler/studentview.controller.php');
 
 echo $output->header();
 
@@ -72,13 +73,16 @@ if ($showowngrades) {
 
     $showowngrades = !$gradebookinfo->hidden;
 
-    if ($gradebookinfo && !$gradebookinfo->hidden && ($totalgrade || $gradebookinfo->overridden) ) {
+    if ($gradebookinfo && !$gradebookinfo->hidden && ($totalgrade || $gradebookinfo->overridden)) {
         $grademsg = '';
         if ($gradebookinfo->overridden) {
-            $grademsg = html_writer::tag('p',
-                            get_string('overriddennotice', 'grades'),  ['class' => 'overriddennotice']
-                        );
+            $grademsg = html_writer::tag(
+                'p',
+                get_string('overriddennotice', 'grades'),
+                ['class' => 'overriddennotice']
+            );
         }
+
         $grademsg .= get_string('yourtotalgrade', 'scheduler', $gradebookinfo->str_grade);
         echo html_writer::div($grademsg, 'totalgrade');
     }
@@ -90,11 +94,19 @@ if ($scheduler->is_group_scheduling_enabled()) {
     if ($scheduler->is_individual_scheduling_enabled()) {
         $groupchoice[0] = get_string('myself', 'scheduler');
     }
+
     foreach ($mygroupsforscheduling as $group) {
         $groupchoice[$group->id] = $group->name;
     }
-    $select = $output->single_select($actionurl, 'appointgroup', $groupchoice, $appointgroup,
-                                     [-1 => 'choosedots'], 'appointgroupform');
+
+    $select = $output->single_select(
+        $actionurl,
+        'appointgroup',
+        $groupchoice,
+        $appointgroup,
+        [-1 => 'choosedots'],
+        'appointgroupform'
+    );
     echo html_writer::div(get_string('appointforgroup', 'scheduler', $select), 'dropdownmenu');
 }
 
@@ -117,6 +129,7 @@ if (count($pastslots) > 0) {
         } else {
             $others = null;
         }
+
         $hasdetails = $scheduler->uses_studentdata();
         $slottable->add_slot($pastslot, $appointment, $others, false, false, $hasdetails);
     }
@@ -152,6 +165,7 @@ if (count($upcomingslots) > 0) {
         if ($scheduler->is_group_scheduling_enabled()) {
             $cancancel = $cancancel && ($appointgroup >= 0);
         }
+
         $slottable->add_slot($slot, $appointment, $others, $cancancel, $canedit, $canview);
     }
 
@@ -164,13 +178,10 @@ $bookableslots = array_values($scheduler->get_slots_available_to_student($USER->
 
 if (!$canseefull && $bookablecnt == 0) {
     echo html_writer::div(get_string('canbooknofurtherappointments', 'scheduler'), 'studentbookingmessage');
-
 } else if (count($bookableslots) == 0) {
-
     // No slots are available at this time.
     $noslots = get_string('noslotsavailable', 'scheduler');
     echo html_writer::div($noslots, 'studentbookingmessage');
-
 } else {
     // The student can book (or see) further appointments, and slots are available.
     // Show the booking form.
@@ -194,6 +205,7 @@ if (!$canseefull && $bookablecnt == 0) {
             foreach ($slot->get_appointments() as $otherapp) {
                 $others->add_student($otherapp, $otherapp->studentid == $USER->id);
             }
+
             $others->expandable = true;
             $others->expanded = false;
         } else {
@@ -208,7 +220,7 @@ if (!$canseefull && $bookablecnt == 0) {
             $groupinfo = get_string('no');
         } else {
             if ($remaining > 0) {
-                $groupinfo = get_string('limited', 'scheduler', $remaining.'/'.$slot->exclusivity);
+                $groupinfo = get_string('limited', 'scheduler', $remaining . '/' . $slot->exclusivity);
             } else { // Group info should not be visible to students.
                 $groupinfo = get_string('complete', 'scheduler');
                 $canbookthisslot = false;
@@ -232,6 +244,7 @@ if (!$canseefull && $bookablecnt == 0) {
     } else {
         $msgkey = 'canbookunlimitedappointments';
     }
+
     $bookingmsg2 = get_string($msgkey, 'scheduler', $a);
 
     echo $output->heading(get_string('availableslots', 'scheduler'), 3);
@@ -239,14 +252,15 @@ if (!$canseefull && $bookablecnt == 0) {
         echo html_writer::div($bookingmsg1, 'studentbookingmessage');
         echo html_writer::div($bookingmsg2, 'studentbookingmessage');
     }
-    if ($total > $pagesize) {
-        echo $output->paging_bar($total, $offset, $pagesize, $actionurl, 'offset');
-    }
-    echo $output->render($booker);
+
     if ($total > $pagesize) {
         echo $output->paging_bar($total, $offset, $pagesize, $actionurl, 'offset');
     }
 
+    echo $output->render($booker);
+    if ($total > $pagesize) {
+        echo $output->paging_bar($total, $offset, $pagesize, $actionurl, 'offset');
+    }
 }
 
 echo $output->footer();

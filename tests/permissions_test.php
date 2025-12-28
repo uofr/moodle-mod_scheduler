@@ -40,8 +40,8 @@ require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
  * @copyright  2019 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class permissions_test extends \advanced_testcase {
-
+final class permissions_test extends \advanced_testcase
+{
     /**
      * @var int Course_modules id used for testing
      */
@@ -167,7 +167,7 @@ final class permissions_test extends \advanced_testcase {
         // Nonediting teacher sees only his own slot.
         $p = new scheduler_permissions($this->context, $this->nonedteacher);
         $this->assertFalse($p->teacher_can_see_slot($this->slots[0]));
-        $this->assertTrue ($p->teacher_can_see_slot($this->slots[1]));
+        $this->assertTrue($p->teacher_can_see_slot($this->slots[1]));
         $this->assertFalse($p->teacher_can_see_slot($this->slots[2]));
 
         // Adminstrator sees all slots.
@@ -181,7 +181,6 @@ final class permissions_test extends \advanced_testcase {
         $this->assertFalse($p->teacher_can_see_slot($this->slots[0]));
         $this->assertFalse($p->teacher_can_see_slot($this->slots[1]));
         $this->assertFalse($p->teacher_can_see_slot($this->slots[2]));
-
     }
 
     /**
@@ -200,7 +199,7 @@ final class permissions_test extends \advanced_testcase {
         // Nonediting teacher can only edit his own slot.
         $p = new scheduler_permissions($this->context, $this->nonedteacher);
         $this->assertFalse($p->can_edit_slot($this->slots[0]));
-        $this->assertTrue ($p->can_edit_slot($this->slots[1]));
+        $this->assertTrue($p->can_edit_slot($this->slots[1]));
         $this->assertFalse($p->can_edit_slot($this->slots[2]));
 
         // Adminstrator cannot edit any slots.
@@ -214,7 +213,6 @@ final class permissions_test extends \advanced_testcase {
         $this->assertFalse($p->can_edit_slot($this->slots[0]));
         $this->assertFalse($p->can_edit_slot($this->slots[1]));
         $this->assertFalse($p->can_edit_slot($this->slots[2]));
-
     }
 
     /**
@@ -235,7 +233,6 @@ final class permissions_test extends \advanced_testcase {
         $this->assertFalse($p->can_edit_own_slots());
         $p = new scheduler_permissions($this->context, $this->students[1]);
         $this->assertFalse($p->can_edit_own_slots());
-
     }
 
     /**
@@ -256,7 +253,6 @@ final class permissions_test extends \advanced_testcase {
         $this->assertFalse($p->can_edit_all_slots());
         $p = new scheduler_permissions($this->context, $this->students[1]);
         $this->assertFalse($p->can_edit_all_slots());
-
     }
 
     /**
@@ -281,7 +277,6 @@ final class permissions_test extends \advanced_testcase {
         // Students cannot see all slots.
         $p = new scheduler_permissions($this->context, $this->students[1]);
         $this->assertFalse($p->can_see_all_slots());
-
     }
 
     /**
@@ -300,7 +295,7 @@ final class permissions_test extends \advanced_testcase {
         // Nonediting teacher can only see his own appointment.
         $p = new scheduler_permissions($this->context, $this->nonedteacher);
         $this->assertFalse($p->can_see_appointment($this->appts[0]));
-        $this->assertTrue ($p->can_see_appointment($this->appts[1]));
+        $this->assertTrue($p->can_see_appointment($this->appts[1]));
         $this->assertFalse($p->can_see_appointment($this->appts[2]));
 
         // Administrator can see all appointments.
@@ -319,8 +314,5 @@ final class permissions_test extends \advanced_testcase {
                 $this->assertEquals($expected, $actual, $msg);
             }
         }
-
     }
-
-
 }

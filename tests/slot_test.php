@@ -39,8 +39,8 @@ require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class slot_test extends \advanced_testcase {
-
+final class slot_test extends \advanced_testcase
+{
     /**
      * @var int Course_modules id used for testing
      */
@@ -162,7 +162,6 @@ final class slot_test extends \advanced_testcase {
 
         $newcnt = $DB->count_records('scheduler_appointment', ['slotid' => $newid]);
         $this->assertEquals(2, $newcnt, "Counting number of appointments after addition");
-
     }
 
 
@@ -193,7 +192,6 @@ final class slot_test extends \advanced_testcase {
         foreach ($this->students as $student) {
             $this->assert_event_absent($student, $start, "");
         }
-
     }
 
     /**
@@ -218,7 +216,6 @@ final class slot_test extends \advanced_testcase {
 
         $newcnt = $DB->count_records('scheduler_appointment', ['slotid' => $slot->get_id()]);
         $this->assertEquals(4, $newcnt, "Counting number of appointments after addition");
-
     }
 
     /**
@@ -272,6 +269,7 @@ final class slot_test extends \advanced_testcase {
             $this->assert_event_absent($student, $oldstart);
             $this->assert_event_exists($student, $newstart, "Meeting with your Teacher");
         }
+
         $this->assert_event_absent($this->teacherid, $oldstart);
         $this->assert_event_exists($this->teacherid, $newstart, "Meeting with your Students");
 
@@ -292,8 +290,8 @@ final class slot_test extends \advanced_testcase {
         foreach ($this->students as $student) {
             $this->assert_event_absent($student, $newstart);
         }
-        $this->assert_event_absent($this->teacherid, $newstart);
 
+        $this->assert_event_absent($this->teacherid, $newstart);
     }
 
     /**

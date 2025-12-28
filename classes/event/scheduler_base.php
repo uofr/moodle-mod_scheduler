@@ -31,8 +31,8 @@ namespace mod_scheduler\event;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class scheduler_base extends \core\event\base {
-
+abstract class scheduler_base extends \core\event\base
+{
     /**
      * @var \mod_scheduler\model\scheduler the scheduler associated with this event
      */
@@ -81,12 +81,14 @@ abstract class scheduler_base extends \core\event\base {
         if ($this->is_restored()) {
             throw new \coding_exception('get_scheduler() is intended for event observers only');
         }
+
         if (!isset($this->scheduler)) {
             debugging('scheduler property should be initialised in each event', DEBUG_DEVELOPER);
             global $CFG;
             require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
             $this->scheduler = \mod_scheduler\model\scheduler::load_by_coursemodule_id($this->contextinstanceid);
         }
+
         return $this->scheduler;
     }
 

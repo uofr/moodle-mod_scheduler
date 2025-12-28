@@ -31,7 +31,8 @@ namespace mod_scheduler\task;
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class purge_unused_slots extends \core\task\scheduled_task {
+class purge_unused_slots extends \core\task\scheduled_task
+{
     /**
      * get_name
      *

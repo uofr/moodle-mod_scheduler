@@ -28,9 +28,9 @@
  * @param string $name name of configuration setting
  */
 function scheduler_migrate_config_setting($name) {
-    $oldval = get_config('core', 'scheduler_'.$name);
+    $oldval = get_config('core', 'scheduler_' . $name);
     set_config($name, $oldval, 'mod_scheduler');
-    unset_config('scheduler_'.$name);
+    unset_config('scheduler_' . $name);
 }
 
 /**
@@ -48,6 +48,7 @@ function scheduler_migrate_groupmode($sid) {
         } else {
             $g = -1;
         }
+
         $DB->set_field('scheduler', 'bookingrouping', $g, ['id' => $sid]);
         $DB->set_field('course_modules', 'groupmode', 0, ['id' => $cm->id]);
         $DB->set_field('course_modules', 'groupingid', 0, ['id' => $cm->id]);
@@ -66,10 +67,11 @@ function scheduler_migrate_eventtype($prefix) {
     foreach ($rs as $record) {
         $parts = explode(':', $record->eventtype, 3);
         if (count($parts) > 2) {
-            $record->eventtype = $parts[0].":".$parts[1];
+            $record->eventtype = $parts[0] . ":" . $parts[1];
             $DB->update_record('event', $record);
         }
     }
+
     $rs->close();
 }
 
@@ -80,7 +82,7 @@ function scheduler_migrate_eventtype($prefix) {
  * @param int $oldversion version number to be migrated from
  * @return bool true if upgrade is successful
  */
-function xmldb_scheduler_upgrade($oldversion=0) {
+function xmldb_scheduler_upgrade($oldversion = 0) {
 
     global $CFG, $DB;
 
@@ -91,14 +93,21 @@ function xmldb_scheduler_upgrade($oldversion=0) {
     /* ******************* 2.0 upgrade line ********************** */
 
     if ($oldversion < 2011081302) {
-
         // Rename description field to intro, and define field introformat to be added to scheduler.
         $table = new xmldb_table('scheduler');
         $introfield = new xmldb_field('description', XMLDB_TYPE_TEXT, 'small', null, XMLDB_NOTNULL, null, null, 'name');
         $dbman->rename_field($table, $introfield, 'intro', false);
 
-        $formatfield = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED,
-            XMLDB_NOTNULL, null, '0', 'intro');
+        $formatfield = new xmldb_field(
+            'introformat',
+            XMLDB_TYPE_INTEGER,
+            '4',
+            XMLDB_UNSIGNED,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'intro'
+        );
 
         if (!$dbman->field_exists($table, $formatfield)) {
             $dbman->add_field($table, $formatfield);
@@ -106,14 +115,19 @@ function xmldb_scheduler_upgrade($oldversion=0) {
 
         // Conditionally migrate to html format in intro.
         if ($CFG->texteditors !== 'textarea') {
-            $rs = $DB->get_recordset('scheduler', ['introformat' => FORMAT_MOODLE],
-                '', 'id, intro, introformat');
+            $rs = $DB->get_recordset(
+                'scheduler',
+                ['introformat' => FORMAT_MOODLE],
+                '',
+                'id, intro, introformat'
+            );
             foreach ($rs as $q) {
                 $q->intro       = text_to_html($q->intro, false, false, true);
                 $q->introformat = FORMAT_HTML;
                 $DB->update_record('scheduler', $q);
                 upgrade_set_timeout();
             }
+
             $rs->close();
         }
 
@@ -124,18 +138,33 @@ function xmldb_scheduler_upgrade($oldversion=0) {
     /* ******************* 2.5 upgrade line ********************** */
 
     if ($oldversion < 2012102903) {
-
         // Define fields notesformat and appointmentnote in respective tables.
         $table = new xmldb_table('scheduler_slots');
-        $formatfield = new xmldb_field('notesformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED,
-            XMLDB_NOTNULL, null, '0', 'notes');
+        $formatfield = new xmldb_field(
+            'notesformat',
+            XMLDB_TYPE_INTEGER,
+            '4',
+            XMLDB_UNSIGNED,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'notes'
+        );
         if (!$dbman->field_exists($table, $formatfield)) {
             $dbman->add_field($table, $formatfield);
         }
 
         $table = new xmldb_table('scheduler_appointment');
-        $formatfield = new xmldb_field('appointmentnoteformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED,
-            XMLDB_NOTNULL, null, '0', 'appointmentnote');
+        $formatfield = new xmldb_field(
+            'appointmentnoteformat',
+            XMLDB_TYPE_INTEGER,
+            '4',
+            XMLDB_UNSIGNED,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'appointmentnote'
+        );
         if (!$dbman->field_exists($table, $formatfield)) {
             $dbman->add_field($table, $formatfield);
         }
@@ -154,7 +183,6 @@ function xmldb_scheduler_upgrade($oldversion=0) {
     /* ******************* 2.7 upgrade line ********************** */
 
     if ($oldversion < 2014071300) {
-
         // Define field teacher to be dropped from scheduler.
         $table = new xmldb_table('scheduler');
         $field = new xmldb_field('teacher');
@@ -234,7 +262,6 @@ function xmldb_scheduler_upgrade($oldversion=0) {
     /* ******************* 2.9 upgrade line ********************** */
 
     if ($oldversion < 2015050400) {
-
         // Migrate config settings to config_plugins table.
         scheduler_migrate_config_setting('allteachersgrading');
         scheduler_migrate_config_setting('showemailplain');
@@ -246,7 +273,6 @@ function xmldb_scheduler_upgrade($oldversion=0) {
     }
 
     if ($oldversion < 2015062601) {
-
         // Define field bookingrouping to be added to scheduler.
         $table = new xmldb_table('scheduler');
         $field = new xmldb_field('bookingrouping', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '-1', 'gradingstrategy');
@@ -269,7 +295,6 @@ function xmldb_scheduler_upgrade($oldversion=0) {
     /* ******************* 3.1 upgrade line ********************** */
 
     if ($oldversion < 2016051700) {
-
         // Add configuration field "usenotes" to scheduler table.
         $table = new xmldb_table('scheduler');
         $field = new xmldb_field('usenotes', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'bookingrouping');
@@ -283,6 +308,7 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         if (!$dbman->field_exists($table, $field1)) {
             $dbman->add_field($table, $field1);
         }
+
         $field2 = new xmldb_field('teachernoteformat', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'teachernote');
         if (!$dbman->field_exists($table, $field2)) {
             $dbman->add_field($table, $field2);
@@ -302,7 +328,6 @@ function xmldb_scheduler_upgrade($oldversion=0) {
     /* ******************* 3.3 upgrade line ********************** */
 
     if ($oldversion < 2017040100) {
-
         // Add new configuration fields (relating to booking form) to scheduler.
         $table = new xmldb_table('scheduler');
 
@@ -310,32 +335,55 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
         $field = new xmldb_field('bookinginstructions', XMLDB_TYPE_TEXT, null, null, null, null, null, 'usebookingform');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        $field = new xmldb_field('bookinginstructionsformat', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL,
-            null, '1', 'bookinginstructions');
+
+        $field = new xmldb_field(
+            'bookinginstructionsformat',
+            XMLDB_TYPE_INTEGER,
+            '4',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '1',
+            'bookinginstructions'
+        );
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        $field = new xmldb_field('usestudentnotes', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL,
-            null, '0', 'bookinginstructionsformat');
+
+        $field = new xmldb_field(
+            'usestudentnotes',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'bookinginstructionsformat'
+        );
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
         $field = new xmldb_field('requireupload', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'usestudentnotes');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
         $field = new xmldb_field('uploadmaxfiles', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'requireupload');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
         $field = new xmldb_field('uploadmaxsize', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'uploadmaxfiles');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
         $field = new xmldb_field('usecaptcha', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'uploadmaxsize');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
@@ -347,6 +395,7 @@ function xmldb_scheduler_upgrade($oldversion=0) {
         if (!$dbman->field_exists($table, $field1)) {
             $dbman->add_field($table, $field1);
         }
+
         $field2 = new xmldb_field('studentnoteformat', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'studentnote');
         if (!$dbman->field_exists($table, $field2)) {
             $dbman->add_field($table, $field2);

@@ -28,12 +28,13 @@ use mod_scheduler\model\scheduler;
 use mod_scheduler\model\slot;
 use mod_scheduler\model\appointment;
 
-require_once($CFG->dirroot.'/lib/excellib.class.php');
-require_once($CFG->dirroot.'/lib/odslib.class.php');
-require_once($CFG->dirroot.'/lib/csvlib.class.php');
-require_once($CFG->dirroot.'/lib/pdflib.php');
-require_once($CFG->dirroot.'/user/profile/lib.php');
+require_once($CFG->dirroot . '/lib/excellib.class.php');
+require_once($CFG->dirroot . '/lib/odslib.class.php');
+require_once($CFG->dirroot . '/lib/csvlib.class.php');
+require_once($CFG->dirroot . '/lib/pdflib.php');
+require_once($CFG->dirroot . '/user/profile/lib.php');
 
+// phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
 
 /**
  * A data field included in an export from Scheduler.
@@ -42,8 +43,8 @@ require_once($CFG->dirroot.'/user/profile/lib.php');
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class scheduler_export_field {
-
+abstract class scheduler_export_field
+{
     /** @var mixed */
     protected $renderer;
 
@@ -87,7 +88,7 @@ abstract class scheduler_export_field {
      * @return string the header for this field
      */
     public function get_header(scheduler $scheduler) {
-        return get_string('field-'.$this->get_id(), 'scheduler');
+        return get_string('field-' . $this->get_id(), 'scheduler');
     }
 
     /**
@@ -162,7 +163,6 @@ abstract class scheduler_export_field {
     public function get_values(slot $slot, $appointment) {
         return [$this->get_value($slot, $appointment)];
     }
-
 }
 
 /**
@@ -191,7 +191,7 @@ function scheduler_get_export_fields(scheduler $scheduler) {
     $pfields = profile_get_custom_fields();
     foreach ($pfields as $id => $field) {
         $type = $field->datatype;
-        $result[] = new scheduler_profile_field('profile_'.$type, $id, $type);
+        $result[] = new scheduler_profile_field('profile_' . $type, $id, $type);
     }
 
     $result[] = new scheduler_groups_single_field();
@@ -215,8 +215,8 @@ function scheduler_get_export_fields(scheduler $scheduler) {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class slotdate_field extends scheduler_export_field {
-
+class slotdate_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -264,8 +264,8 @@ class slotdate_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_starttime_field extends scheduler_export_field {
-
+class scheduler_starttime_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -293,7 +293,6 @@ class scheduler_starttime_field extends scheduler_export_field {
     public function get_value(slot $slot, $appointment) {
         return mod_scheduler_renderer::usertime($slot->starttime);
     }
-
 }
 
 
@@ -304,8 +303,8 @@ class scheduler_starttime_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_endtime_field extends scheduler_export_field {
-
+class scheduler_endtime_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -333,7 +332,6 @@ class scheduler_endtime_field extends scheduler_export_field {
     public function get_value(slot $slot, $appointment) {
         return mod_scheduler_renderer::usertime($slot->endtime);
     }
-
 }
 
 /**
@@ -343,8 +341,8 @@ class scheduler_endtime_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_teachername_field extends scheduler_export_field {
-
+class scheduler_teachername_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -394,7 +392,6 @@ class scheduler_teachername_field extends scheduler_export_field {
     public function get_value(slot $slot, $appointment) {
         return fullname($slot->teacher);
     }
-
 }
 
 /**
@@ -404,8 +401,8 @@ class scheduler_teachername_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_location_field extends scheduler_export_field {
-
+class scheduler_location_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -433,7 +430,6 @@ class scheduler_location_field extends scheduler_export_field {
     public function get_value(slot $slot, $appointment) {
         return format_string($slot->appointmentlocation);
     }
-
 }
 
 /**
@@ -443,8 +439,8 @@ class scheduler_location_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_maxstudents_field extends scheduler_export_field {
-
+class scheduler_maxstudents_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -476,7 +472,6 @@ class scheduler_maxstudents_field extends scheduler_export_field {
             return $slot->exclusivity;
         }
     }
-
 }
 
 /**
@@ -486,8 +481,8 @@ class scheduler_maxstudents_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_student_field extends scheduler_export_field {
-
+class scheduler_student_field extends scheduler_export_field
+{
     /** @var mixed */
     protected $id;
     /** @var mixed */
@@ -539,6 +534,7 @@ class scheduler_student_field extends scheduler_export_field {
         if (!$this->idfield) {
             return true;
         }
+
         $ctx = $scheduler->get_context();
         return has_capability('moodle/site:viewuseridentity', $ctx);
     }
@@ -569,17 +565,18 @@ class scheduler_student_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         $student = $appointment->get_student();
         if (is_null($student)) {
             return '';
         }
+
         if ($this->studfield == 'fullname') {
             return fullname($student);
         } else {
             return $student->{$this->studfield};
         }
     }
-
 }
 
 /**
@@ -589,8 +586,8 @@ class scheduler_student_field extends scheduler_export_field {
  * @copyright  2017 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_profile_field extends scheduler_export_field {
-
+class scheduler_profile_field extends scheduler_export_field
+{
     /** @var mixed */
     protected $id;
     /** @var mixed */
@@ -607,8 +604,8 @@ class scheduler_profile_field extends scheduler_export_field {
         global $CFG;
 
         $this->id = $id;
-        require_once($CFG->dirroot.'/user/profile/field/'.$type.'/field.class.php');
-        $fieldclass = 'profile_field_'.$type;
+        require_once($CFG->dirroot . '/user/profile/field/' . $type . '/field.class.php');
+        $fieldclass = 'profile_field_' . $type;
         $fieldobj = new $fieldclass($fieldid, 0);
         $this->field = $fieldobj;
     }
@@ -659,19 +656,22 @@ class scheduler_profile_field extends scheduler_export_field {
      * @return string the value of this field for the given data
      */
     public function get_value(slot $slot, $appointment) {
-        if (!$appointment instanceof appointment || $appointment->studentid == 0
-        || !context_user::instance($appointment->studentid, IGNORE_MISSING)) {
+        if (
+            !$appointment instanceof appointment || $appointment->studentid == 0
+            || !context_user::instance($appointment->studentid, IGNORE_MISSING)
+        ) {
             return '';
         }
+
         $this->field->set_userid($appointment->studentid);
         $this->field->load_data();
         if ($this->field->is_visible()) {
             $content = $this->field->display_data();
             return strip_tags($content);
         }
+
         return '';
     }
-
 }
 
 
@@ -682,8 +682,8 @@ class scheduler_profile_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_attended_field extends scheduler_export_field {
-
+class scheduler_attended_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -712,10 +712,10 @@ class scheduler_attended_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         $str = $appointment->is_attended() ? get_string('yes') : get_string('no');
         return $str;
     }
-
 }
 
 /**
@@ -725,8 +725,8 @@ class scheduler_attended_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class slotnotes_field extends scheduler_export_field {
-
+class slotnotes_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -774,7 +774,6 @@ class slotnotes_field extends scheduler_export_field {
     public function get_value(slot $slot, $appointment) {
         return strip_tags($slot->notes);
     }
-
 }
 
 /**
@@ -784,8 +783,8 @@ class slotnotes_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_appointmentnote_field extends scheduler_export_field {
-
+class scheduler_appointmentnote_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -844,9 +843,9 @@ class scheduler_appointmentnote_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         return strip_tags($appointment->appointmentnote);
     }
-
 }
 
 /**
@@ -856,8 +855,8 @@ class scheduler_appointmentnote_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_teachernote_field extends scheduler_export_field {
-
+class scheduler_teachernote_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -916,9 +915,9 @@ class scheduler_teachernote_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         return strip_tags($appointment->teachernote);
     }
-
 }
 
 /**
@@ -928,8 +927,8 @@ class scheduler_teachernote_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_studentnote_field extends scheduler_export_field {
-
+class scheduler_studentnote_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -988,9 +987,9 @@ class scheduler_studentnote_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         return strip_tags($appointment->studentnote);
     }
-
 }
 
 /**
@@ -1000,8 +999,8 @@ class scheduler_studentnote_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_filecount_field extends scheduler_export_field {
-
+class scheduler_filecount_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -1060,9 +1059,9 @@ class scheduler_filecount_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         return $appointment->count_studentfiles();
     }
-
 }
 
 /**
@@ -1072,8 +1071,8 @@ class scheduler_filecount_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_grade_field extends scheduler_export_field {
-
+class scheduler_grade_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -1112,9 +1111,9 @@ class scheduler_grade_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         return $this->renderer->format_grade($slot->get_scheduler(), $appointment->grade);
     }
-
 }
 
 /**
@@ -1124,8 +1123,8 @@ class scheduler_grade_field extends scheduler_export_field {
  * @copyright  2018 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_groups_single_field extends scheduler_export_field {
-
+class scheduler_groups_single_field extends scheduler_export_field
+{
     /**
      * Retrieve the unique id (a string) for this field
      */
@@ -1176,6 +1175,7 @@ class scheduler_groups_single_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         $scheduler = $slot->get_scheduler();
         $groups = groups_get_user_groups($scheduler->courseid, $appointment->studentid);
         $groupingid = $scheduler->get_cm()->groupingid;
@@ -1183,9 +1183,9 @@ class scheduler_groups_single_field extends scheduler_export_field {
         foreach ($groups[$groupingid] as $groupid) {
             $gn[] = groups_get_group_name($groupid);
         }
+
         return implode(',', $gn);
     }
-
 }
 
 /**
@@ -1195,8 +1195,8 @@ class scheduler_groups_single_field extends scheduler_export_field {
  * @copyright  2018 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_groups_multi_field extends scheduler_export_field {
-
+class scheduler_groups_multi_field extends scheduler_export_field
+{
     /** @var mixed */
     protected $coursegroups;
 
@@ -1258,6 +1258,7 @@ class scheduler_groups_multi_field extends scheduler_export_field {
         foreach ($this->coursegroups as $group) {
             $result[] = $group->name;
         }
+
         return $result;
     }
 
@@ -1284,15 +1285,16 @@ class scheduler_groups_multi_field extends scheduler_export_field {
         if (! $appointment instanceof appointment) {
             return '';
         }
+
         $usergroups = groups_get_user_groups($slot->get_scheduler()->courseid, $appointment->studentid)[0];
         $result = [];
         foreach ($this->coursegroups as $group) {
             $key = in_array($group->id, $usergroups) ? 'yes' : 'no';
             $result[] = get_string($key);
         }
+
         return $result;
     }
-
 }
 
 /**
@@ -1302,8 +1304,8 @@ class scheduler_groups_multi_field extends scheduler_export_field {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class scheduler_canvas {
-
+abstract class scheduler_canvas
+{
     /**
      * @var object format instructions for header
      */
@@ -1393,7 +1395,6 @@ abstract class scheduler_canvas {
      * @param string $filename the file name to send
      */
     abstract public function send($filename);
-
 }
 
 /**
@@ -1403,8 +1404,8 @@ abstract class scheduler_canvas {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_excel_canvas extends scheduler_canvas {
-
+class scheduler_excel_canvas extends scheduler_canvas
+{
     /** @var mixed */
     protected $workbook;
     /** @var mixed */
@@ -1429,7 +1430,6 @@ class scheduler_excel_canvas extends scheduler_canvas {
         $this->formatboldit->set_bold();
         $this->formatboldit->set_italic();
         $this->formatwrap->set_text_wrap();
-
     }
 
     /**
@@ -1458,7 +1458,7 @@ class scheduler_excel_canvas extends scheduler_canvas {
      * @param mixed $str the string to write
      * @param mixed $format the format to use (one of the $format... fields of this object), can be null
      */
-    public function write_string($row, $col, $str, $format=null) {
+    public function write_string($row, $col, $str, $format = null) {
         $this->ensure_open_page();
         $this->worksheet->write_string($row, $col, $str, $format);
     }
@@ -1471,7 +1471,7 @@ class scheduler_excel_canvas extends scheduler_canvas {
      * @param mixed $num the number to write
      * @param mixed $format the format to use (one of the $format... fields of this object), can be null
      */
-    public function write_number($row, $col, $num, $format=null) {
+    public function write_number($row, $col, $num, $format = null) {
         $this->ensure_open_page();
         $this->worksheet->write_number($row, $col, $num, $format);
     }
@@ -1508,7 +1508,6 @@ class scheduler_excel_canvas extends scheduler_canvas {
         $this->workbook->send($filename);
         $this->workbook->close();
     }
-
 }
 
 /**
@@ -1518,8 +1517,8 @@ class scheduler_excel_canvas extends scheduler_canvas {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_ods_canvas extends scheduler_canvas {
-
+class scheduler_ods_canvas extends scheduler_canvas
+{
     /** @var mixed */
     protected $workbook;
     /** @var mixed */
@@ -1543,7 +1542,6 @@ class scheduler_ods_canvas extends scheduler_canvas {
         $this->formatboldit->set_bold();
         $this->formatboldit->set_italic();
         $this->formatwrap->set_text_wrap();
-
     }
 
     /**
@@ -1572,7 +1570,7 @@ class scheduler_ods_canvas extends scheduler_canvas {
      * @param mixed $str the string to write
      * @param mixed $format the format to use (one of the $format... fields of this object), can be null
      */
-    public function write_string($row, $col, $str, $format=null) {
+    public function write_string($row, $col, $str, $format = null) {
         $this->ensure_open_page();
         $this->worksheet->write_string($row, $col, $str, $format);
     }
@@ -1585,7 +1583,7 @@ class scheduler_ods_canvas extends scheduler_canvas {
      * @param mixed $num the number to write
      * @param mixed $format the format to use (one of the $format... fields of this object), can be null
      */
-    public function write_number($row, $col, $num, $format=null) {
+    public function write_number($row, $col, $num, $format = null) {
         $this->ensure_open_page();
         $this->worksheet->write_number($row, $col, $num, $format);
     }
@@ -1622,7 +1620,6 @@ class scheduler_ods_canvas extends scheduler_canvas {
         $this->workbook->send($filename);
         $this->workbook->close();
     }
-
 }
 
 
@@ -1633,8 +1630,8 @@ class scheduler_ods_canvas extends scheduler_canvas {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class scheduler_cached_text_canvas extends scheduler_canvas {
-
+abstract class scheduler_cached_text_canvas extends scheduler_canvas
+{
     /** @var mixed */
     protected $pages;
     /** @var mixed */
@@ -1651,7 +1648,6 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
         $this->formatwrap = 'wrap';
 
         $this->start_page('');
-
     }
 
     /**
@@ -1669,6 +1665,7 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
                 }
             }
         }
+
         return $maxcol + 1;
     }
 
@@ -1685,6 +1682,7 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
                 $maxrow = $rownum;
             }
         }
+
         return $maxrow + 1;
     }
 
@@ -1700,6 +1698,7 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
         foreach ($page->columnwidths as $width) {
             $sum += $width;
         }
+
         $relwidths = [];
         for ($col = 0; $col < $cols; $col++) {
             if ($sum > 0 && isset($page->columnwidths[$col])) {
@@ -1708,6 +1707,7 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
                 $relwidths[$col] = 0;
             }
         }
+
         return $relwidths;
     }
 
@@ -1721,7 +1721,7 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
         if ($onemptypage) {
             $this->curpage->title = $title;
         } else {
-            $newpage = new stdClass;
+            $newpage = new stdClass();
             $newpage->title = $title;
             $newpage->cells = [];
             $newpage->formats = [];
@@ -1740,7 +1740,7 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
      * @param mixed $str the string to write
      * @param mixed $format the format to use (one of the $format... fields of this object), can be null
      */
-    public function write_string($row, $col, $str, $format=null) {
+    public function write_string($row, $col, $str, $format = null) {
         $this->curpage->cells[$row][$col] = $str;
         $this->curpage->formats[$row][$col] = $format;
     }
@@ -1753,7 +1753,7 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
      * @param mixed $num the number to write
      * @param mixed $format the format to use (one of the $format... fields of this object), can be null
      */
-    public function write_number($row, $col, $num, $format=null) {
+    public function write_number($row, $col, $num, $format = null) {
         $this->write_string($row, $col, $num, $format);
     }
 
@@ -1778,7 +1778,6 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
     public function set_column_width($col, $width) {
         $this->curpage->columnwidths[$col] = $width;
     }
-
 }
 
 /**
@@ -1788,8 +1787,8 @@ abstract class scheduler_cached_text_canvas extends scheduler_canvas {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_html_canvas extends scheduler_cached_text_canvas {
-
+class scheduler_html_canvas extends scheduler_cached_text_canvas
+{
     /**
      * as_html
      *
@@ -1817,6 +1816,7 @@ class scheduler_html_canvas extends scheduler_cached_text_canvas {
             if ($rowcutoff && $rows > $rowcutoff) {
                 $rows = $rowcutoff;
             }
+
             $relwidths = $this->compute_relative_widths($page);
 
             $table = new html_table();
@@ -1832,35 +1832,44 @@ class scheduler_html_canvas extends scheduler_cached_text_canvas {
                             $span = $mergewidth;
                         }
                     }
+
                     $cell = new html_table_cell('');
                     $text = '';
                     if (isset($page->cells[$row][$col])) {
                         $text = $page->cells[$row][$col];
                     }
+
                     if (isset($page->formats[$row][$col])) {
                         $cell->header = ($page->formats[$row][$col] == 'header');
                         if ($page->formats[$row][$col] == 'boldit') {
                             $text = html_writer::tag('i', $text);
                             $text = html_writer::tag('b', $text);
                         }
+
                         if ($page->formats[$row][$col] == 'bold') {
                             $text = html_writer::tag('b', $text);
                         }
                     }
+
                     if ($span > 1) {
                         $cell->colspan = $span;
                     }
+
                     if ($row == 0 & $relwidths[$col] > 0) {
-                        $cell->width = $relwidths[$col].'%';
+                        $cell->width = $relwidths[$col] . '%';
                     }
+
                     $cell->text = $text;
                     $hrow->cells[] = $cell;
                     $col = $col + $span;
                 }
+
                 $table->data[] = $hrow;
             }
+
             $o .= html_writer::table($table);
         }
+
         return $o;
     }
 
@@ -1876,7 +1885,6 @@ class scheduler_html_canvas extends scheduler_cached_text_canvas {
         echo $this->as_html(0, true);
         echo $OUTPUT->footer();
     }
-
 }
 
 /**
@@ -1886,8 +1894,8 @@ class scheduler_html_canvas extends scheduler_cached_text_canvas {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_csv_canvas extends scheduler_cached_text_canvas {
-
+class scheduler_csv_canvas extends scheduler_cached_text_canvas
+{
     /** @var mixed */
     protected $delimiter;
 
@@ -1913,7 +1921,7 @@ class scheduler_csv_canvas extends scheduler_cached_text_canvas {
 
         foreach ($this->pages as $page) {
             if ($page->title) {
-                $writer->add_data(['*** '.$page->title.' ***']);
+                $writer->add_data(['*** ' . $page->title . ' ***']);
             }
 
             // Find extent of the table.
@@ -1937,15 +1945,16 @@ class scheduler_csv_canvas extends scheduler_cached_text_canvas {
                             $span = $mergewidth;
                         }
                     }
+
                     $col += $span;
                 }
+
                 $writer->add_data($data);
             }
         }
 
         $writer->download_file();
     }
-
 }
 
 /**
@@ -1955,8 +1964,8 @@ class scheduler_csv_canvas extends scheduler_cached_text_canvas {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_pdf_canvas extends scheduler_cached_text_canvas {
-
+class scheduler_pdf_canvas extends scheduler_cached_text_canvas
+{
     /** @var mixed */
     protected $orientation;
 
@@ -1984,12 +1993,13 @@ class scheduler_pdf_canvas extends scheduler_cached_text_canvas {
         } else {
             $doc->setPrintHeader(false);
         }
+
         $doc->setPrintFooter(false);
 
         foreach ($this->pages as $page) {
             $doc->AddPage();
             if ($page->title) {
-                $doc->writeHtml('<h2>'.$page->title.'</h2>');
+                $doc->writeHtml('<h2>' . $page->title . '</h2>');
             }
 
             // Find extent of the table.
@@ -2009,13 +2019,16 @@ class scheduler_pdf_canvas extends scheduler_cached_text_canvas {
                             $span = $mergewidth;
                         }
                     }
+
                     $opts = [];
                     if ($row == 0 && $relwidths[$col] > 0) {
-                        $opts['width'] = $relwidths[$col].'%';
+                        $opts['width'] = $relwidths[$col] . '%';
                     }
+
                     if ($span > 1) {
                         $opts['colspan'] = $span;
                     }
+
                     $o .= html_writer::start_tag('td', $opts);
                     $cell = '';
                     if (isset($page->cells[$row][$col])) {
@@ -2029,21 +2042,23 @@ class scheduler_pdf_canvas extends scheduler_cached_text_canvas {
                             }
                         }
                     }
+
                     $o .= $cell;
 
                     $o .= html_writer::end_tag('td');
 
                     $col += $span;
                 }
+
                 $o .= html_writer::end_tag('tr');
             }
+
             $o .= html_Writer::end_tag('table');
             $doc->writeHtml($o);
         }
 
-        $doc->Output($filename.'.pdf');
+        $doc->Output($filename . '.pdf');
     }
-
 }
 
 /**
@@ -2053,8 +2068,8 @@ class scheduler_pdf_canvas extends scheduler_cached_text_canvas {
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_export {
-
+class scheduler_export
+{
     /**
      * @var scheduler_canvas the canvas used for output
      */
@@ -2086,11 +2101,20 @@ class scheduler_export {
      * @param bool $includeempty whether to include slots without appointments
      * @param bool $pageperteacher whether one page should be used for each teacher
      */
-    public function build(scheduler $scheduler, array $fields, $mode, $userid, $groupid, $timerange, $includeempty,
-                          $pageperteacher) {
+    public function build(
+        scheduler $scheduler,
+        array $fields,
+        $mode,
+        $userid,
+        $groupid,
+        $timerange,
+        $includeempty,
+        $pageperteacher
+    ) {
         if ($groupid) {
             $this->studfilter = array_keys(groups_get_members($groupid, 'u.id'));
         }
+
         $this->canvas->set_title(format_string($scheduler->name));
         if ($userid) {
             $slots = $scheduler->get_slots_for_teacher($userid, $groupid, '', '', $timerange);
@@ -2132,9 +2156,11 @@ class scheduler_export {
                     $this->canvas->write_string($row, $col + $i, $headers[$i], $this->canvas->formatheader);
                     $this->canvas->set_column_width($col + $i, $field->get_typical_width($scheduler));
                 }
+
                 $col = $col + $numcols;
             }
         }
+
         $row++;
 
         // Output the data rows.
@@ -2145,6 +2171,7 @@ class scheduler_export {
                     $this->write_row_summary($row, $slot, $fields);
                     $row++;
                 }
+
                 foreach ($appts as $appt) {
                     $this->write_row($row, $slot, $appt, $fields, false);
                     $row++;
@@ -2166,7 +2193,6 @@ class scheduler_export {
                 }
             }
         }
-
     }
 
     /**
@@ -2178,9 +2204,14 @@ class scheduler_export {
      * @param bool $includeslotfields whether fields relating to slots, rather than appointments, should be included
      * @param string $multiple whether the row represents multiple values (appointments)
      */
-    protected function write_row($row, slot $slot, $appointment, array $fields, $includeslotfields = true,
-                                 $multiple = false) {
-
+    protected function write_row(
+        $row,
+        slot $slot,
+        $appointment,
+        array $fields,
+        $includeslotfields = true,
+        $multiple = false
+    ) {
         $col = 0;
         foreach ($fields as $field) {
             if ($includeslotfields || $field->get_group() != 'slot') {
@@ -2195,6 +2226,7 @@ class scheduler_export {
                     for ($i = 0; $i < $numcols; $i++) {
                         $this->canvas->write_string($row, $col + $i, $values[$i], $format);
                     }
+
                     $col = $col + $numcols;
                 }
             }
@@ -2219,9 +2251,9 @@ class scheduler_export {
                 $cols++;
             }
         }
+
         $str = implode(' - ', $strs);
         $this->canvas->write_string($row, 0, $str, $this->canvas->formatboldit);
         $this->canvas->merge_cells($row, 0, $cols - 1);
     }
-
 }

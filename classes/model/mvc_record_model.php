@@ -30,8 +30,8 @@ namespace mod_scheduler\model;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class mvc_record_model extends mvc_model {
-
+abstract class mvc_record_model extends mvc_model
+{
     /**
      * @var \stdClass the underlying data record
      */
@@ -82,12 +82,12 @@ abstract class mvc_record_model extends mvc_model {
      * @return mixed
      */
     public function __get($key) {
-        if (method_exists($this, 'get_'.$key)) {
-            return $this->{'get_'.$key}();
+        if (method_exists($this, 'get_' . $key)) {
+            return $this->{'get_' . $key}();
         } else if (property_exists($this->data, $key)) {
             return $this->data->{$key};
         } else {
-            throw new \coding_exception('unknown property: '.$key);
+            throw new \coding_exception('unknown property: ' . $key);
         }
     }
 
@@ -101,8 +101,8 @@ abstract class mvc_record_model extends mvc_model {
      * @param mixed $value
      */
     public function __set($key, $value) {
-        if (method_exists($this, 'set_'.$key)) {
-            $this->{'set_'.$key}($value);
+        if (method_exists($this, 'set_' . $key)) {
+            $this->{'set_' . $key}($value);
         } else {
             $this->data->{$key} = $value;
         }
@@ -161,6 +161,7 @@ abstract class mvc_record_model extends mvc_model {
         if (is_null($propnames)) {
             $propnames = array_keys($data);
         }
+
         foreach ($propnames as $propname) {
             $this->{$propname} = $data[$propname];
         }
@@ -177,5 +178,4 @@ abstract class mvc_record_model extends mvc_model {
             $DB->delete_records($this->get_table(), ['id' => $id]);
         }
     }
-
 }

@@ -30,8 +30,8 @@ namespace mod_scheduler\model;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class mvc_child_model_factory extends mvc_model_factory {
-
+abstract class mvc_child_model_factory extends mvc_model_factory
+{
     /**
      * @var mvc_model the parent record
      */
@@ -73,4 +73,3 @@ abstract class mvc_child_model_factory extends mvc_model_factory {
         return $new;
     }
 }
-

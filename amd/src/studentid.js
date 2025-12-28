@@ -38,6 +38,7 @@ define(['jquery', 'core/ajax', 'core/templates'], function($, Ajax, Templates) {
 
         transport: function(selector, query, success, failure) {
             var promise;
+            var users;
 
             let scheduler = $(selector).attr('scheduler') || null;
             let groupids = $(selector).attr('groupids') || null;
@@ -51,25 +52,29 @@ define(['jquery', 'core/ajax', 'core/templates'], function($, Ajax, Templates) {
             }]);
 
             promise[0].then(function(results) {
-                var promises = [],
-                    i = 0;
+                var promises = [];
+
+                // Remember the results so the next step can apply the rendered labels.
+                users = results;
 
                 // Render the label.
                 $.each(results, function(index, user) {
                     promises.push(Templates.render('mod_scheduler/studentid', user));
                 });
 
-                // Apply the label to the results.
-                return $.when.apply($.when, promises).then(function() {
-                    var args = arguments;
-                    $.each(results, function(index, user) {
-                        user._label = args[i];
-                        i++;
-                    });
-                    success(results);
-                    return;
-                });
+                // Wait for all labels to render.
+                return $.when.apply($.when, promises);
+            }).then(function() {
+                var i = 0;
+                var labels = arguments;
 
+                // Apply the label to the results.
+                $.each(users, function(index, user) {
+                    user._label = labels[i];
+                    i++;
+                });
+                success(users);
+                return;
             }).fail(failure);
         }
 

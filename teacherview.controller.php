@@ -56,47 +56,68 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
     } else {
         $slot->duration = max(1, $data->endhour * 60 + $data->endminute - $data->starthour * 60 - $data->startminute);
     }
+
     $slot->notes = '';
     $slot->notesformat = FORMAT_HTML;
     $slot->timemodified = time();
 
-    for ($d = 0; $d <= $fordays; $d ++) {
+    for ($d = 0; $d <= $fordays; $d++) {
         $starttime = $startfrom + ($d * DAYSECS);
         $eventdate = usergetdate($starttime);
         $dayofweek = $eventdate['wday'];
-        if ((($dayofweek == 1) && ($data->monday == 1)) ||
-        (($dayofweek == 2) && ($data->tuesday == 1)) ||
-        (($dayofweek == 3) && ($data->wednesday == 1)) ||
-        (($dayofweek == 4) && ($data->thursday == 1)) ||
-        (($dayofweek == 5) && ($data->friday == 1)) ||
-        (($dayofweek == 6) && ($data->saturday == 1)) ||
-        (($dayofweek == 0) && ($data->sunday == 1))) {
-            $slot->starttime = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'],
-                                              $data->starthour, $data->startminute);
+        if (
+            (($dayofweek == 1) && ($data->monday == 1)) ||
+            (($dayofweek == 2) && ($data->tuesday == 1)) ||
+            (($dayofweek == 3) && ($data->wednesday == 1)) ||
+            (($dayofweek == 4) && ($data->thursday == 1)) ||
+            (($dayofweek == 5) && ($data->friday == 1)) ||
+            (($dayofweek == 6) && ($data->saturday == 1)) ||
+            (($dayofweek == 0) && ($data->sunday == 1))
+        ) {
+            $slot->starttime = make_timestamp(
+                $eventdate['year'],
+                $eventdate['mon'],
+                $eventdate['mday'],
+                $data->starthour,
+                $data->startminute
+            );
             $data->timestart = $slot->starttime;
-            $data->timeend = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'],
-                                            $data->endhour, $data->endminute);
+            $data->timeend = make_timestamp(
+                $eventdate['year'],
+                $eventdate['mon'],
+                $eventdate['mday'],
+                $data->endhour,
+                $data->endminute
+            );
 
             // This corrects around midnight bug.
             if ($data->timestart > $data->timeend) {
                 $data->timeend += DAYSECS;
             }
+
             if ($data->hideuntilrel == 0) {
                 $slot->hideuntil = time();
             } else {
                 $slot->hideuntil = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'], 6, 0) -
                                     $data->hideuntilrel;
             }
+
             if ($data->emaildaterel == -1) {
                 $slot->emaildate = 0;
             } else {
                 $slot->emaildate = make_timestamp($eventdate['year'], $eventdate['mon'], $eventdate['mday'], 0, 0) -
                                     $data->emaildaterel;
             }
+
             while ($slot->starttime <= $data->timeend - $slot->duration * 60) {
-                $conflicts = $scheduler->get_conflicts($data->timestart, $data->timestart + $slot->duration * 60,
-                                                       $data->teacherid, 0, SCHEDULER_ALL);
-                $resolvable = (boolean) $data->forcewhenoverlap;
+                $conflicts = $scheduler->get_conflicts(
+                    $data->timestart,
+                    $data->timestart + $slot->duration * 60,
+                    $data->teacherid,
+                    0,
+                    SCHEDULER_ALL
+                );
+                $resolvable = (bool) $data->forcewhenoverlap;
                 foreach ($conflicts as $conflict) {
                     $resolvable = $resolvable
                                      && $conflict->isself == 1       // Do not delete slots outside the current scheduler.
@@ -117,18 +138,22 @@ function scheduler_action_doaddsession($scheduler, $formdata, moodle_url $return
                             \mod_scheduler\event\slot_deleted::create_from_slot($cslot, 'addsession-conflict')->trigger();
                             $cslot->delete();
                         }
+
                         $conflictmsg .= get_string('deletedconflictingslots', 'scheduler', userdate($data->timestart));
                         $conflictmsg .= $output->doc_link('mod/scheduler/conflict', '', true);
                         $conflictmsg .= $output->render($cl);
                     }
+
                     \core\notification::warning($conflictmsg);
                 }
+
                 if (!$conflicts || $resolvable) {
                     $slotid = $DB->insert_record('scheduler_slots', $slot, true, true);
                     $slotobj = $scheduler->get_slot($slotid);
                     \mod_scheduler\event\slot_added::create_from_slot($slotobj)->trigger();
                     $countslots++;
                 }
+
                 $slot->starttime += ($slot->duration + $data->break) * 60;
                 $data->timestart += ($slot->duration + $data->break) * 60;
             }
@@ -159,6 +184,7 @@ function scheduler_action_dosendmessage($scheduler, $formdata, $returnurl) {
     if ($data->copytomyself) {
         $recipients[$USER->id] = 1;
     }
+
     $rawmessage = $data->body['text'];
     $format = $data->body['format'];
     $textmessage = format_text_email($rawmessage, $format);
@@ -181,6 +207,7 @@ function scheduler_action_dosendmessage($scheduler, $formdata, $returnurl) {
             if ($htmlmessage) {
                 $message->fullmessagehtml = $htmlmessage;
             }
+
             $message->notification = '1';
 
             message_send($message);
@@ -214,6 +241,7 @@ function scheduler_action_delete_slots(array $slots, $action, moodle_url $return
     } else {
         $message = get_string('slotsdeleted', 'scheduler', $cnt);
     }
+
     $messagetype = ($cnt > 0) ? \core\output\notification::NOTIFY_SUCCESS : \core\output\notification::NOTIFY_INFO;
     \core\notification::add($message, $messagetype);
     redirect($returnurl);
@@ -244,6 +272,7 @@ switch ($action) {
                 $slots[] = $slot;
             }
         }
+
         scheduler_action_delete_slots($slots, $action, $viewurl);
         break;
     /************************************ Students were seen ***************************************************/
@@ -259,6 +288,7 @@ switch ($action) {
                 $app->timemodified = time();
             }
         }
+
         $slot->save();
         redirect($viewurl);
         break;
@@ -273,16 +303,25 @@ switch ($action) {
             $oldstudents[] = $app->studentid;
             $slot->remove_appointment($app);
         }
+
         // Notify the student.
         if ($scheduler->allownotifications) {
             foreach ($oldstudents as $oldstudent) {
-                include_once($CFG->dirroot.'/mod/scheduler/mailtemplatelib.php');
+                include_once($CFG->dirroot . '/mod/scheduler/mailtemplatelib.php');
 
                 $student = $DB->get_record('user', ['id' => $oldstudent]);
                 $teacher = $DB->get_record('user', ['id' => $slot->teacherid]);
 
-                scheduler_messenger::send_slot_notification($slot, 'bookingnotification', 'teachercancelled',
-                                        $teacher, $student, $teacher, $student, $COURSE);
+                scheduler_messenger::send_slot_notification(
+                    $slot,
+                    'bookingnotification',
+                    'teachercancelled',
+                    $teacher,
+                    $student,
+                    $teacher,
+                    $student,
+                    $COURSE
+                );
             }
         }
 

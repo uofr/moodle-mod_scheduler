@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__).'/exportform.php');
+require_once(dirname(__FILE__) . '/exportform.php');
 
 $PAGE->set_docs_path('mod/scheduler/export');
 
@@ -49,17 +49,19 @@ if ($data) {
     $availablefields = scheduler_get_export_fields($scheduler);
     $selectedfields = [];
     foreach ($availablefields as $field) {
-        $inputid = 'field-'.$field->get_id();
+        $inputid = 'field-' . $field->get_id();
         if (isset($data->{$inputid}) && $data->{$inputid} == 1) {
             $selectedfields[] = $field;
             $field->set_renderer($output);
         }
     }
+
     $userid = $USER->id;
     if (isset($data->includewhom) && $data->includewhom == 'all') {
         $permissions->ensure($permissions->can_see_all_slots());
         $userid = 0;
     }
+
     $pageperteacher = isset($data->paging) && $data->paging == 'perteacher';
     $preview = isset($data->preview);
 } else {
@@ -85,14 +87,16 @@ if (!$data || $preview) {
         $canvas = new scheduler_html_canvas();
         $export = new scheduler_export($canvas);
 
-        $export->build($scheduler,
-                        $selectedfields,
-                        $data->content,
-                        $userid,
-                        $currentgroupid,
-                        $data->timerange,
-                        $data->includeemptyslots,
-                        $pageperteacher);
+        $export->build(
+            $scheduler,
+            $selectedfields,
+            $data->content,
+            $userid,
+            $currentgroupid,
+            $data->timerange,
+            $data->includeemptyslots,
+            $pageperteacher
+        );
 
         $limit = 20;
         echo $canvas->as_html($limit, false);
@@ -124,15 +128,16 @@ switch ($data->outputformat) {
 
 $export = new scheduler_export($canvas);
 
-$export->build($scheduler,
-               $selectedfields,
-               $data->content,
-               $userid,
-               $currentgroupid,
-               $data->timerange,
-               $data->includeemptyslots,
-               $pageperteacher);
+$export->build(
+    $scheduler,
+    $selectedfields,
+    $data->content,
+    $userid,
+    $currentgroupid,
+    $data->timerange,
+    $data->includeemptyslots,
+    $pageperteacher
+);
 
-$filename = clean_filename(format_string($course->shortname).'_'.format_string($scheduler->name));
+$filename = clean_filename(format_string($course->shortname) . '_' . format_string($scheduler->name));
 $canvas->send($filename);
-

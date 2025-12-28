@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 use mod_scheduler\model\appointment;
 use mod_scheduler\permission\scheduler_permissions;
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Form to edit one appointment
@@ -36,8 +36,8 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_editappointment_form extends moodleform {
-
+class scheduler_editappointment_form extends moodleform
+{
     /**
      * @var appointment the appointment being edited
      */
@@ -105,31 +105,54 @@ class scheduler_editappointment_form extends moodleform {
                 $mform->addElement('static', 'gradedisplay', get_string('grade', 'scheduler'), $gradetext);
             }
         }
+
         // Appointment notes (visible to teacher and/or student).
         if ($scheduler->uses_appointmentnotes()) {
             if ($this->permissions->can_edit_notes($this->appointment)) {
-                $mform->addElement('editor', 'appointmentnote_editor', get_string('appointmentnote', 'scheduler'),
-                                   ['rows' => 3, 'columns' => 60], $this->noteoptions);
+                $mform->addElement(
+                    'editor',
+                    'appointmentnote_editor',
+                    get_string('appointmentnote', 'scheduler'),
+                    ['rows' => 3, 'columns' => 60],
+                    $this->noteoptions
+                );
                 $mform->setType('appointmentnote', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
                 $candistribute = true;
             } else {
-                $note = $output->format_notes($this->appointment->appointmentnote, $this->appointment->appointmentnoteformat,
-                                              $scheduler->get_context(), 'appointmentnote', $this->appointment->id);
+                $note = $output->format_notes(
+                    $this->appointment->appointmentnote,
+                    $this->appointment->appointmentnoteformat,
+                    $scheduler->get_context(),
+                    'appointmentnote',
+                    $this->appointment->id
+                );
                 $mform->addElement('static', 'appointmentnote_display', get_string('appointmentnote', 'scheduler'), $note);
             }
         }
+
         if ($scheduler->uses_teachernotes()) {
             if ($this->permissions->can_edit_notes($this->appointment)) {
-                $mform->addElement('editor', 'teachernote_editor', get_string('teachernote', 'scheduler'),
-                                   ['rows' => 3, 'columns' => 60], $this->noteoptions);
+                $mform->addElement(
+                    'editor',
+                    'teachernote_editor',
+                    get_string('teachernote', 'scheduler'),
+                    ['rows' => 3, 'columns' => 60],
+                    $this->noteoptions
+                );
                 $mform->setType('teachernote', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
                 $candistribute = true;
             } else {
-                $note = $output->format_notes($this->appointment->teachernote, $this->appointment->teachernoteformat,
-                                              $scheduler->get_context(), 'teachernote', $this->appointment->id);
+                $note = $output->format_notes(
+                    $this->appointment->teachernote,
+                    $this->appointment->teachernoteformat,
+                    $scheduler->get_context(),
+                    'teachernote',
+                    $this->appointment->id
+                );
                 $mform->addElement('static', 'teachernote_display', get_string('teachernote', 'scheduler'), $note);
             }
         }
+
         if ($this->distribute && $candistribute) {
             $mform->addElement('checkbox', 'distribute', get_string('distributetoslot', 'scheduler'));
             $mform->setDefault('distribute', false);
@@ -162,11 +185,25 @@ class scheduler_editappointment_form extends moodleform {
         $newdata = clone($appointment->get_data());
         $context = $this->appointment->get_scheduler()->get_context();
 
-        $newdata = file_prepare_standard_editor($newdata, 'appointmentnote', $this->noteoptions, $context,
-                                                'mod_scheduler', 'appointmentnote', $this->appointment->id);
+        $newdata = file_prepare_standard_editor(
+            $newdata,
+            'appointmentnote',
+            $this->noteoptions,
+            $context,
+            'mod_scheduler',
+            'appointmentnote',
+            $this->appointment->id
+        );
 
-        $newdata = file_prepare_standard_editor($newdata, 'teachernote', $this->noteoptions, $context,
-                                                'mod_scheduler', 'teachernote', $this->appointment->id);
+        $newdata = file_prepare_standard_editor(
+            $newdata,
+            'teachernote',
+            $this->noteoptions,
+            $context,
+            'mod_scheduler',
+            'teachernote',
+            $this->appointment->id
+        );
         return $newdata;
     }
 
@@ -183,18 +220,32 @@ class scheduler_editappointment_form extends moodleform {
         $appointment->attended = isset($formdata->attended);
         if ($scheduler->uses_appointmentnotes() && isset($formdata->appointmentnote_editor)) {
             $editor = $formdata->appointmentnote_editor;
-            $appointment->appointmentnote = file_save_draft_area_files($editor['itemid'], $cid,
-                    'mod_scheduler', 'appointmentnote', $appointment->id,
-                    $this->noteoptions, $editor['text']);
+            $appointment->appointmentnote = file_save_draft_area_files(
+                $editor['itemid'],
+                $cid,
+                'mod_scheduler',
+                'appointmentnote',
+                $appointment->id,
+                $this->noteoptions,
+                $editor['text']
+            );
             $appointment->appointmentnoteformat = $editor['format'];
         }
+
         if ($scheduler->uses_teachernotes() && isset($formdata->teachernote_editor)) {
             $editor = $formdata->teachernote_editor;
-            $appointment->teachernote = file_save_draft_area_files($editor['itemid'], $cid,
-                    'mod_scheduler', 'teachernote', $appointment->id,
-                    $this->noteoptions, $editor['text']);
+            $appointment->teachernote = file_save_draft_area_files(
+                $editor['itemid'],
+                $cid,
+                'mod_scheduler',
+                'teachernote',
+                $appointment->id,
+                $this->noteoptions,
+                $editor['text']
+            );
             $appointment->teachernoteformat = $editor['format'];
         }
+
         $appointment->save();
         if (isset($formdata->distribute)) {
             $slot = $appointment->get_slot();
@@ -202,4 +253,3 @@ class scheduler_editappointment_form extends moodleform {
         }
     }
 }
-

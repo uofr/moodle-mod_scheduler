@@ -27,7 +27,7 @@ define('AJAX_SCRIPT', true);
 use mod_scheduler\model\scheduler;
 use mod_scheduler\permission\scheduler_permissions;
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('locallib.php');
 
 $id = required_param('id', PARAM_INT);
@@ -46,9 +46,8 @@ $return = 'OK';
 
 switch ($action) {
     case 'saveseen':
-
         $appid = required_param('appointmentid', PARAM_INT);
-        list($slot, $app) = $scheduler->get_slot_appointment($appid);
+        [$slot, $app] = $scheduler->get_slot_appointment($appid);
         $newseen = required_param('seen', PARAM_BOOL);
 
         $permissions->ensure($permissions->can_edit_attended($app));

@@ -120,18 +120,18 @@ switch ($subpage) {
 
         $allattendees = ($attendees) ? count($attendees) : 0;
 
-        $str = '<h3>'.get_string('attendable', 'scheduler').'</h3>';
-        $str .= '<strong>'.get_string('attendablelbl', 'scheduler').'</strong>: ' . $allattendees . '<br/>';
-        $str .= '<h3>'.get_string('attended', 'scheduler').'</h3>';
-        $str .= '<strong>'.get_string('attendedlbl', 'scheduler').'</strong>: ' . $attended . '<br/><br/>';
-        $str .= '<h3>'.get_string('unattended', 'scheduler').'</h3>';
-        $str .= '<strong>'.get_string('registeredlbl', 'scheduler').'</strong>: ' . $registered . '<br/>';
-        $str .= '<strong>'.get_string('unregisteredlbl', 'scheduler').'</strong>: ' .
+        $str = '<h3>' . get_string('attendable', 'scheduler') . '</h3>';
+        $str .= '<strong>' . get_string('attendablelbl', 'scheduler') . '</strong>: ' . $allattendees . '<br/>';
+        $str .= '<h3>' . get_string('attended', 'scheduler') . '</h3>';
+        $str .= '<strong>' . get_string('attendedlbl', 'scheduler') . '</strong>: ' . $attended . '<br/><br/>';
+        $str .= '<h3>' . get_string('unattended', 'scheduler') . '</h3>';
+        $str .= '<strong>' . get_string('registeredlbl', 'scheduler') . '</strong>: ' . $registered . '<br/>';
+        $str .= '<strong>' . get_string('unregisteredlbl', 'scheduler') . '</strong>: ' .
                 ($allattendees - $registered - $attended) . '<br/>';
-        $str .= '<h3>'.get_string('availableslots', 'scheduler').'</h3>';
-        $str .= '<strong>'.get_string('availableslotsowned', 'scheduler').'</strong>: ' . $freeowned . '<br/>';
-        $str .= '<strong>'.get_string('availableslotsnotowned', 'scheduler').'</strong>: ' . $freenotowned . '<br/>';
-        $str .= '<strong>'.get_string('availableslotsall', 'scheduler').'</strong>: ' . ($freeowned + $freenotowned) . '<br/>';
+        $str .= '<h3>' . get_string('availableslots', 'scheduler') . '</h3>';
+        $str .= '<strong>' . get_string('availableslotsowned', 'scheduler') . '</strong>: ' . $freeowned . '<br/>';
+        $str .= '<strong>' . get_string('availableslotsnotowned', 'scheduler') . '</strong>: ' . $freenotowned . '<br/>';
+        $str .= '<strong>' . get_string('availableslotsall', 'scheduler') . '</strong>: ' . ($freeowned + $freenotowned) . '<br/>';
 
         echo $OUTPUT->box($str);
 
@@ -165,8 +165,10 @@ switch ($subpage) {
                         $table->data[] = [fullname($attendees[$arecord->studentid]), $arecord->totaltime];
                     }
                 }
+
                 uasort($table->data, 'byname');
             }
+
             echo html_writer::table($table);
         } else {
             echo $OUTPUT->box(get_string('nostudents', 'scheduler'), 'center', '70%');
@@ -187,6 +189,7 @@ switch ($subpage) {
             $sql .= " AND EXISTS (SELECT 1 FROM {groups_members} gm WHERE gm.userid = a.studentid AND gm.groupid = :gid)";
             $params['gid'] = $currentgroupid;
         }
+
         $sql .= " GROUP BY s.teacherid";
         if ($statrecords = $DB->get_records_sql($sql, $params)) {
             $table = new html_table();
@@ -197,6 +200,7 @@ switch ($subpage) {
                 $ateacher = $DB->get_record('user', ['id' => $arecord->teacherid]);
                 $table->data[] = [fullname($ateacher), $arecord->totaltime];
             }
+
             uasort($table->data, 'byname');
             echo html_writer::table($table);
         }
@@ -222,6 +226,7 @@ switch ($subpage) {
             $sql .= " AND EXISTS (SELECT 1 FROM {groups_members} gm WHERE gm.userid = a.studentid AND gm.groupid = :gid)";
             $params['gid'] = $currentgroupid;
         }
+
         $sql .= " GROUP BY s.starttime ORDER BY groupsize DESC";
         if ($groupslots = $DB->get_records_sql($sql, $params)) {
             $table = new html_table();
@@ -232,14 +237,16 @@ switch ($subpage) {
             $durationcount = [];
             foreach ($groupslots as $slot) {
                 if (array_key_exists($slot->duration, $durationcount)) {
-                    $durationcount[$slot->duration] ++;
+                    $durationcount[$slot->duration]++;
                 } else {
                     $durationcount[$slot->duration] = 1;
                 }
             }
+
             foreach ($durationcount as $key => $duration) {
                 $table->data[] = [$key, $duration];
             }
+
             echo html_writer::table($table);
         }
         break;
@@ -264,6 +271,7 @@ switch ($subpage) {
             $sql .= " AND EXISTS (SELECT 1 FROM {groups_members} gm WHERE gm.userid = s.teacherid AND gm.groupid = :gid)";
             $params['gid'] = $currentgroupid;
         }
+
         $sql .= " GROUP BY s.starttime
                   ORDER BY groupsize DESC";
         if ($groupslots = $DB->get_records_sql($sql, $params)) {
@@ -279,17 +287,21 @@ switch ($subpage) {
                     $grouprows[$agroup->groupsize]->occurrences = 0;
                     $grouprows[$agroup->groupsize]->duration = 0;
                 }
+
                 $grouprows[$agroup->groupsize]->occurrences++;
                 $grouprows[$agroup->groupsize]->duration += $agroup->duration;
             }
+
             foreach (array_keys($grouprows) as $agroupsize) {
                 $table->data[] = [$agroupsize, $grouprows[$agroupsize]->occurrences, $grouprows[$agroupsize]->duration];
             }
+
             echo html_writer::table($table);
         }
 }
+
 echo '<br/>';
-echo $OUTPUT->continue_button("$CFG->wwwroot/mod/scheduler/view.php?id=".$cm->id);
+echo $OUTPUT->continue_button("$CFG->wwwroot/mod/scheduler/view.php?id=" . $cm->id);
 // Finish the page.
 echo $OUTPUT->footer($course);
 exit;

@@ -33,8 +33,8 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
  * @copyright  2011 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_scheduler_mod_form extends moodleform_mod {
-
+class mod_scheduler_mod_form extends moodleform_mod
+{
     /** @var array */
     protected $editoroptions;
 
@@ -55,6 +55,7 @@ class mod_scheduler_mod_form extends moodleform_mod {
         } else {
             $mform->setType('name', PARAM_CLEANHTML);
         }
+
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
@@ -77,6 +78,7 @@ class mod_scheduler_mod_form extends moodleform_mod {
         for ($i = 1; $i <= 10; $i++) {
             $maxbookoptions[(string)$i] = $i;
         }
+
         $modegroup[] = $mform->createElement('select', 'maxbookings', '', $maxbookoptions);
         $mform->setDefault('maxbookings', 1);
 
@@ -99,6 +101,7 @@ class mod_scheduler_mod_form extends moodleform_mod {
             foreach ($groupings as $grouping) {
                 $selopt[$grouping->id] = get_string('yesingrouping', 'scheduler', $grouping->name);
             }
+
             $mform->addElement('select', 'bookingrouping', get_string('groupbookings', 'scheduler'), $selopt);
             $mform->addHelpButton('bookingrouping', 'groupbookings', 'scheduler');
             $mform->setDefault('bookingrouping', '-1');
@@ -141,8 +144,13 @@ class mod_scheduler_mod_form extends moodleform_mod {
 
         $this->editoroptions = ['trusttext' => true, 'maxfiles' => -1, 'maxbytes' => 0,
                                      'context' => $this->context, 'collapsed' => true, ];
-        $mform->addElement('editor', 'bookinginstructions_editor', get_string('bookinginstructions', 'scheduler'),
-                ['rows' => 3, 'columns' => 60], $this->editoroptions);
+        $mform->addElement(
+            'editor',
+            'bookinginstructions_editor',
+            get_string('bookinginstructions', 'scheduler'),
+            ['rows' => 3, 'columns' => 60],
+            $this->editoroptions
+        );
         $mform->setType('bookinginstructions', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
         $mform->disabledIf('bookinginstructions_editor', 'usebookingform', 'eq', '0');
         $mform->addHelpButton('bookinginstructions_editor', 'bookinginstructions', 'scheduler');
@@ -161,6 +169,7 @@ class mod_scheduler_mod_form extends moodleform_mod {
         for ($i = 0; $i <= get_config('mod_scheduler', 'uploadmaxfiles'); $i++) {
             $filechoices[$i] = $i;
         }
+
         $uploadgroup[] = $mform->createElement('select', 'uploadmaxfiles', get_string('uploadmaxfiles', 'scheduler'), $filechoices);
         $mform->setDefault('uploadmaxfiles', 0);
         $mform->disabledIf('uploadmaxfiles', 'usebookingform', 'eq', '0');
@@ -202,11 +211,18 @@ class mod_scheduler_mod_form extends moodleform_mod {
     public function data_preprocessing(&$defaultvalues) {
         parent::data_preprocessing($defaultvalues);
         if ($this->current->instance) {
-            $newvalues = file_prepare_standard_editor((object)$defaultvalues, 'bookinginstructions',
-                             $this->editoroptions, $this->context,
-                            'mod_scheduler', 'bookinginstructions', 0);
+            $newvalues = file_prepare_standard_editor(
+                (object)$defaultvalues,
+                'bookinginstructions',
+                $this->editoroptions,
+                $this->context,
+                'mod_scheduler',
+                'bookinginstructions',
+                0
+            );
             $defaultvalues['bookinginstructions_editor'] = $newvalues->bookinginstructions_editor;
         }
+
         if (array_key_exists('scale', $defaultvalues)) {
             $dgrade = $defaultvalues['scale'];
             $defaultvalues['grade'] = $dgrade;
@@ -216,6 +232,7 @@ class mod_scheduler_mod_form extends moodleform_mod {
             } else if ($dgrade < 0) {
                 $type = 'scale';
             }
+
             $defaultvalues['grade[modgrade_type]'] = $type;
         }
     }
@@ -231,14 +248,17 @@ class mod_scheduler_mod_form extends moodleform_mod {
 
         $editor = $data->bookinginstructions_editor;
         if ($editor && array_key_exists('text', $editor)) {
-            $data->bookinginstructions = file_save_draft_area_files($editor['itemid'], $context->id,
-                                            'mod_scheduler', 'bookinginstructions', 0,
-                                            $this->editoroptions, $editor['text']);
+            $data->bookinginstructions = file_save_draft_area_files(
+                $editor['itemid'],
+                $context->id,
+                'mod_scheduler',
+                'bookinginstructions',
+                0,
+                $this->editoroptions,
+                $editor['text']
+            );
             $data->bookinginstructionsformat = $editor['format'];
             $DB->update_record('scheduler', $data);
         }
     }
-
-
-
 }
