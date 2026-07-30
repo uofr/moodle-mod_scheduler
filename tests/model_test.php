@@ -26,8 +26,8 @@ namespace mod_scheduler;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \mod_scheduler\model\scheduler;
-use \mod_scheduler\model\appointment_factory;
+use mod_scheduler\model\scheduler;
+use mod_scheduler\model\appointment_factory;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
@@ -39,8 +39,8 @@ require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class model_test extends \advanced_testcase {
-
+final class model_test extends \advanced_testcase
+{
     /**
      * @var int Course_modules id used for testing
      */
@@ -65,24 +65,26 @@ class model_test extends \advanced_testcase {
         global $DB, $CFG;
 
         $this->resetAfterTest(true);
+        parent::setUp();
 
         $course = $this->getDataGenerator()->create_course();
-        $options = array();
-        $options['slottimes'] = array();
-        $options['slotstudents'] = array();
+        $options = [];
+        $options['slottimes'] = [];
+        $options['slotstudents'] = [];
         for ($c = 0; $c < 4; $c++) {
             $options['slottimes'][$c] = time() + ($c + 1) * DAYSECS;
-            $options['slotstudents'][$c] = array($this->getDataGenerator()->create_user()->id);
+            $options['slotstudents'][$c] = [$this->getDataGenerator()->create_user()->id];
         }
+
         $options['slottimes'][4] = time() + 10 * DAYSECS;
         $options['slottimes'][5] = time() + 11 * DAYSECS;
-        $options['slotstudents'][5] = array(
+        $options['slotstudents'][5] = [
                                             $this->getDataGenerator()->create_user()->id,
-                                            $this->getDataGenerator()->create_user()->id
-                                           );
+                                            $this->getDataGenerator()->create_user()->id,
+                                           ];
 
-        $scheduler = $this->getDataGenerator()->create_module('scheduler', array('course' => $course->id), $options);
-        $coursemodule = $DB->get_record('course_modules', array('id' => $scheduler->cmid));
+        $scheduler = $this->getDataGenerator()->create_module('scheduler', ['course' => $course->id], $options);
+        $coursemodule = $DB->get_record('course_modules', ['id' => $scheduler->cmid]);
 
         $this->schedulerid = $scheduler->id;
         $this->moduleid  = $coursemodule->id;
@@ -95,15 +97,14 @@ class model_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_coursemodule_id
      */
-    public function test_scheduler() {
+    public function test_scheduler(): void {
         global $DB;
 
-        $dbdata = $DB->get_record('scheduler', array('id' => $this->schedulerid));
+        $dbdata = $DB->get_record('scheduler', ['id' => $this->schedulerid]);
 
         $instance = scheduler::load_by_coursemodule_id($this->moduleid);
 
-        $this->assertEquals( $dbdata->name, $instance->get_name());
-
+        $this->assertEquals($dbdata->name, $instance->get_name());
     }
 
     /**
@@ -112,7 +113,7 @@ class model_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_coursemodule_id
      */
-    public function test_appointment() {
+    public function test_appointment(): void {
 
         global $DB;
 
@@ -149,7 +150,5 @@ class model_test extends \advanced_testcase {
         $this->assertEquals(fullname($user), fullname($appobj->get_student()));
         $this->assertTrue($appobj->is_attended());
         $this->assertEquals(-7, $appobj->grade);
-
     }
-
 }

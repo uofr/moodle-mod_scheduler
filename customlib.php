@@ -39,7 +39,7 @@
  */
 function scheduler_get_user_fields($user, $context) {
 
-    $fields = array();
+    $fields = [];
 
     if (has_capability('moodle/site:viewuseridentity', $context)) {
         $emailfield = new stdClass();
@@ -53,6 +53,8 @@ function scheduler_get_user_fields($user, $context) {
     /*
      * As an example: Uncomment the following lines in order to display the user's city and country.
      */
+
+    // phpcs:disable
 
     /*
     $cityfield = new stdClass();
@@ -73,5 +75,7 @@ function scheduler_get_user_fields($user, $context) {
         }
     }
     */
+
+    // phpcs:enable
     return $fields;
 }

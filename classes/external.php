@@ -34,7 +34,7 @@ use external_value;
 use external_single_structure;
 use external_multiple_structure;
 
-use \mod_scheduler\model\scheduler;
+use mod_scheduler\model\scheduler;
 
 /**
  * This is the external API for this component.
@@ -42,8 +42,8 @@ use \mod_scheduler\model\scheduler;
  * @copyright  2022 University of Glasgow
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class external extends external_api {
-
+class external extends external_api
+{
     /**
      * studentid parameters
      *
@@ -53,7 +53,7 @@ class external extends external_api {
         return new external_function_parameters([
             'query' => new external_value(PARAM_TEXT, 'The search query', VALUE_REQUIRED),
             'scheduler' => new external_value(PARAM_INT, 'The scheduler id', VALUE_REQUIRED),
-            'groupids' => new external_value(PARAM_INT, 'The group ids', VALUE_DEFAULT)
+            'groupids' => new external_value(PARAM_INT, 'The group ids', VALUE_DEFAULT),
         ]);
     }
 
@@ -70,12 +70,11 @@ class external extends external_api {
      * @throws invalid_parameter_exception
      * @throws restricted_context_exception
      */
-
     public static function studentid($query, $scheduler, $groupids) {
         $params = external_api::validate_parameters(self::studentid_parameters(), [
             'query' => $query,
             'scheduler' => $scheduler,
-            'groupids' => $groupids
+            'groupids' => $groupids,
         ]);
         $query = $params['query'];
         $scheduler = $params['scheduler'];
@@ -96,7 +95,6 @@ class external extends external_api {
         }
 
         return $students;
-
     }
 
     /**
@@ -110,9 +108,8 @@ class external extends external_api {
         return new external_multiple_structure(
             new external_single_structure([
                 'id'    => new external_value(PARAM_INT, 'User ID'),
-                'fullname'  => new external_value(PARAM_NOTAGS, 'User fullname')
+                'fullname'  => new external_value(PARAM_NOTAGS, 'User fullname'),
             ])
         );
     }
-
 }

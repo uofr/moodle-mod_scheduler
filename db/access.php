@@ -24,170 +24,168 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
+$capabilities = [
 
-    'mod/scheduler:addinstance' => array(
+    'mod/scheduler:addinstance' => [
         'riskbitmask' => RISK_XSS,
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-        'clonepermissionsfrom' => 'moodle/course:manageactivities'
-    ),
+            'manager' => CAP_ALLOW,
+        ],
+        'clonepermissionsfrom' => 'moodle/course:manageactivities',
+    ],
 
-    'mod/scheduler:appoint' => array(
+    'mod/scheduler:appoint' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'student' => CAP_ALLOW,
-        )
-    ),
+        ],
+    ],
 
-    'mod/scheduler:attend' => array(
+    'mod/scheduler:attend' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW
-        )
-    ),
-
-    'mod/scheduler:manage' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
+        ],
+    ],
 
-    'mod/scheduler:manageallappointments' => array(
+    'mod/scheduler:manage' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-
-    'mod/scheduler:canscheduletootherteachers' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-
-    'mod/scheduler:canseeotherteachersbooking' => array(
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-
-    'mod/scheduler:seeoverviewoutsideactivity' => array(
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
+            'manager' => CAP_ALLOW,
+        ],
+    ],
 
-    'mod/scheduler:editallattended' => array(
+    'mod/scheduler:manageallappointments' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
+    'mod/scheduler:canscheduletootherteachers' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
+    'mod/scheduler:canseeotherteachersbooking' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
+    'mod/scheduler:seeoverviewoutsideactivity' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
+    'mod/scheduler:editallattended' => [
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
-            'archetypes' => array(
+            'archetypes' => [
                     'editingteacher' => CAP_ALLOW,
                     'coursecreator' => CAP_ALLOW,
-                    'manager' => CAP_ALLOW
-            )
-    ),
+                    'manager' => CAP_ALLOW,
+            ],
+    ],
 
-    'mod/scheduler:editallgrades' => array(
+    'mod/scheduler:editallgrades' => [
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
-            'archetypes' => array(
+            'archetypes' => [
                     'editingteacher' => CAP_ALLOW,
                     'coursecreator' => CAP_ALLOW,
-                    'manager' => CAP_ALLOW
-            )
-    ),
+                    'manager' => CAP_ALLOW,
+            ],
+    ],
 
-    'mod/scheduler:editallnotes' => array(
+    'mod/scheduler:editallnotes' => [
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
-            'archetypes' => array(
+            'archetypes' => [
                     'editingteacher' => CAP_ALLOW,
                     'coursecreator' => CAP_ALLOW,
-                    'manager' => CAP_ALLOW
-            )
-    ),
+                    'manager' => CAP_ALLOW,
+            ],
+    ],
 
-    'mod/scheduler:disengage' => array(
+    'mod/scheduler:disengage' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
+            'manager' => CAP_ALLOW,
+        ],
+    ],
 
-    'mod/scheduler:viewslots' => array(
+    'mod/scheduler:viewslots' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'student' => CAP_ALLOW,
-        ),
-        'clonepermissionsfrom' => 'mod/scheduler:appoint'
-    ),
+        ],
+        'clonepermissionsfrom' => 'mod/scheduler:appoint',
+    ],
 
-    'mod/scheduler:viewfullslots' => array(
+    'mod/scheduler:viewfullslots' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-        )
-    ),
+        'archetypes' => [
+        ],
+    ],
 
-    'mod/scheduler:seeotherstudentsbooking' => array(
+    'mod/scheduler:seeotherstudentsbooking' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
+            'manager' => CAP_ALLOW,
+        ],
+    ],
 
-    'mod/scheduler:seeotherstudentsresults' => array(
+    'mod/scheduler:seeotherstudentsresults' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'coursecreator' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    )
+            'manager' => CAP_ALLOW,
+        ],
+    ],
 
-);
-
-
+];

@@ -24,18 +24,18 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$messageproviders = array (
+$messageproviders = [
 
     // Invitations to make a booking.
-    'invitation' => array(
-    ),
+    'invitation' => [
+    ],
 
     // Notifications about bookings (to teachers or students).
-    'bookingnotification' => array(
-    ),
+    'bookingnotification' => [
+    ],
 
     // Automated reminders about upcoming appointments.
-    'reminder' => array(
-    ),
+    'reminder' => [
+    ],
 
-);
+];

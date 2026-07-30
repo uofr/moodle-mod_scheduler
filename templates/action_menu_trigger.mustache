@@ -22,6 +22,7 @@
     Example context (json):
     {
         "actiontext": "Example link text",
+        "bs5": "bs5",
         "title": "Example link title",
         "triggerrole": "button",
         "triggerattributes": [
@@ -86,10 +87,10 @@
     <a
         href="#"
         tabindex="0"
-        class="{{triggerextraclasses}} dropdown-toggle icon-no-margin"
+        class="{{triggerextraclasses}} dropdown-{{#bs5}}bs-{{/bs5}}toggle icon-no-margin"
         id="action-menu-toggle-{{instance}}"
         aria-label="{{title}}"
-        data-toggle="dropdown"
+        data-{{#bs5}}bs-{{/bs5}}toggle="dropdown"
         role="{{triggerrole}}"
         aria-haspopup="true"
         aria-expanded="false"

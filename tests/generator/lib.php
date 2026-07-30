@@ -29,8 +29,8 @@
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_scheduler_generator extends testing_module_generator {
-
+class mod_scheduler_generator extends testing_module_generator
+{
     /**
      * set default
      *
@@ -46,11 +46,12 @@ class mod_scheduler_generator extends testing_module_generator {
 
     /**
      * Create new scheduler module instance
-     * @param array|stdClass $record
-     * @param array $options
+     *
+     * @param array|stdClass $record data for module being generated.
+     * @param null|array $options general options for module.
      * @return stdClass activity record with extra cmid field
      */
-    public function create_instance($record = null, array $options = null) {
+    public function create_instance($record = null, ?array $options = null) {
         global $CFG, $DB;
         require_once("$CFG->dirroot/mod/scheduler/lib.php");
 
@@ -63,8 +64,9 @@ class mod_scheduler_generator extends testing_module_generator {
         if (empty($record->course)) {
             throw new coding_exception('module generator requires $record->course');
         }
-        self::set_default($record, 'name', get_string('pluginname', 'scheduler').' '.$i);
-        self::set_default($record, 'intro', 'Test scheduler '.$i);
+
+        self::set_default($record, 'name', get_string('pluginname', 'scheduler') . ' ' . $i);
+        self::set_default($record, 'intro', 'Test scheduler ' . $i);
         self::set_default($record, 'introformat', FORMAT_MOODLE);
         self::set_default($record, 'schedulermode', 'onetime');
         self::set_default($record, 'guardtime', 0);
@@ -146,5 +148,4 @@ class mod_scheduler_generator extends testing_module_generator {
 
         $slot->save();
     }
-
 }

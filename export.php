@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__).'/exportform.php');
+require_once(dirname(__FILE__) . '/exportform.php');
 
 $PAGE->set_docs_path('mod/scheduler/export');
 
@@ -35,8 +35,8 @@ if ($groupmode) {
     $currentgroupid = groups_get_activity_group($scheduler->cm, true);
 }
 
-$actionurl = new moodle_url('/mod/scheduler/view.php', array('what' => 'export', 'id' => $scheduler->cmid));
-$returnurl = new moodle_url('/mod/scheduler/view.php', array('what' => 'view', 'id' => $scheduler->cmid));
+$actionurl = new moodle_url('/mod/scheduler/view.php', ['what' => 'export', 'id' => $scheduler->cmid]);
+$returnurl = new moodle_url('/mod/scheduler/view.php', ['what' => 'view', 'id' => $scheduler->cmid]);
 $PAGE->set_url($actionurl);
 $mform = new scheduler_export_form($actionurl, $scheduler);
 
@@ -47,19 +47,21 @@ if ($mform->is_cancelled()) {
 $data = $mform->get_data();
 if ($data) {
     $availablefields = scheduler_get_export_fields($scheduler);
-    $selectedfields = array();
+    $selectedfields = [];
     foreach ($availablefields as $field) {
-        $inputid = 'field-'.$field->get_id();
+        $inputid = 'field-' . $field->get_id();
         if (isset($data->{$inputid}) && $data->{$inputid} == 1) {
             $selectedfields[] = $field;
             $field->set_renderer($output);
         }
     }
+
     $userid = $USER->id;
     if (isset($data->includewhom) && $data->includewhom == 'all') {
         $permissions->ensure($permissions->can_see_all_slots());
         $userid = 0;
     }
+
     $pageperteacher = isset($data->paging) && $data->paging == 'perteacher';
     $preview = isset($data->preview);
 } else {
@@ -70,7 +72,7 @@ if (!$data || $preview) {
     echo $OUTPUT->header();
 
     // Print top tabs.
-    $taburl = new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->cmid, 'what' => 'export'));
+    $taburl = new moodle_url('/mod/scheduler/view.php', ['id' => $scheduler->cmid, 'what' => 'export']);
     echo $output->teacherview_tabs($scheduler, $permissions, $taburl, 'export');
 
     if ($groupmode) {
@@ -85,14 +87,16 @@ if (!$data || $preview) {
         $canvas = new scheduler_html_canvas();
         $export = new scheduler_export($canvas);
 
-        $export->build($scheduler,
-                        $selectedfields,
-                        $data->content,
-                        $userid,
-                        $currentgroupid,
-                        $data->timerange,
-                        $data->includeemptyslots,
-                        $pageperteacher);
+        $export->build(
+            $scheduler,
+            $selectedfields,
+            $data->content,
+            $userid,
+            $currentgroupid,
+            $data->timerange,
+            $data->includeemptyslots,
+            $pageperteacher
+        );
 
         $limit = 20;
         echo $canvas->as_html($limit, false);
@@ -124,15 +128,16 @@ switch ($data->outputformat) {
 
 $export = new scheduler_export($canvas);
 
-$export->build($scheduler,
-               $selectedfields,
-               $data->content,
-               $userid,
-               $currentgroupid,
-               $data->timerange,
-               $data->includeemptyslots,
-               $pageperteacher);
+$export->build(
+    $scheduler,
+    $selectedfields,
+    $data->content,
+    $userid,
+    $currentgroupid,
+    $data->timerange,
+    $data->includeemptyslots,
+    $pageperteacher
+);
 
-$filename = clean_filename(format_string($course->shortname).'_'.format_string($scheduler->name));
+$filename = clean_filename(format_string($course->shortname) . '_' . format_string($scheduler->name));
 $canvas->send($filename);
-

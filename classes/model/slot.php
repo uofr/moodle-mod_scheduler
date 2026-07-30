@@ -30,8 +30,8 @@ namespace mod_scheduler\model;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class slot extends mvc_child_record_model {
-
+class slot extends mvc_child_record_model
+{
     /**
      * @var mvc_child_list list of appointments in this slot
      */
@@ -57,8 +57,12 @@ class slot extends mvc_child_record_model {
         $this->data->id = 0;
         $this->set_parent($scheduler);
         $this->data->schedulerid = $scheduler->get_id();
-        $this->appointments = new mvc_child_list($this, 'scheduler_appointment', 'slotid',
-                                                 new appointment_factory($this));
+        $this->appointments = new mvc_child_list(
+            $this,
+            'scheduler_appointment',
+            'slotid',
+            new appointment_factory($this)
+        );
     }
 
     /**
@@ -95,16 +99,19 @@ class slot extends mvc_child_record_model {
                 if ($scheduler->uses_grades()) {
                     $appointment->grade = $template->grade;
                 }
+
                 if ($scheduler->uses_appointmentnotes()) {
                     $appointment->appointmentnote = $template->appointmentnote;
                     $appointment->appointmentnoteformat = $template->appointmentnoteformat;
                     $this->distribute_file_area('appointmentnote', $template->id, $appointment->id);
                 }
+
                 if ($scheduler->uses_teachernotes()) {
                     $appointment->teachernote = $template->teachernote;
                     $appointment->teachernoteformat = $template->teachernoteformat;
                     $this->distribute_file_area('teachernote', $template->id, $appointment->id);
                 }
+
                 $appointment->save();
             }
         }
@@ -136,7 +143,7 @@ class slot extends mvc_child_record_model {
         // Copy files from the source to the target.
         $files = $fs->get_area_files($ctxid, $component, $area, $sourceid);
         foreach ($files as $f) {
-            $fs->create_file_from_storedfile(array('itemid' => $targetid), $f);
+            $fs->create_file_from_storedfile(['itemid' => $targetid], $f);
         }
     }
 
@@ -157,7 +164,7 @@ class slot extends mvc_child_record_model {
     public function get_teacher() {
         global $DB;
         if ($this->data->teacherid) {
-            return $DB->get_record('user', array('id' => $this->data->teacherid), '*', MUST_EXIST);
+            return $DB->get_record('user', ['id' => $this->data->teacherid], '*', MUST_EXIST);
         } else {
             return new \stdClass();
         }
@@ -191,7 +198,7 @@ class slot extends mvc_child_record_model {
      * @return boolean
      */
     public function is_groupslot() {
-        return (boolean) !($this->data->exclusivity == 1);
+        return (bool) !($this->data->exclusivity == 1);
     }
 
 
@@ -218,6 +225,7 @@ class slot extends mvc_child_record_model {
                 break;
             }
         }
+
         return $studapp;
     }
 
@@ -232,6 +240,7 @@ class slot extends mvc_child_record_model {
         foreach ($this->appointments->get_children() as $app) {
             $isattended = $isattended || $app->attended;
         }
+
         return $isattended;
     }
 
@@ -246,6 +255,7 @@ class slot extends mvc_child_record_model {
         foreach ($this->get_appointments() as $appointment) {
             $result = $result || $appointment->studentid == $studentid;
         }
+
         return $result;
     }
 
@@ -262,6 +272,7 @@ class slot extends mvc_child_record_model {
             if ($rem < 0) {
                 $rem = 0;
             }
+
             return $rem;
         }
     }
@@ -291,6 +302,7 @@ class slot extends mvc_child_record_model {
                 }
             }
         }
+
         return array_values($apps);
     }
 
@@ -364,8 +376,8 @@ class slot extends mvc_child_record_model {
      */
     private function clear_calendar() {
         global $DB;
-        $DB->delete_records('event', array('eventtype' => $this->get_teacher_eventtype()));
-        $DB->delete_records('event', array('eventtype' => $this->get_student_eventtype()));
+        $DB->delete_records('event', ['eventtype' => $this->get_teacher_eventtype()]);
+        $DB->delete_records('event', ['eventtype' => $this->get_student_eventtype()]);
     }
 
     /**
@@ -381,16 +393,16 @@ class slot extends mvc_child_record_model {
 
         $myappointments = $this->appointments->get_children();
 
-        $studentids = array();
+        $studentids = [];
         foreach ($myappointments as $appointment) {
             if (!$appointment->is_attended()) {
                 $studentids[] = $appointment->studentid;
             }
         }
 
-        $teacher = $DB->get_record('user', array('id' => $this->teacherid));
+        $teacher = $DB->get_record('user', ['id' => $this->teacherid]);
         $students = $DB->get_records_list('user', 'id', $studentids);
-        $studentnames = array();
+        $studentnames = [];
         foreach ($students as $student) {
             $studentnames[] = fullname($student);
         }
@@ -403,7 +415,7 @@ class slot extends mvc_child_record_model {
 
         $baseevent = new \stdClass();
         $baseevent->description = "$schedulername<br/><br/>"
-                                     .format_module_intro('scheduler', $scheduler, $scheduler->get_cmid(), false);
+                                     . format_module_intro('scheduler', $scheduler, $scheduler->get_cmid(), false);
         $baseevent->format = FORMAT_HTML;
         $baseevent->modulename = 'scheduler';
         $baseevent->courseid = 0;
@@ -415,29 +427,30 @@ class slot extends mvc_child_record_model {
         // Update student events.
 
         $studentevent = clone($baseevent);
-        $studenteventname = get_string('meetingwith', 'scheduler').' '.$scheduler->get_teacher_name().', '.fullname($teacher);
+        $studenteventname = get_string('meetingwith', 'scheduler') . ' ' . $scheduler->get_teacher_name() . ', ' .
+            fullname($teacher);
         $studentevent->name = shorten_text($studenteventname, 200);
 
-        $this->update_calendar_events( $this->get_student_eventtype(), $studentids, $studentevent);
+        $this->update_calendar_events($this->get_student_eventtype(), $studentids, $studentevent);
 
         // Update teacher events.
 
-        $teacherids = array();
+        $teacherids = [];
         $teacherevent = clone($baseevent);
         if (count($studentids) > 0) {
             $teacherids[] = $teacher->id;
             if (count($studentids) > 1) {
-                $teachereventname = get_string('meetingwithplural', 'scheduler').' '.
-                                get_string('students', 'scheduler').', '.implode(', ', $studentnames);
+                $teachereventname = get_string('meetingwithplural', 'scheduler') . ' ' .
+                                get_string('students', 'scheduler') . ', ' . implode(', ', $studentnames);
             } else {
-                $teachereventname = get_string('meetingwith', 'scheduler').' '.
-                                get_string('student', 'scheduler').', '.$studentnames[0];
+                $teachereventname = get_string('meetingwith', 'scheduler') . ' ' .
+                                get_string('student', 'scheduler') . ', ' . $studentnames[0];
             }
+
             $teacherevent->name = shorten_text($teachereventname, 200);
         }
 
-        $this->update_calendar_events( $this->get_teacher_eventtype(), $teacherids, $teacherevent);
-
+        $this->update_calendar_events($this->get_teacher_eventtype(), $teacherids, $teacherevent);
     }
 
     /**
@@ -450,13 +463,13 @@ class slot extends mvc_child_record_model {
     private function update_calendar_events($eventtype, array $userids, \stdClass $eventdata) {
 
         global $CFG, $DB;
-        require_once($CFG->dirroot.'/calendar/lib.php');
+        require_once($CFG->dirroot . '/calendar/lib.php');
 
         $eventdata->eventtype = $eventtype;
 
-        $existingevents = $DB->get_records('event', array('modulename' => 'scheduler', 'eventtype' => $eventtype));
-        $handledevents = array();
-        $handledusers = array();
+        $existingevents = $DB->get_records('event', ['modulename' => 'scheduler', 'eventtype' => $eventtype]);
+        $handledevents = [];
+        $handledusers = [];
 
         // Update existing calendar events.
         foreach ($existingevents as $eventid => $existingdata) {
@@ -485,9 +498,5 @@ class slot extends mvc_child_record_model {
                 $calendarevent->delete();
             }
         }
-
     }
-
-
 }
-

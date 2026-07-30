@@ -24,21 +24,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once(dirname(__FILE__).'/lib.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once(dirname(__FILE__) . '/lib.php');
 
 $id = required_param('id', PARAM_INT);   // Course id.
-$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $id], '*', MUST_EXIST);
 
-$PAGE->set_url('/mod/scheduler/index.php', array('id' => $id));
+$PAGE->set_url('/mod/scheduler/index.php', ['id' => $id]);
 $PAGE->set_pagelayout('incourse');
 
 $coursecontext = context_course::instance($id);
 require_login($course->id);
 
-$event = \mod_scheduler\event\course_module_instance_list_viewed::create(array(
-    'context' => $coursecontext
-));
+$event = \mod_scheduler\event\course_module_instance_list_viewed::create([
+    'context' => $coursecontext,
+]);
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
@@ -72,26 +72,26 @@ $strtopic  = get_string('topic');
 $table = new html_table();
 
 if ($course->format == 'weeks') {
-    $table->head  = array ($strweek, $strname);
-    $table->align = array ('CENTER', 'LEFT');
+    $table->head = [$strweek, $strname];
+    $table->align = ['CENTER', 'LEFT'];
 } else if ($course->format == 'topics') {
-    $table->head  = array ($strtopic, $strname);
-    $table->align = array ('CENTER', 'LEFT', 'LEFT', 'LEFT');
+    $table->head = [$strtopic, $strname];
+    $table->align = ['CENTER', 'LEFT', 'LEFT', 'LEFT'];
 } else {
-    $table->head  = array ($strname);
-    $table->align = array ('LEFT', 'LEFT', 'LEFT');
+    $table->head = [$strname];
+    $table->align = ['LEFT', 'LEFT', 'LEFT'];
 }
 
 foreach ($schedulers as $scheduler) {
-    $url = new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->coursemodule));
+    $url = new moodle_url('/mod/scheduler/view.php', ['id' => $scheduler->coursemodule]);
     // Show dimmed if the mod is hidden.
-    $attr = $scheduler->visible ? null : array('class' => 'dimmed');
+    $attr = $scheduler->visible ? null : ['class' => 'dimmed'];
     $link = html_writer::link($url, $scheduler->name, $attr);
     if ($scheduler->visible || has_capability('moodle/course:viewhiddenactivities', $coursecontext)) {
         if ($course->format == 'weeks' || $course->format == 'topics') {
-            $table->data[] = array ($scheduler->section, $link);
+            $table->data[] = [$scheduler->section, $link];
         } else {
-            $table->data[] = array ($link);
+            $table->data[] = [$link];
         }
     }
 }
@@ -101,4 +101,3 @@ echo html_writer::table($table);
 // Finish the page.
 
 echo $OUTPUT->footer($course);
-
