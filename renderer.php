@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use mod_scheduler\model\scheduler;
+use mod_scheduler\output\thumbsdown_icon;
 use mod_scheduler\permission\scheduler_permissions;
 
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
@@ -928,7 +929,11 @@ class mod_scheduler_renderer extends plugin_renderer_base
             if ($slot->editable && $slot->isappointed) {
                 $url = new moodle_url($slotman->actionurl, ['what' => 'revokeall', 'slotid' => $slot->slotid]);
                 $confirmrevoke = new confirm_action(get_string('confirmrevoke', 'scheduler'));
-                $actions .= $this->action_icon($url, new pix_icon('s/no', get_string('revoke', 'scheduler')), $confirmrevoke);
+                $actions .= $this->action_icon(
+                    $url,
+                    new thumbsdown_icon('t/no', get_string('revoke', 'scheduler'), 'mod_scheduler'),
+                    $confirmrevoke
+                );
             }
 
             if ($slot->exclusivity > 1) {
