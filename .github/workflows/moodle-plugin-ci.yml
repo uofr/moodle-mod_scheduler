@@ -3,10 +3,10 @@ name: Moodle Plugin CI
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   call-moodle-ci:
