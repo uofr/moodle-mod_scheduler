@@ -36,6 +36,7 @@ use core_privacy\local\request\writer;
 
 /**
  * Implementation of the privacy subsystem plugin provider for the scheduler activity module.
+ * This plugin stores personal data and provides the related privacy operations.
  *
  * @package    mod_scheduler
  * @copyright  2018 Henning Bostelmann
@@ -43,9 +44,7 @@ use core_privacy\local\request\writer;
  */
 class provider implements
     \core_privacy\local\metadata\provider,
-    // This plugin is a core_user_data_provider.
     \core_privacy\local\request\core_userlist_provider,
-    // This plugin stores personal data.
     \core_privacy\local\request\plugin\provider {
     /** @var mixed */
     private static $renderer;
