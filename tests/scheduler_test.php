@@ -26,9 +26,9 @@ namespace mod_scheduler;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \mod_scheduler\model\scheduler;
-use \mod_scheduler\model\slot;
-use \mod_scheduler\model\appointment;
+use mod_scheduler\model\scheduler;
+use mod_scheduler\model\slot;
+use mod_scheduler\model\appointment;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
@@ -40,8 +40,8 @@ require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
  * @copyright  2011 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_test extends \advanced_testcase {
-
+final class scheduler_test extends \advanced_testcase
+{
     /**
      * @var int Course_module id used for testing
      */
@@ -71,33 +71,35 @@ class scheduler_test extends \advanced_testcase {
         global $DB, $CFG;
 
         $this->resetAfterTest(true);
+        parent::setUp();
 
         $course = $this->getDataGenerator()->create_course();
         $this->courseid  = $course->id;
 
-        $options = array();
-        $options['slottimes'] = array();
-        $options['slotstudents'] = array();
+        $options = [];
+        $options['slottimes'] = [];
+        $options['slotstudents'] = [];
         for ($c = 0; $c < 4; $c++) {
             $options['slottimes'][$c] = time() + ($c + 1) * DAYSECS;
-            $options['slotstudents'][$c] = array($this->getDataGenerator()->create_user()->id);
+            $options['slotstudents'][$c] = [$this->getDataGenerator()->create_user()->id];
         }
+
         $options['slottimes'][4] = time() + 10 * DAYSECS;
         $options['slottimes'][5] = time() + 11 * DAYSECS;
-        $options['slotstudents'][5] = array(
+        $options['slotstudents'][5] = [
                                         $this->getDataGenerator()->create_user()->id,
-                                        $this->getDataGenerator()->create_user()->id
-                                      );
+                                        $this->getDataGenerator()->create_user()->id,
+                                      ];
 
-        $scheduler = $this->getDataGenerator()->create_module('scheduler', array('course' => $course->id), $options);
-        $coursemodule = $DB->get_record('course_modules', array('id' => $scheduler->cmid));
+        $scheduler = $this->getDataGenerator()->create_module('scheduler', ['course' => $course->id], $options);
+        $coursemodule = $DB->get_record('course_modules', ['id' => $scheduler->cmid]);
 
         $this->schedulerid = $scheduler->id;
         $this->moduleid  = $coursemodule->id;
 
-        $recs = $DB->get_records('scheduler_slots', array('schedulerid' => $scheduler->id), 'id DESC');
+        $recs = $DB->get_records('scheduler_slots', ['schedulerid' => $scheduler->id], 'id DESC');
         $this->slotid = array_keys($recs)[0];
-        $this->appointmentids = array_keys($DB->get_records('scheduler_appointment', array('slotid' => $this->slotid)));
+        $this->appointmentids = array_keys($DB->get_records('scheduler_appointment', ['slotid' => $this->slotid]));
     }
 
     /**
@@ -110,6 +112,7 @@ class scheduler_test extends \advanced_testcase {
         if ($courseid == 0) {
             $courseid = $this->courseid;
         }
+
         $userid = $this->getDataGenerator()->create_user()->id;
         $this->getDataGenerator()->enrol_user($userid, $courseid);
         return $userid;
@@ -126,7 +129,7 @@ class scheduler_test extends \advanced_testcase {
     private function assert_record_count($table, $field, $value, $expect) {
         global $DB;
 
-        $act = $DB->count_records($table, array($field => $value));
+        $act = $DB->count_records($table, [$field => $value]);
         $this->assertEquals($expect, $act, "Checking whether table $table has $expect records with $field equal to $value");
     }
 
@@ -135,15 +138,14 @@ class scheduler_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_coursemodule_id
      */
-    public function test_scheduler() {
+    public function test_scheduler(): void {
         global $DB;
 
-        $dbdata = $DB->get_record('scheduler', array('id' => $this->schedulerid));
+        $dbdata = $DB->get_record('scheduler', ['id' => $this->schedulerid]);
 
         $instance = scheduler::load_by_coursemodule_id($this->moduleid);
 
         $this->assertEquals($dbdata->name, $instance->get_name());
-
     }
 
     /**
@@ -151,7 +153,7 @@ class scheduler_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_coursemodule_id
      */
-    public function test_load_slots() {
+    public function test_load_slots(): void {
         global $DB;
 
         $instance = scheduler::load_by_coursemodule_id($this->moduleid);
@@ -181,6 +183,7 @@ class scheduler_test extends \advanced_testcase {
             } else {
                 $expectedapp = 1;
             }
+
             $this->assertEquals($expectedapp, $slot->get_appointment_count());
 
             $apps = $slot->get_appointments();
@@ -189,9 +192,9 @@ class scheduler_test extends \advanced_testcase {
             foreach ($apps as $app) {
                 $this->assertTrue($app instanceof appointment);
             }
+
             $cnt++;
         }
-
     }
 
     /**
@@ -199,7 +202,7 @@ class scheduler_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_coursemodule_id
      */
-    public function test_add_slot() {
+    public function test_add_slot(): void {
 
         $scheduler = scheduler::load_by_coursemodule_id($this->moduleid);
 
@@ -212,7 +215,6 @@ class scheduler_test extends \advanced_testcase {
         $this->assertEquals(7, count($allslots));
 
         $scheduler->save();
-
     }
 
     /**
@@ -220,17 +222,17 @@ class scheduler_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_id
      */
-    public function test_delete_scheduler() {
+    public function test_delete_scheduler(): void {
 
-        $options = array();
-        $options['slottimes'] = array();
-        $options['slotstudents'] = array();
+        $options = [];
+        $options['slottimes'] = [];
+        $options['slotstudents'] = [];
         for ($c = 0; $c < 10; $c++) {
             $options['slottimes'][$c] = time() + ($c + 1) * DAYSECS;
-            $options['slotstudents'][$c] = array($this->getDataGenerator()->create_user()->id);
+            $options['slotstudents'][$c] = [$this->getDataGenerator()->create_user()->id];
         }
 
-        $delrec = $this->getDataGenerator()->create_module('scheduler', array('course' => $this->courseid), $options);
+        $delrec = $this->getDataGenerator()->create_module('scheduler', ['course' => $this->courseid], $options);
         $delid = $delrec->id;
 
         $delsched = scheduler::load_by_id($delid);
@@ -250,7 +252,6 @@ class scheduler_test extends \advanced_testcase {
 
         $this->assert_record_count('scheduler', 'id', $delid, 0);
         $this->assert_record_count('scheduler_slots', 'schedulerid', $delid, 0);
-
     }
 
     /**
@@ -262,12 +263,13 @@ class scheduler_test extends \advanced_testcase {
      */
     private function assert_slot_times($expected, $actual, $options, $message) {
         $this->assertEquals(count($expected), count($actual), "Slot count - $message");
-        $slottimes = array();
+        $slottimes = [];
         foreach ($expected as $e) {
             $slottimes[] = $options['slottimes'][$e];
         }
+
         foreach ($actual as $a) {
-            $this->assertTrue( in_array($a->starttime, $slottimes), "Slot at {$a->starttime} - $message");
+            $this->assertTrue(in_array($a->starttime, $slottimes), "Slot at {$a->starttime} - $message");
         }
     }
 
@@ -282,9 +284,15 @@ class scheduler_test extends \advanced_testcase {
      * @param unknown $expavailable which slots are expected to be "available" (including already booked ones)
      * @param unknown $expbookable  which slots are expected to be "bookable"
      */
-    private function check_timed_slots($schedulerid, $studentid, $slotoptions,
-                                       $expattended, $expupcoming, $expavailable, $expbookable) {
-
+    private function check_timed_slots(
+        $schedulerid,
+        $studentid,
+        $slotoptions,
+        $expattended,
+        $expupcoming,
+        $expavailable,
+        $expbookable
+    ) {
         $sched = scheduler::load_by_id($schedulerid);
 
         $attended = $sched->get_attended_slots_for_student($studentid);
@@ -298,7 +306,6 @@ class scheduler_test extends \advanced_testcase {
 
         $bookable = $sched->get_slots_available_to_student($studentid, true);
         $this->assert_slot_times($expbookable, $bookable, $slotoptions, 'Booked slots');
-
     }
 
     /**
@@ -306,17 +313,17 @@ class scheduler_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_load_slot_timing() {
+    public function test_load_slot_timing(): void {
 
         global $DB;
 
         $currentstud = $this->getDataGenerator()->create_user()->id;
         $otherstud   = $this->getDataGenerator()->create_user()->id;
 
-        $options = array();
-        $options['slottimes'] = array();
-        $options['slotstudents'] = array();
-        $options['slotattended'] = array();
+        $options = [];
+        $options['slottimes'] = [];
+        $options['slotstudents'] = [];
+        $options['slotattended'] = [];
 
         // Create slots 0 to 5, n days in the future, booked by the student but not attended.
         for ($c = 0; $c <= 5; $c++) {
@@ -351,45 +358,60 @@ class scheduler_test extends \advanced_testcase {
             $options['slottimes'][$c] = time() + ($c - 10) * DAYSECS + 10 * HOURSECS;
         }
 
-        $schedrec = $this->getDataGenerator()->create_module('scheduler', array('course' => $this->courseid), $options);
+        $schedrec = $this->getDataGenerator()->create_module('scheduler', ['course' => $this->courseid], $options);
         $schedid = $schedrec->id;
 
         $schedrec->guardtime = 0;
         $DB->update_record('scheduler', $schedrec);
 
-        $this->check_timed_slots($schedid, $currentstud, $options,
-                     array(7, 8),
-                     array(0, 1, 2, 3, 4, 5, 6),
-                     array(10, 11, 12, 13, 14),
-                     array(10, 11, 12, 13, 14, 9) );
+        $this->check_timed_slots(
+            $schedid,
+            $currentstud,
+            $options,
+            [7, 8],
+            [0, 1, 2, 3, 4, 5, 6],
+            [10, 11, 12, 13, 14],
+            [10, 11, 12, 13, 14, 9]
+        );
 
         $schedrec->guardtime = DAYSECS;
         $DB->update_record('scheduler', $schedrec);
 
-        $this->check_timed_slots($schedid, $currentstud, $options,
-                     array(7, 8),
-                     array(0, 1, 2, 3, 4, 5, 6),
-                     array(11, 12, 13, 14),
-                     array(11, 12, 13, 14, 9) );
+        $this->check_timed_slots(
+            $schedid,
+            $currentstud,
+            $options,
+            [7, 8],
+            [0, 1, 2, 3, 4, 5, 6],
+            [11, 12, 13, 14],
+            [11, 12, 13, 14, 9]
+        );
 
         $schedrec->guardtime = 4 * DAYSECS;
         $DB->update_record('scheduler', $schedrec);
 
-        $this->check_timed_slots($schedid, $currentstud, $options,
-                     array(7, 8),
-                     array(0, 1, 2, 3, 4, 5, 6),
-                     array(14),
-                     array(14, 9) );
+        $this->check_timed_slots(
+            $schedid,
+            $currentstud,
+            $options,
+            [7, 8],
+            [0, 1, 2, 3, 4, 5, 6],
+            [14],
+            [14, 9]
+        );
 
         $schedrec->guardtime = 20 * DAYSECS;
         $DB->update_record('scheduler', $schedrec);
 
-        $this->check_timed_slots($schedid, $currentstud, $options,
-                     array(7, 8),
-                     array(0, 1, 2, 3, 4, 5, 6),
-                     array(),
-                     array() );
-
+        $this->check_timed_slots(
+            $schedid,
+            $currentstud,
+            $options,
+            [7, 8],
+            [0, 1, 2, 3, 4, 5, 6],
+            [],
+            []
+        );
     }
 
     /**
@@ -402,22 +424,33 @@ class scheduler_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_id
      */
-    private function assert_bookable_appointments($expectedwithchangeables, $expectedwithoutchangeables,
-                                                  $schedid, $studentid) {
+    private function assert_bookable_appointments(
+        $expectedwithchangeables,
+        $expectedwithoutchangeables,
+        $schedid,
+        $studentid
+    ) {
         $scheduler = scheduler::load_by_id($schedid);
 
         $actualwithchangeables = $scheduler->count_bookable_appointments($studentid, true);
-        $this->assertEquals($expectedwithchangeables, $actualwithchangeables,
-                        'Checking number of bookable appointments (including changeable bookings)');
+        $this->assertEquals(
+            $expectedwithchangeables,
+            $actualwithchangeables,
+            'Checking number of bookable appointments (including changeable bookings)'
+        );
 
         $actualwithoutchangeables = $scheduler->count_bookable_appointments($studentid, false);
-        $this->assertEquals($expectedwithoutchangeables, $actualwithoutchangeables,
-                        'Checking number of bookable appointments (excluding changeable bookings)');
+        $this->assertEquals(
+            $expectedwithoutchangeables,
+            $actualwithoutchangeables,
+            'Checking number of bookable appointments (excluding changeable bookings)'
+        );
 
         $studs = $scheduler->get_students_for_scheduling();
         if ($expectedwithoutchangeables != 0) {
             $this->assertTrue(is_array($studs), 'Checking that get_students_for_scheduling returns an array');
         }
+
         $actualnum = count($studs);
         $expectednum = ($expectedwithoutchangeables > 0) ? 3 : 2;
         $this->assertEquals($expectednum, $actualnum, 'Checking number of students available for scheduling');
@@ -439,15 +472,20 @@ class scheduler_test extends \advanced_testcase {
      * @param array $bookedslots slots to book the student in
      * @param array $attendedslots slots which the student has attended
      */
-    private function create_data_for_bookable_appointments($schedulermode, $maxbookings, $guardtime, $studentid,
-                                                           array $bookedslots, array $attendedslots) {
-
+    private function create_data_for_bookable_appointments(
+        $schedulermode,
+        $maxbookings,
+        $guardtime,
+        $studentid,
+        array $bookedslots,
+        array $attendedslots
+    ) {
         global $DB;
 
         $course = $this->getDataGenerator()->create_course();
         $this->getDataGenerator()->enrol_user($studentid, $course->id);
 
-        $options['slottimes'] = array();
+        $options['slottimes'] = [];
         for ($c = 0; $c < 10; $c++) {
             $options['slottimes'][$c] = time() + $c * DAYSECS + HOURSECS;
             if (in_array($c, $bookedslots) || in_array($c, $attendedslots)) {
@@ -455,7 +493,7 @@ class scheduler_test extends \advanced_testcase {
             }
         }
 
-        $schedrec = $this->getDataGenerator()->create_module('scheduler', array('course' => $course->id), $options);
+        $schedrec = $this->getDataGenerator()->create_module('scheduler', ['course' => $course->id], $options);
 
         $scheduler = scheduler::load_by_id($schedrec->id);
 
@@ -464,11 +502,11 @@ class scheduler_test extends \advanced_testcase {
         $scheduler->guardtime = $guardtime;
         $scheduler->save();
 
-        $slotrecs = $DB->get_records('scheduler_slots', array('schedulerid' => $scheduler->id), 'starttime ASC');
+        $slotrecs = $DB->get_records('scheduler_slots', ['schedulerid' => $scheduler->id], 'starttime ASC');
         $slotrecs = array_values($slotrecs);
 
         foreach ($attendedslots as $id) {
-            $DB->set_field('scheduler_appointment', 'attended', 1, array('slotid' => $slotrecs[$id]->id));
+            $DB->set_field('scheduler_appointment', 'attended', 1, ['slotid' => $slotrecs[$id]->id]);
         }
 
         for ($i = 0; $i < 2; $i++) {
@@ -483,50 +521,48 @@ class scheduler_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_bookable_appointments() {
+    public function test_bookable_appointments(): void {
 
         $studid = $this->create_student();
 
-        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 0, $studid, array(), array());
+        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 0, $studid, [], []);
         $this->assert_bookable_appointments(1, 1, $sid, $studid);
 
-        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 0, $studid, array(5), array());
+        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 0, $studid, [5], []);
         $this->assert_bookable_appointments(1, 0, $sid, $studid);
 
-        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 0, $studid, array(5, 6, 7), array());
+        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 0, $studid, [5, 6, 7], []);
         $this->assert_bookable_appointments(1, 0, $sid, $studid);
 
-        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 0, $studid, array(5, 6), array(8));
+        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 0, $studid, [5, 6], [8]);
         $this->assert_bookable_appointments(0, 0, $sid, $studid);
 
         // One booking inside guard time, cannot be rebooked.
-        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 5 * DAYSECS, $studid, array(1), array());
+        $sid = $this->create_data_for_bookable_appointments('oneonly', 1, 5 * DAYSECS, $studid, [1], []);
         $this->assert_bookable_appointments(0, 0, $sid, $studid);
 
         // Five bookings allowed, three booked, one of which attended.
-        $sid = $this->create_data_for_bookable_appointments('oneonly', 5, 0, $studid, array(2, 3), array(4));
+        $sid = $this->create_data_for_bookable_appointments('oneonly', 5, 0, $studid, [2, 3], [4]);
         $this->assert_bookable_appointments(4, 2, $sid, $studid);
 
         // Five bookings allowed, three booked, one of which inside guard time.
-        $sid = $this->create_data_for_bookable_appointments('oneonly', 5, 5 * DAYSECS, $studid, array(2, 7, 8), array());
+        $sid = $this->create_data_for_bookable_appointments('oneonly', 5, 5 * DAYSECS, $studid, [2, 7, 8], []);
         $this->assert_bookable_appointments(4, 2, $sid, $studid);
 
         // Five bookings allowed, four booked, of which two inside guard time (one attended), two outside guard time (one attended).
-        $sid = $this->create_data_for_bookable_appointments('oneonly', 5, 5 * DAYSECS, $studid, array(2, 7), array(1, 8));
+        $sid = $this->create_data_for_bookable_appointments('oneonly', 5, 5 * DAYSECS, $studid, [2, 7], [1, 8]);
         $this->assert_bookable_appointments(2, 1, $sid, $studid);
 
         // One booking allowed at a time. Two attended already present (one inside GT, one outside GT).
-        $sid = $this->create_data_for_bookable_appointments('onetime', 1, 5 * DAYSECS, $studid, array(), array(3, 7));
+        $sid = $this->create_data_for_bookable_appointments('onetime', 1, 5 * DAYSECS, $studid, [], [3, 7]);
         $this->assert_bookable_appointments(1, 1, $sid, $studid);
 
         // One booking allowed at a time. One booked outside GT.
-        $sid = $this->create_data_for_bookable_appointments('onetime', 1, 5 * DAYSECS, $studid, array(7), array());
+        $sid = $this->create_data_for_bookable_appointments('onetime', 1, 5 * DAYSECS, $studid, [7], []);
         $this->assert_bookable_appointments(1, 0, $sid, $studid);
 
         // One booking allowed at a time. One booked inside GT.
-        $sid = $this->create_data_for_bookable_appointments('onetime', 1, 5 * DAYSECS, $studid, array(2), array());
+        $sid = $this->create_data_for_bookable_appointments('onetime', 1, 5 * DAYSECS, $studid, [2], []);
         $this->assert_bookable_appointments(0, 0, $sid, $studid);
-
     }
-
 }

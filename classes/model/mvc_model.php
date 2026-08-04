@@ -30,6 +30,6 @@ namespace mod_scheduler\model;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class mvc_model {
-
+abstract class mvc_model
+{
 }

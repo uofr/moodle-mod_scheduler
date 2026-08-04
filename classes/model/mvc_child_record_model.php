@@ -30,8 +30,8 @@ namespace mod_scheduler\model;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class mvc_child_record_model extends mvc_record_model {
-
+abstract class mvc_child_record_model extends mvc_record_model
+{
     /**
      * @var mvc_record_model the parent record
      */
@@ -61,6 +61,7 @@ abstract class mvc_child_record_model extends mvc_record_model {
         if (is_null($this->parentrec)) {
             throw new \coding_exception('parent has not been set');
         }
+
         return $this->parentrec;
     }
 
@@ -72,6 +73,4 @@ abstract class mvc_child_record_model extends mvc_record_model {
     protected function get_parent_id() {
         return $this->get_parent()->get_id();
     }
-
 }
-

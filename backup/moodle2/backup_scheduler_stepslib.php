@@ -28,8 +28,8 @@
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class backup_scheduler_activity_structure_step extends backup_activity_structure_step {
-
+class backup_scheduler_activity_structure_step extends backup_activity_structure_step
+{
     /**
      * define_structure
      *
@@ -41,27 +41,27 @@ class backup_scheduler_activity_structure_step extends backup_activity_structure
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define each element separated.
-        $scheduler = new backup_nested_element('scheduler', array('id'), array(
+        $scheduler = new backup_nested_element('scheduler', ['id'], [
             'name', 'intro', 'introformat', 'schedulermode', 'maxbookings',
             'guardtime', 'defaultslotduration', 'allownotifications', 'staffrolename',
             'scale', 'gradingstrategy', 'bookingrouping', 'usenotes',
             'usebookingform', 'bookinginstructions', 'bookinginstructionsformat',
             'usestudentnotes', 'requireupload', 'uploadmaxfiles', 'uploadmaxsize',
-            'usecaptcha', 'timemodified'));
+            'usecaptcha', 'timemodified', ]);
 
         $slots = new backup_nested_element('slots');
 
-        $slot = new backup_nested_element('slot', array('id'), array(
+        $slot = new backup_nested_element('slot', ['id'], [
             'starttime', 'duration', 'teacherid', 'appointmentlocation',
             'timemodified', 'notes', 'notesformat', 'exclusivity',
-            'emaildate', 'hideuntil'));
+            'emaildate', 'hideuntil', ]);
 
         $appointments = new backup_nested_element('appointments');
 
-        $appointment = new backup_nested_element('appointment', array('id'), array(
+        $appointment = new backup_nested_element('appointment', ['id'], [
             'studentid', 'attended', 'grade',
             'appointmentnote', 'appointmentnoteformat', 'teachernote', 'teachernoteformat',
-            'studentnote', 'studentnoteformat', 'timecreated', 'timemodified'));
+            'studentnote', 'studentnoteformat', 'timecreated', 'timemodified', ]);
 
         // Build the tree.
 
@@ -72,13 +72,13 @@ class backup_scheduler_activity_structure_step extends backup_activity_structure
         $appointments->add_child($appointment);
 
         // Define sources.
-        $scheduler->set_source_table('scheduler', array('id' => backup::VAR_ACTIVITYID));
+        $scheduler->set_source_table('scheduler', ['id' => backup::VAR_ACTIVITYID]);
         $scheduler->annotate_ids('grouping', 'bookingrouping');
 
         // Include appointments only if we back up user information.
         if ($userinfo) {
-            $slot->set_source_table('scheduler_slots', array('schedulerid' => backup::VAR_PARENTID));
-            $appointment->set_source_table('scheduler_appointment', array('slotid' => backup::VAR_PARENTID));
+            $slot->set_source_table('scheduler_slots', ['schedulerid' => backup::VAR_PARENTID]);
+            $appointment->set_source_table('scheduler_appointment', ['slotid' => backup::VAR_PARENTID]);
         }
 
         // Define id annotations.

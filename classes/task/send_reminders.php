@@ -26,7 +26,7 @@ namespace mod_scheduler\task;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__).'/../../mailtemplatelib.php');
+require_once(dirname(__FILE__) . '/../../mailtemplatelib.php');
 
 /**
  * Scheduled background task for sending automated appointment reminders
@@ -35,8 +35,8 @@ require_once(dirname(__FILE__).'/../../mailtemplatelib.php');
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class send_reminders extends \core\task\scheduled_task {
-
+class send_reminders extends \core\task\scheduled_task
+{
     /**
      * get_name
      *
@@ -57,11 +57,11 @@ class send_reminders extends \core\task\scheduled_task {
 
         // Find relevant slots in all schedulers.
         $select = 'emaildate > 0 AND emaildate <= ? AND starttime > ?';
-        $slots = $DB->get_records_select('scheduler_slots', $select, array($date, $date), 'starttime');
+        $slots = $DB->get_records_select('scheduler_slots', $select, [$date, $date], 'starttime');
 
         foreach ($slots as $slot) {
             // Get teacher record.
-            $teacher = $DB->get_record('user', array('id' => $slot->teacherid));
+            $teacher = $DB->get_record('user', ['id' => $slot->teacherid]);
 
             // Get scheduler, slot and course.
             $scheduler = \mod_scheduler\model\scheduler::load_by_id($slot->schedulerid);
@@ -76,10 +76,19 @@ class send_reminders extends \core\task\scheduled_task {
             foreach ($slotm->get_appointments() as $appointment) {
                 $student = \core_user::get_user($appointment->studentid);
                 \core\cron::setup_user($student, $course);
-                \scheduler_messenger::send_slot_notification($slotm,
-                        'reminder', 'reminder', $teacher, $student, $teacher, $student, $course);
+                \scheduler_messenger::send_slot_notification(
+                    $slotm,
+                    'reminder',
+                    'reminder',
+                    $teacher,
+                    $student,
+                    $teacher,
+                    $student,
+                    $course
+                );
             }
         }
+
         \core\cron::setup_user();
     }
 }

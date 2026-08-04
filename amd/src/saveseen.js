@@ -10,10 +10,10 @@ export const MOD = {};
  * @param {Boolean} newseen
  * @param {Object} spinner The spinner icon shown while saving
  */
-export const save_status = (cmid, appid, newseen, spinner, ) => {
+export const saveStatus = (cmid, appid, newseen, spinner,) => {
     const url = M.cfg.wwwroot + '/mod/scheduler/ajax.php';
     // The request paramaters.
-    const params = 'action=saveseen&id='+cmid+'&appointmentid='+appid+'&seen='+newseen+'&sesskey='+M.cfg.sesskey;
+    const params = 'action=saveseen&id=' + cmid + '&appointmentid=' + appid + '&seen=' + newseen + '&sesskey=' + M.cfg.sesskey;
     const xhr = new XMLHttpRequest();
 
     // 5 seconds of timeout.
@@ -64,7 +64,7 @@ export const init = (cmid) => {
             span.classList.add('sr-only');
             div.appendChild(span);
             box.closest('div').appendChild(div);
-            save_status(cmid, box.value, box.checked, div);
+            saveStatus(cmid, box.value, box.checked, div);
         });
     });
 };

@@ -26,8 +26,8 @@ namespace mod_scheduler;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \mod_scheduler\model\scheduler;
-use \mod_scheduler\model\slot;
+use mod_scheduler\model\scheduler;
+use mod_scheduler\model\slot;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
@@ -39,8 +39,8 @@ require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class slot_test extends \advanced_testcase {
-
+final class slot_test extends \advanced_testcase
+{
     /**
      * @var int Course_modules id used for testing
      */
@@ -80,29 +80,30 @@ class slot_test extends \advanced_testcase {
         global $DB, $CFG;
 
         $this->resetAfterTest(true);
+        parent::setUp();
 
         $course = $this->getDataGenerator()->create_course();
 
-        $this->students = array();
+        $this->students = [];
         for ($i = 0; $i < 3; $i++) {
             $this->students[$i] = $this->getDataGenerator()->create_user()->id;
         }
 
-        $options = array();
-        $options['slottimes'] = array();
-        $options['slotstudents'] = array();
+        $options = [];
+        $options['slottimes'] = [];
+        $options['slotstudents'] = [];
         $options['slottimes'][0] = time() + DAYSECS;
         $options['slotstudents'][0] = $this->students;
 
-        $scheduler = $this->getDataGenerator()->create_module('scheduler', array('course' => $course->id), $options);
-        $coursemodule = $DB->get_record('course_modules', array('id' => $scheduler->cmid));
+        $scheduler = $this->getDataGenerator()->create_module('scheduler', ['course' => $course->id], $options);
+        $coursemodule = $DB->get_record('course_modules', ['id' => $scheduler->cmid]);
 
         $this->schedulerid = $scheduler->id;
         $this->moduleid  = $coursemodule->id;
         $this->courseid  = $coursemodule->course;
         $this->teacherid = 2;  // Admin user.
-        $this->slotid = $DB->get_field('scheduler_slots', 'id', array('schedulerid' => $scheduler->id), MUST_EXIST);
-        $this->appointmentids = array_keys($DB->get_records('scheduler_appointment', array('slotid' => $this->slotid)));
+        $this->slotid = $DB->get_field('scheduler_slots', 'id', ['schedulerid' => $scheduler->id], MUST_EXIST);
+        $this->appointmentids = array_keys($DB->get_records('scheduler_appointment', ['slotid' => $this->slotid]));
     }
 
     /**
@@ -115,7 +116,7 @@ class slot_test extends \advanced_testcase {
     private function assert_record_present($table, $id, $msg = "") {
         global $DB;
 
-        $ex = $DB->record_exists($table, array('id' => $id));
+        $ex = $DB->record_exists($table, ['id' => $id]);
         $this->assertTrue($ex, "Checking whether record $id is present in table $table: $msg");
     }
 
@@ -129,7 +130,7 @@ class slot_test extends \advanced_testcase {
     private function assert_record_absent($table, $id, $msg = "") {
         global $DB;
 
-        $ex = $DB->record_exists($table, array('id' => $id));
+        $ex = $DB->record_exists($table, ['id' => $id]);
         $this->assertFalse($ex, "Checking whether record $id is absent in table $table: $msg");
     }
 
@@ -138,7 +139,7 @@ class slot_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_id
      */
-    public function test_create() {
+    public function test_create(): void {
 
         global $DB;
 
@@ -159,9 +160,8 @@ class slot_test extends \advanced_testcase {
         $newid = $slot->get_id();
         $this->assertNotEquals(0, $newid, "Checking slot id after creation");
 
-        $newcnt = $DB->count_records('scheduler_appointment', array('slotid' => $newid));
+        $newcnt = $DB->count_records('scheduler_appointment', ['slotid' => $newid]);
         $this->assertEquals(2, $newcnt, "Counting number of appointments after addition");
-
     }
 
 
@@ -170,7 +170,7 @@ class slot_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_id
      */
-    public function test_delete() {
+    public function test_delete(): void {
 
         $scheduler = scheduler::load_by_id($this->schedulerid);
 
@@ -192,7 +192,6 @@ class slot_test extends \advanced_testcase {
         foreach ($this->students as $student) {
             $this->assert_event_absent($student, $start, "");
         }
-
     }
 
     /**
@@ -200,14 +199,14 @@ class slot_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_id
      */
-    public function test_add_appointment() {
+    public function test_add_appointment(): void {
 
         global $DB;
 
         $scheduler = scheduler::load_by_id($this->schedulerid);
         $slot = slot::load_by_id($this->slotid, $scheduler);
 
-        $oldcnt = $DB->count_records('scheduler_appointment', array('slotid' => $slot->get_id()));
+        $oldcnt = $DB->count_records('scheduler_appointment', ['slotid' => $slot->get_id()]);
         $this->assertEquals(3, $oldcnt, "Counting number of appointments before addition");
 
         $newapp = $slot->create_appointment();
@@ -215,9 +214,8 @@ class slot_test extends \advanced_testcase {
 
         $slot->save();
 
-        $newcnt = $DB->count_records('scheduler_appointment', array('slotid' => $slot->get_id()));
+        $newcnt = $DB->count_records('scheduler_appointment', ['slotid' => $slot->get_id()]);
         $this->assertEquals(4, $newcnt, "Counting number of appointments after addition");
-
     }
 
     /**
@@ -225,7 +223,7 @@ class slot_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_id
      */
-    public function test_remove_appointment() {
+    public function test_remove_appointment(): void {
 
         global $DB;
 
@@ -249,7 +247,7 @@ class slot_test extends \advanced_testcase {
      *
      * @covers \mod_scheduler\model\scheduler::load_by_id
      */
-    public function test_calendar_events() {
+    public function test_calendar_events(): void {
         global $DB;
 
         $scheduler = scheduler::load_by_id($this->schedulerid);
@@ -271,6 +269,7 @@ class slot_test extends \advanced_testcase {
             $this->assert_event_absent($student, $oldstart);
             $this->assert_event_exists($student, $newstart, "Meeting with your Teacher");
         }
+
         $this->assert_event_absent($this->teacherid, $oldstart);
         $this->assert_event_exists($this->teacherid, $newstart, "Meeting with your Students");
 
@@ -284,15 +283,15 @@ class slot_test extends \advanced_testcase {
         $this->assert_event_exists($this->teacherid, $newstart, "Meeting with your Students");
 
         // Delete all appointments.
-        $DB->delete_records('scheduler_appointment', array('slotid' => $this->slotid));
+        $DB->delete_records('scheduler_appointment', ['slotid' => $this->slotid]);
         $slot = slot::load_by_id($this->slotid, $scheduler);
         $slot->save();
 
         foreach ($this->students as $student) {
             $this->assert_event_absent($student, $newstart);
         }
-        $this->assert_event_absent($this->teacherid, $newstart);
 
+        $this->assert_event_absent($this->teacherid, $newstart);
     }
 
     /**

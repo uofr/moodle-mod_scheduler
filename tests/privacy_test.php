@@ -36,7 +36,7 @@ use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\writer;
 
-require_once($CFG->dirroot.'/mod/scheduler/locallib.php');
+require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
 
 /**
  * Data provider testcase class.
@@ -45,8 +45,8 @@ require_once($CFG->dirroot.'/mod/scheduler/locallib.php');
  * @copyright  2018 Henning Bostelmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class privacy_test extends provider_testcase {
-
+final class privacy_test extends provider_testcase
+{
     /**
      * @var int course_module id used for testing
      */
@@ -96,6 +96,7 @@ class privacy_test extends provider_testcase {
         global $DB, $CFG;
 
         $this->resetAfterTest(true);
+        parent::setUp();
 
         $course = $this->getDataGenerator()->create_course();
         $this->courseid  = $course->id;
@@ -104,32 +105,33 @@ class privacy_test extends provider_testcase {
         $this->student2 = $this->getDataGenerator()->create_user();
         $this->allstudents = [$this->student1->id, $this->student2->id];
 
-        $options = array();
-        $options['slottimes'] = array();
-        $options['slotstudents'] = array();
+        $options = [];
+        $options['slottimes'] = [];
+        $options['slotstudents'] = [];
         for ($c = 0; $c < 4; $c++) {
             $options['slottimes'][$c] = time() + ($c + 1) * DAYSECS;
             $stud = $this->getDataGenerator()->create_user()->id;
             $this->allstudents[] = $stud;
-            $options['slotstudents'][$c] = array($stud);
+            $options['slotstudents'][$c] = [$stud];
         }
+
         $options['slottimes'][4] = time() + 10 * DAYSECS;
         $options['slottimes'][5] = time() + 11 * DAYSECS;
-        $options['slotstudents'][5] = array(
+        $options['slotstudents'][5] = [
                                         $this->student1->id,
-                                        $this->student2->id
-                                      );
+                                        $this->student2->id,
+                                      ];
 
-        $scheduler = $this->getDataGenerator()->create_module('scheduler', array('course' => $course->id), $options);
-        $coursemodule = $DB->get_record('course_modules', array('id' => $scheduler->cmid));
+        $scheduler = $this->getDataGenerator()->create_module('scheduler', ['course' => $course->id], $options);
+        $coursemodule = $DB->get_record('course_modules', ['id' => $scheduler->cmid]);
 
         $this->schedulerid = $scheduler->id;
         $this->moduleid  = $coursemodule->id;
         $this->context = \context_module::instance($scheduler->cmid);
 
-        $recs = $DB->get_records('scheduler_slots', array('schedulerid' => $scheduler->id), 'id DESC');
+        $recs = $DB->get_records('scheduler_slots', ['schedulerid' => $scheduler->id], 'id DESC');
         $this->slotid = array_keys($recs)[0];
-        $this->appointmentids = array_keys($DB->get_records('scheduler_appointment', array('slotid' => $this->slotid)));
+        $this->appointmentids = array_keys($DB->get_records('scheduler_appointment', ['slotid' => $this->slotid]));
     }
 
     /**
@@ -147,7 +149,7 @@ class privacy_test extends provider_testcase {
                          JOIN {scheduler_appointment} a ON a.slotid = t.id
                         WHERE s.id = :schedulerid AND a.studentid = :studentid";
 
-        $params = array('schedulerid' => $schedulerid, 'studentid' => $studentid);
+        $params = ['schedulerid' => $schedulerid, 'studentid' => $studentid];
         $actual = $DB->record_exists_sql($sql, $params);
         $this->assertEquals($expected, $actual, "Checking whether student $studentid has appointment in scheduler $schedulerid");
     }
@@ -157,7 +159,7 @@ class privacy_test extends provider_testcase {
      *
      * @covers \mod_scheduler\privacy\provider::get_contexts_for_userid
      */
-    public function test_get_contexts_for_userid() {
+    public function test_get_contexts_for_userid(): void {
 
         // Get contexts for the first user.
         $contextids = provider::get_contexts_for_userid($this->student1->id)->get_contextids();
@@ -169,7 +171,7 @@ class privacy_test extends provider_testcase {
      *
      * @covers \mod_scheduler\privacy\provider::get_users_in_context
      */
-    public function test_get_users_in_context() {
+    public function test_get_users_in_context(): void {
         global $DB;
         $component = 'mod_scheduler';
 
@@ -191,12 +193,12 @@ class privacy_test extends provider_testcase {
      *
      * @covers \mod_scheduler\privacy\provider::export_user_data
      */
-    public function test_export_teacher_data() {
+    public function test_export_teacher_data(): void {
         global $DB;
 
         // Export all contexts for the teacher.
         $contextids = [$this->context->id];
-        $teacher = $DB->get_record('user', array('id' => 2));
+        $teacher = $DB->get_record('user', ['id' => 2]);
         $appctx = new approved_contextlist($teacher, 'mod_scheduler', $contextids);
         provider::export_user_data($appctx);
         $data = writer::with_context($this->context)->get_data([]);
@@ -208,7 +210,7 @@ class privacy_test extends provider_testcase {
      *
      * @covers \mod_scheduler\privacy\provider::export_user_data
      */
-    public function test_export_user_data1() {
+    public function test_export_user_data1(): void {
 
         // Export all contexts for the first user.
         $contextids = [$this->context->id];
@@ -223,7 +225,7 @@ class privacy_test extends provider_testcase {
      *
      * @covers \mod_scheduler\privacy\provider::delete_data_for_all_users_in_context
      */
-    public function test_delete_data_for_all_users_in_context() {
+    public function test_delete_data_for_all_users_in_context(): void {
         provider::delete_data_for_all_users_in_context($this->context);
 
         foreach ($this->allstudents as $u) {
@@ -236,13 +238,12 @@ class privacy_test extends provider_testcase {
      *
      * @covers \mod_scheduler\privacy\provider::delete_data_for_user
      */
-    public function test_delete_data_for_user() {
+    public function test_delete_data_for_user(): void {
         $appctx = new approved_contextlist($this->student1, 'mod_scheduler', [$this->context->id]);
         provider::delete_data_for_user($appctx);
 
         $this->assert_appointment_status($this->schedulerid, $this->student1->id, false);
         $this->assert_appointment_status($this->schedulerid, $this->student2->id, true);
-
     }
 
     /**
@@ -250,7 +251,7 @@ class privacy_test extends provider_testcase {
      *
      * @covers \mod_scheduler\privacy\provider::delete_data_for_users
      */
-    public function test_delete_data_for_users() {
+    public function test_delete_data_for_users(): void {
         $component = 'mod_scheduler';
 
         $approveduserids = [$this->student1->id, $this->student2->id];

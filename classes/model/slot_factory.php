@@ -30,7 +30,8 @@ namespace mod_scheduler\model;
  * @copyright  2011 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class slot_factory extends mvc_child_model_factory {
+class slot_factory extends mvc_child_model_factory
+{
     /**
      * Create child
      *
