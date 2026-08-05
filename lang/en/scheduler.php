@@ -470,6 +470,7 @@ $string['slotsdeleted'] = '{$a} slots have been deleted';
 $string['slottype'] = 'Slot type';
 $string['slotupdated'] = '1 slot updated';
 $string['slotwarning'] = '<strong>Warning:</strong> Moving this slot to the selected time conflicts with the slot(s) listed below. Tick "Ignore scheduling conflicts" if you want to move the slot nevertheless.';
+$string['slotwarning_limited'] = '<strong>Warning:</strong> Moving this slot to the selected time conflicts with the slot(s) listed below.';
 $string['staffbreakdown'] = 'By {$a}';
 $string['staffrolename'] = 'Role name of the teacher';
 $string['start'] = 'Start';
