@@ -34,8 +34,8 @@ require_once($CFG->dirroot . '/mod/scheduler/backup/moodle2/backup_scheduler_ste
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class backup_scheduler_activity_task extends backup_activity_task {
-
+class backup_scheduler_activity_task extends backup_activity_task
+{
     /**
      * Define (add) particular settings this activity can have
      */
@@ -63,11 +63,11 @@ class backup_scheduler_activity_task extends backup_activity_task {
         $base = preg_quote($CFG->wwwroot, "/");
 
         // Link to the list of schedulers.
-        $search = "/(".$base."\/mod\/scheduler\/index.php\?id\=)([0-9]+)/";
+        $search = "/(" . $base . "\/mod\/scheduler\/index.php\?id\=)([0-9]+)/";
         $content = preg_replace($search, '$@SCHEDULERINDEX*$2@$', $content);
 
         // Link to scheduler view by coursemoduleid.
-        $search = "/(".$base."\/mod\/scheduler\/view.php\?id\=)([0-9]+)/";
+        $search = "/(" . $base . "\/mod\/scheduler\/view.php\?id\=)([0-9]+)/";
         $content = preg_replace($search, '$@SCHEDULERVIEWBYID*$2@$', $content);
 
         return $content;

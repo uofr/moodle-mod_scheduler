@@ -30,8 +30,8 @@ namespace mod_scheduler\event;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class slot_base extends \core\event\base {
-
+abstract class slot_base extends \core\event\base
+{
     /**
      * @var \mod_scheduler\model\slot the slot associated with this event
      */
@@ -44,11 +44,11 @@ abstract class slot_base extends \core\event\base {
      * @return array
      */
     protected static function base_data(\mod_scheduler\model\slot $slot) {
-        return array(
+        return [
             'context' => $slot->get_scheduler()->get_context(),
             'objectid' => $slot->id,
-            'relateduserid' => $slot->teacherid
-        );
+            'relateduserid' => $slot->teacherid,
+        ];
     }
 
     /**
@@ -75,6 +75,7 @@ abstract class slot_base extends \core\event\base {
         if ($this->is_restored()) {
             throw new \coding_exception('get_slot() is intended for event observers only');
         }
+
         return $this->slot;
     }
 
@@ -84,7 +85,7 @@ abstract class slot_base extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/scheduler/view.php', array('id' => $this->contextinstanceid));
+        return new \moodle_url('/mod/scheduler/view.php', ['id' => $this->contextinstanceid]);
     }
 
     /**

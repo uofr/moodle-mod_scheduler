@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * A factory class for scheduler appointments.
  *
@@ -31,7 +30,8 @@ namespace mod_scheduler\model;
  * @copyright  2011 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class appointment_factory extends mvc_child_model_factory {
+class appointment_factory extends mvc_child_model_factory
+{
     /**
      * Create child
      *

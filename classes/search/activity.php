@@ -31,5 +31,6 @@ namespace mod_scheduler\search;
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class activity extends \core_search\base_activity {
+class activity extends \core_search\base_activity
+{
 }

@@ -22,12 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \mod_scheduler\model\scheduler;
+use mod_scheduler\model\scheduler;
 
 require_once(dirname(__FILE__) . '/../../config.php');
-require_once($CFG->dirroot.'/mod/scheduler/lib.php');
-require_once($CFG->dirroot.'/mod/scheduler/locallib.php');
-require_once($CFG->dirroot.'/mod/scheduler/renderable.php');
+require_once($CFG->dirroot . '/mod/scheduler/lib.php');
+require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
+require_once($CFG->dirroot . '/mod/scheduler/renderable.php');
 
 // Read common request parameters.
 $id = optional_param('id', '', PARAM_INT);    // Course Module ID - if it's not specified, must specify 'a', see below.
@@ -43,7 +43,8 @@ if ($id) {
     $scheduler = scheduler::load_by_id($a);
     $cm = $scheduler->get_cm();
 }
-$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+
+$course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 
 
 require_login($course->id, true, $cm);
@@ -51,7 +52,7 @@ $context = context_module::instance($cm->id);
 $permissions = new \mod_scheduler\permission\scheduler_permissions($context, $USER->id);
 
 // Initialize $PAGE, compute blocks.
-$PAGE->set_url('/mod/scheduler/view.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/scheduler/view.php', ['id' => $cm->id]);
 
 $output = $PAGE->get_renderer('mod_scheduler');
 
@@ -60,6 +61,7 @@ if (groups_get_activity_groupmode($cm) || !$permissions->can_see_all_slots()) {
 } else {
     $defaultsubpage = 'allappointments';
 }
+
 $subpage = optional_param('subpage', $defaultsubpage, PARAM_ALPHA);
 
 
@@ -77,21 +79,19 @@ $isstudent = has_capability('mod/scheduler:viewslots', $context);
 if ($isteacher) {
     // Teacher side.
     if ($action == 'viewstatistics') {
-        include($CFG->dirroot.'/mod/scheduler/viewstatistics.php');
+        include($CFG->dirroot . '/mod/scheduler/viewstatistics.php');
     } else if ($action == 'viewstudent') {
-        include($CFG->dirroot.'/mod/scheduler/viewstudent.php');
+        include($CFG->dirroot . '/mod/scheduler/viewstudent.php');
     } else if ($action == 'export') {
-        include($CFG->dirroot.'/mod/scheduler/export.php');
+        include($CFG->dirroot . '/mod/scheduler/export.php');
     } else if ($action == 'datelist') {
-        include($CFG->dirroot.'/mod/scheduler/datelist.php');
+        include($CFG->dirroot . '/mod/scheduler/datelist.php');
     } else {
-        include($CFG->dirroot.'/mod/scheduler/teacherview.php');
+        include($CFG->dirroot . '/mod/scheduler/teacherview.php');
     }
-
 } else if ($isstudent) {
     // Student side.
-    include($CFG->dirroot.'/mod/scheduler/studentview.php');
-
+    include($CFG->dirroot . '/mod/scheduler/studentview.php');
 } else {
     // For guests.
     echo $OUTPUT->header();

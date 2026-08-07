@@ -30,8 +30,8 @@ namespace mod_scheduler\permission;
  * @copyright  2019 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class permissions_manager {
-
+abstract class permissions_manager
+{
     /** @var int */
     protected $userid;
     /** @var \context */
@@ -54,7 +54,7 @@ abstract class permissions_manager {
         $this->context = $context;
         $this->prefix = str_replace('_', '/', $pluginname) . ':';
 
-        $this->caps = array();
+        $this->caps = [];
     }
 
     /**
@@ -86,6 +86,7 @@ abstract class permissions_manager {
                 return true;
             }
         }
+
         return false;
     }
 

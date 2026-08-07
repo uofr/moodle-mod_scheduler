@@ -26,7 +26,7 @@ use mod_scheduler\model\scheduler;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Message form for invitations (using Moodle formslib)
@@ -35,8 +35,8 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_message_form extends moodleform {
-
+class scheduler_message_form extends moodleform
+{
     /**
      * @var scheduler scheduler in whose context the messages are sent
      */
@@ -49,7 +49,7 @@ class scheduler_message_form extends moodleform {
      * @param scheduler $scheduler scheduler in whose context the messages are sent
      * @param object $customdata
      */
-    public function __construct($action, scheduler $scheduler, $customdata=null) {
+    public function __construct($action, scheduler $scheduler, $customdata = null) {
         $this->scheduler = $scheduler;
         parent::__construct($action, $customdata);
     }
@@ -62,21 +62,23 @@ class scheduler_message_form extends moodleform {
         $mform = $this->_form;
 
         // Select users to sent the message to.
-        $checkboxes = array();
+        $checkboxes = [];
         $recipients = $this->_customdata['recipients'];
         foreach ($recipients as $recipient) {
-            $inputid = 'recipient['.$recipient->id.']';
+            $inputid = 'recipient[' . $recipient->id . ']';
             $label = fullname($recipient);
             $checkboxes[] = $mform->createElement('checkbox', $inputid, '', $label);
             $mform->setDefault($inputid, true);
         }
+
         $mform->addGroup($checkboxes, 'recipients', get_string('recipients', 'scheduler'), null, false);
 
         if (get_config('mod_scheduler', 'showemailplain')) {
-            $maillist = array();
+            $maillist = [];
             foreach ($recipients as $recipient) {
                 $maillist[] = trim($recipient->email);
             }
+
             $maildisplay = html_writer::div(implode(', ', $maillist));
             $mform->addElement('html', $maildisplay);
         }
@@ -84,25 +86,29 @@ class scheduler_message_form extends moodleform {
         $mform->addElement('selectyesno', 'copytomyself', get_string('copytomyself', 'scheduler'));
         $mform->setDefault('copytomyself', true);
 
-        $mform->addElement('text', 'subject', get_string('messagesubject', 'scheduler'), array('size' => '60'));
+        $mform->addElement('text', 'subject', get_string('messagesubject', 'scheduler'), ['size' => '60']);
         $mform->setType('subject', PARAM_TEXT);
         $mform->addRule('subject', null, 'required');
         if (isset($this->_customdata['subject'])) {
             $mform->setDefault('subject', $this->_customdata['subject']);
         }
 
-        $bodyedit = $mform->addElement('editor', 'body', get_string('messagebody', 'scheduler'),
-                                       array('rows' => 15, 'columns' => 60), array('collapsed' => true));
+        $bodyedit = $mform->addElement(
+            'editor',
+            'body',
+            get_string('messagebody', 'scheduler'),
+            ['rows' => 15, 'columns' => 60],
+            ['collapsed' => true]
+        );
         $mform->setType('body', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
         if (isset($this->_customdata['body'])) {
-            $bodyedit->setValue(array('text' => $this->_customdata['body']));
+            $bodyedit->setValue(['text' => $this->_customdata['body']]);
         }
 
-        $buttonarray = array();
+        $buttonarray = [];
         $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('sendmessage', 'scheduler'));
         $buttonarray[] = $mform->createElement('cancel');
-        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
-
+        $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
     }
 
     /**
@@ -118,5 +124,4 @@ class scheduler_message_form extends moodleform {
 
         return $errors;
     }
-
 }

@@ -26,9 +26,9 @@ namespace mod_scheduler;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \mod_scheduler\model\scheduler;
-use \mod_scheduler\model\slot;
-use \mod_scheduler\permission\scheduler_permissions;
+use mod_scheduler\model\scheduler;
+use mod_scheduler\model\slot;
+use mod_scheduler\permission\scheduler_permissions;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
@@ -40,8 +40,8 @@ require_once($CFG->dirroot . '/mod/scheduler/locallib.php');
  * @copyright  2019 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class permissions_test extends \advanced_testcase {
-
+final class permissions_test extends \advanced_testcase
+{
     /**
      * @var int Course_modules id used for testing
      */
@@ -106,10 +106,11 @@ class permissions_test extends \advanced_testcase {
         $dg = $this->getDataGenerator();
 
         $this->resetAfterTest(false);
+        parent::setUp();
 
         $course = $dg->create_course();
 
-        $this->students = array();
+        $this->students = [];
         for ($i = 0; $i < 3; $i++) {
             $this->students[$i] = $dg->create_user()->id;
             $dg->enrol_user($this->students[$i], $course->id, 'student');
@@ -129,21 +130,21 @@ class permissions_test extends \advanced_testcase {
         $this->administ = $dg->create_user()->id;
         $dg->enrol_user($this->administ, $course->id, $adminrole);
 
-        $options = array();
+        $options = [];
         $options['slottimes'] = [time() + DAYSECS, time() + 2 * DAYSECS, time() + 3 * DAYSECS];
         $options['slotstudents'] = array_values($this->students);
         $options['slotteachers'] = [$this->edteacher, $this->nonedteacher];
 
         $schedrec = $this->getDataGenerator()->create_module('scheduler', ['course' => $course->id], $options);
-        $coursemodule = $DB->get_record('course_modules', array('id' => $schedrec->cmid));
+        $coursemodule = $DB->get_record('course_modules', ['id' => $schedrec->cmid]);
         $this->scheduler = scheduler::load_by_coursemodule_id($coursemodule->id);
 
         $this->moduleid  = $coursemodule->id;
         $this->courseid  = $coursemodule->course;
         $this->context   = $this->scheduler->context;
-        $slotids = array_keys($DB->get_records('scheduler_slots', array('schedulerid' => $this->scheduler->id), 'starttime ASC'));
-        $this->slots = array();
-        $this->appts = array();
+        $slotids = array_keys($DB->get_records('scheduler_slots', ['schedulerid' => $this->scheduler->id], 'starttime ASC'));
+        $this->slots = [];
+        $this->appts = [];
         foreach ($slotids as $key => $id) {
             $this->slots[$key] = $this->scheduler->get_slot($id);
             $this->appts[$key] = array_values($this->slots[$key]->get_appointments())[0];
@@ -155,7 +156,7 @@ class permissions_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_teacher_can_see_slot() {
+    public function test_teacher_can_see_slot(): void {
 
         // Editing teacher sees all slots.
         $p = new scheduler_permissions($this->context, $this->edteacher);
@@ -166,7 +167,7 @@ class permissions_test extends \advanced_testcase {
         // Nonediting teacher sees only his own slot.
         $p = new scheduler_permissions($this->context, $this->nonedteacher);
         $this->assertFalse($p->teacher_can_see_slot($this->slots[0]));
-        $this->assertTrue ($p->teacher_can_see_slot($this->slots[1]));
+        $this->assertTrue($p->teacher_can_see_slot($this->slots[1]));
         $this->assertFalse($p->teacher_can_see_slot($this->slots[2]));
 
         // Adminstrator sees all slots.
@@ -180,7 +181,6 @@ class permissions_test extends \advanced_testcase {
         $this->assertFalse($p->teacher_can_see_slot($this->slots[0]));
         $this->assertFalse($p->teacher_can_see_slot($this->slots[1]));
         $this->assertFalse($p->teacher_can_see_slot($this->slots[2]));
-
     }
 
     /**
@@ -188,7 +188,7 @@ class permissions_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_can_edit_slot() {
+    public function test_can_edit_slot(): void {
 
         // Editing teacher can edit all slots.
         $p = new scheduler_permissions($this->context, $this->edteacher);
@@ -199,7 +199,7 @@ class permissions_test extends \advanced_testcase {
         // Nonediting teacher can only edit his own slot.
         $p = new scheduler_permissions($this->context, $this->nonedteacher);
         $this->assertFalse($p->can_edit_slot($this->slots[0]));
-        $this->assertTrue ($p->can_edit_slot($this->slots[1]));
+        $this->assertTrue($p->can_edit_slot($this->slots[1]));
         $this->assertFalse($p->can_edit_slot($this->slots[2]));
 
         // Adminstrator cannot edit any slots.
@@ -213,7 +213,6 @@ class permissions_test extends \advanced_testcase {
         $this->assertFalse($p->can_edit_slot($this->slots[0]));
         $this->assertFalse($p->can_edit_slot($this->slots[1]));
         $this->assertFalse($p->can_edit_slot($this->slots[2]));
-
     }
 
     /**
@@ -221,7 +220,7 @@ class permissions_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_can_edit_own_slots() {
+    public function test_can_edit_own_slots(): void {
 
         // Both teachers can edit their own slots.
         $p = new scheduler_permissions($this->context, $this->edteacher);
@@ -234,7 +233,6 @@ class permissions_test extends \advanced_testcase {
         $this->assertFalse($p->can_edit_own_slots());
         $p = new scheduler_permissions($this->context, $this->students[1]);
         $this->assertFalse($p->can_edit_own_slots());
-
     }
 
     /**
@@ -242,7 +240,7 @@ class permissions_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_can_edit_all_slots() {
+    public function test_can_edit_all_slots(): void {
 
         // Editing teachers can edit all slots.
         $p = new scheduler_permissions($this->context, $this->edteacher);
@@ -255,7 +253,6 @@ class permissions_test extends \advanced_testcase {
         $this->assertFalse($p->can_edit_all_slots());
         $p = new scheduler_permissions($this->context, $this->students[1]);
         $this->assertFalse($p->can_edit_all_slots());
-
     }
 
     /**
@@ -263,7 +260,7 @@ class permissions_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_can_see_all_slots() {
+    public function test_can_see_all_slots(): void {
 
         // Editing teachers can see all slots.
         $p = new scheduler_permissions($this->context, $this->edteacher);
@@ -280,7 +277,6 @@ class permissions_test extends \advanced_testcase {
         // Students cannot see all slots.
         $p = new scheduler_permissions($this->context, $this->students[1]);
         $this->assertFalse($p->can_see_all_slots());
-
     }
 
     /**
@@ -288,7 +284,7 @@ class permissions_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_can_see_appointment() {
+    public function test_can_see_appointment(): void {
 
         // Editing teacher can all appointments.
         $p = new scheduler_permissions($this->context, $this->edteacher);
@@ -299,7 +295,7 @@ class permissions_test extends \advanced_testcase {
         // Nonediting teacher can only see his own appointment.
         $p = new scheduler_permissions($this->context, $this->nonedteacher);
         $this->assertFalse($p->can_see_appointment($this->appts[0]));
-        $this->assertTrue ($p->can_see_appointment($this->appts[1]));
+        $this->assertTrue($p->can_see_appointment($this->appts[1]));
         $this->assertFalse($p->can_see_appointment($this->appts[2]));
 
         // Administrator can see all appointments.
@@ -318,8 +314,5 @@ class permissions_test extends \advanced_testcase {
                 $this->assertEquals($expected, $actual, $msg);
             }
         }
-
     }
-
-
 }

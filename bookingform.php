@@ -24,10 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-use \mod_scheduler\model\slot;
-use \mod_scheduler\model\appointment;
+use mod_scheduler\model\slot;
+use mod_scheduler\model\appointment;
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Student-side form to book or edit an appointment in a selected slot
@@ -36,14 +36,16 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright  2016 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_booking_form extends moodleform {
-
+class scheduler_booking_form extends moodleform
+{
     /** @var mixed */
     protected $slot;
     /** @var mixed */
     protected $appointment = null;
     /** @var mixed */
     protected $uploadoptions;
+    /** @var mixed */
+    protected $noteoptions = [];
     /** @var mixed */
     protected $existing;
 
@@ -70,19 +72,23 @@ class scheduler_booking_form extends moodleform {
         $mform = $this->_form;
         $scheduler = $this->slot->get_scheduler();
 
-        $this->noteoptions = array('trusttext' => false, 'maxfiles' => 0, 'maxbytes' => 0,
+        $this->noteoptions = ['trusttext' => false, 'maxfiles' => 0, 'maxbytes' => 0,
                                    'context' => $scheduler->get_context(),
-                                   'collapsed' => true);
+                                   'collapsed' => true, ];
 
-        $this->uploadoptions = array('subdirs' => 0,
+        $this->uploadoptions = ['subdirs' => 0,
                                      'maxbytes' => $scheduler->uploadmaxsize,
-                                     'maxfiles' => $scheduler->uploadmaxfiles);
+                                     'maxfiles' => $scheduler->uploadmaxfiles, ];
 
         // Text field for student-supplied data.
         if ($scheduler->uses_studentnotes()) {
-
-            $mform->addElement('editor', 'studentnote_editor', get_string('yourstudentnote', 'scheduler'),
-                                array('rows' => 3, 'columns' => 60), $this->noteoptions);
+            $mform->addElement(
+                'editor',
+                'studentnote_editor',
+                get_string('yourstudentnote', 'scheduler'),
+                ['rows' => 3, 'columns' => 60],
+                $this->noteoptions
+            );
             $mform->setType('studentnote', PARAM_RAW); // Must be PARAM_RAW for rich text editor content.
             if ($scheduler->usestudentnotes == 2) {
                 $mform->addRule('studentnote_editor', get_string('notesrequired', 'scheduler'), 'required');
@@ -91,9 +97,13 @@ class scheduler_booking_form extends moodleform {
 
         // Student file upload.
         if ($scheduler->uses_studentfiles()) {
-            $mform->addElement('filemanager', 'studentfiles',
-                    get_string('uploadstudentfiles', 'scheduler'),
-                    null, $this->uploadoptions );
+            $mform->addElement(
+                'filemanager',
+                'studentfiles',
+                get_string('uploadstudentfiles', 'scheduler'),
+                null,
+                $this->uploadoptions
+            );
             if ($scheduler->requireupload) {
                 $mform->addRule('studentfiles', get_string('uploadrequired', 'scheduler'), 'required');
             }
@@ -101,7 +111,7 @@ class scheduler_booking_form extends moodleform {
 
         // Captcha.
         if ($scheduler->uses_bookingcaptcha() && !$this->existing) {
-            $mform->addElement('recaptcha', 'bookingcaptcha', get_string('security_question', 'auth'), array('https' => true));
+            $mform->addElement('recaptcha', 'bookingcaptcha', get_string('security_question', 'auth'), ['https' => true]);
             $mform->addHelpButton('bookingcaptcha', 'recaptcha', 'auth');
             $mform->closeHeaderBefore('bookingcaptcha');
         }
@@ -170,11 +180,18 @@ class scheduler_booking_form extends moodleform {
             $appointment->studentnote = $editor['text'];
             $appointment->studentnoteformat = $editor['format'];
         }
+
         if ($scheduler->uses_studentfiles()) {
-            file_save_draft_area_files($formdata->studentfiles, $scheduler->context->id,
-                                       'mod_scheduler', 'studentfiles', $appointment->id,
-                                       $this->uploadoptions);
+            file_save_draft_area_files(
+                $formdata->studentfiles,
+                $scheduler->context->id,
+                'mod_scheduler',
+                'studentfiles',
+                $appointment->id,
+                $this->uploadoptions
+            );
         }
+
         $appointment->save();
     }
 }

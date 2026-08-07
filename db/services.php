@@ -24,14 +24,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = array(
+$functions = [
 
-    'mod_scheduler_studentid' => array(
+    'mod_scheduler_studentid' => [
         'classname'   => 'mod_scheduler\external',
         'methodname'  => 'studentid',
         'description' => 'Retrieve the list of potential studentids.',
         'type'        => 'read',
         'ajax'          => true,
-        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
-    ),
-);
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
+];

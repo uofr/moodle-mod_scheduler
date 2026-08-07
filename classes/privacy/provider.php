@@ -25,31 +25,30 @@
 namespace mod_scheduler\privacy;
 
 use core_privacy\local\metadata\collection;
+use core_privacy\local\metadata\provider as metadata_provider;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
-use core_privacy\local\request\contextlist;
-use core_privacy\local\request\userlist;
-use core_privacy\local\request\helper;
 use core_privacy\local\request\content_writer;
+use core_privacy\local\request\contextlist;
+use core_privacy\local\request\core_userlist_provider;
+use core_privacy\local\request\helper;
+use core_privacy\local\request\plugin\provider as plugin_provider;
 use core_privacy\local\request\transform;
+use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
 /**
  * Implementation of the privacy subsystem plugin provider for the scheduler activity module.
+ * This plugin stores personal data and provides the related privacy operations.
  *
  * @package    mod_scheduler
  * @copyright  2018 Henning Bostelmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
-        // This plugin stores personal data.
-        \core_privacy\local\metadata\provider,
-
-        // This plugin is a core_user_data_provider.
-        \core_privacy\local\request\plugin\provider,
-
-        \core_privacy\local\request\core_userlist_provider {
-
+    core_userlist_provider,
+    metadata_provider,
+    plugin_provider {
     /** @var mixed */
     private static $renderer;
 
@@ -59,7 +58,7 @@ class provider implements
      * @param collection $collection a reference to the collection to use to store the metadata.
      * @return collection the updated collection of metadata items.
      */
-    public static function get_metadata(collection $collection) : collection {
+    public static function get_metadata(collection $collection): collection {
         $collection->add_database_table(
             'scheduler_slots',
             [
@@ -69,7 +68,7 @@ class provider implements
                 'appointmentlocation' => 'privacy:metadata:scheduler_slots:appointmentlocation',
                 'notes' => 'privacy:metadata:scheduler_slots:notes',
                 'notesformat' => 'privacy:metadata:scheduler_slots:notesformat',
-                'exclusivity' => 'privacy:metadata:scheduler_slots:exclusivity'
+                'exclusivity' => 'privacy:metadata:scheduler_slots:exclusivity',
                  // The fields "timemodified", "emaildate" and "hideuntil" do not contain personal data.
             ],
             'privacy:metadata:scheduler_slots'
@@ -85,7 +84,7 @@ class provider implements
                 'teachernote' => 'privacy:metadata:scheduler_appointment:teachernote',
                 'teachernoteformat' => 'privacy:metadata:scheduler_appointment:teachernoteformat',
                 'studentnote' => 'privacy:metadata:scheduler_appointment:studentnote',
-                'studentnoteformat' => 'privacy:metadata:scheduler_appointment:studentnoteformat'
+                'studentnoteformat' => 'privacy:metadata:scheduler_appointment:studentnoteformat',
                 // The fields "timecreated" and "timemodifed" are technical only, they do not contain personal data.
             ],
             'privacy:metadata:scheduler_appointment'
@@ -103,7 +102,7 @@ class provider implements
      * @param int $userid the userid.
      * @return contextlist the list of contexts containing user info for the user.
      */
-    public static function get_contexts_for_userid(int $userid) : contextlist {
+    public static function get_contexts_for_userid(int $userid): contextlist {
         $contextlist = new contextlist();
 
         // Fetch all scheduler records for teachers.
@@ -118,7 +117,7 @@ class provider implements
         $params = [
             'modname'       => 'scheduler',
             'contextlevel'  => CONTEXT_MODULE,
-            'userid'        => $userid
+            'userid'        => $userid,
         ];
 
         $contextlist->add_from_sql($sql, $params);
@@ -136,7 +135,7 @@ class provider implements
         $params = [
                 'modname'       => 'scheduler',
                 'contextlevel'  => CONTEXT_MODULE,
-                'userid'        => $userid
+                'userid'        => $userid,
         ];
 
         $contextlist->add_from_sql($sql, $params);
@@ -167,7 +166,7 @@ class provider implements
 
         $params = [
                 'modname'       => 'scheduler',
-                'cmid'          => $context->instanceid
+                'cmid'          => $context->instanceid,
         ];
 
         $userlist->add_from_sql('teacherid', $sql, $params);
@@ -183,7 +182,7 @@ class provider implements
 
         $params = [
                 'modname'       => 'scheduler',
-                'cmid'          => $context->instanceid
+                'cmid'          => $context->instanceid,
         ];
 
         $userlist->add_from_sql('studentid', $sql, $params);
@@ -218,7 +217,6 @@ class provider implements
         } else {
             return null;
         }
-
     }
 
     /**
@@ -236,7 +234,7 @@ class provider implements
 
         $user = $contextlist->get_user();
 
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
         $sql = "SELECT cm.id AS cmid, s.name AS schedulername, s.id as schedulerid, cm.course AS courseid,
                 t.id as slotid, t.teacherid, t.starttime, t.duration,
                 t.appointmentlocation, t.notes, t.notesformat, t.exclusivity,
@@ -255,7 +253,7 @@ class provider implements
                 AND t.teacherid = :userid1 OR a.studentid = :userid2
                 ORDER BY cm.id, t.id, a.id";
         $rs = $DB->get_recordset_sql($sql, $contextparams + ['contextlevel' => CONTEXT_MODULE,
-                'modname' => 'scheduler', 'userid1' => $user->id, 'userid2' => $user->id]);
+                'modname' => 'scheduler', 'userid1' => $user->id, 'userid2' => $user->id, ]);
 
         $context = null;
         $lastrow = null;
@@ -274,9 +272,11 @@ class provider implements
                 // Export previous slot record.
                 self::export_slot($context, $user, $row);
             }
+
             self::export_appointment($context, $scheduler, $user, $row);
             $lastrow = $row;
         }
+
         $rs->close();
         self::export_slot($context, $user, $lastrow);
         self::export_scheduler($context, $user);
@@ -294,15 +294,23 @@ class provider implements
      * @param string $exportarea
      * @return string
      */
-    private static function format_note($notetext, $noteformat, $filearea, $id,
-            \context $context, content_writer $wrc, $exportarea) {
+    private static function format_note(
+        $notetext,
+        $noteformat,
+        $filearea,
+        $id,
+        \context $context,
+        content_writer $wrc,
+        $exportarea
+    ) {
         $message = $notetext;
         if ($filearea) {
             $message = $wrc->rewrite_pluginfile_urls($exportarea, 'mod_scheduler', $filearea, $id, $notetext);
         }
+
         $opts = (object) [
                 'para'    => false,
-                'context' => $context
+                'context' => $context,
         ];
         $message = format_text($message, $noteformat, $opts);
         return $message;
@@ -319,7 +327,8 @@ class provider implements
         if (!$record) {
             return;
         }
-        $slotarea = ['slot '.$record->slotid];
+
+        $slotarea = ['slot ' . $record->slotid];
         $wrc = writer::with_context($context);
 
         $data = [
@@ -327,8 +336,15 @@ class provider implements
             'starttime' => transform::datetime($record->starttime),
             'duration'  => $record->duration,
             'appointmentlocation' => format_string($record->appointmentlocation),
-            'notes' => self::format_note($record->notes, $record->notesformat,
-                                         'slotnote', $record->slotid, $context, $wrc, $slotarea),
+            'notes' => self::format_note(
+                $record->notes,
+                $record->notesformat,
+                'slotnote',
+                $record->slotid,
+                $context,
+                $wrc,
+                $slotarea
+            ),
             'exclusivity' => $record->exclusivity,
         ];
 
@@ -349,8 +365,9 @@ class provider implements
         if (!$record) {
             return;
         }
+
         $wrc = writer::with_context($context);
-        $apparea = ['slot '.$record->slotid, 'appointment '.$record->appointmentid];
+        $apparea = ['slot ' . $record->slotid, 'appointment ' . $record->appointmentid];
 
         $revealteachernote = ($user->id == $record->teacherid) ||
                              get_config('mod_scheduler', 'revealteachernotes');
@@ -359,14 +376,35 @@ class provider implements
                 'studentid' => transform::user($record->studentid),
                 'attended' => transform::yesno($record->attended),
                 'grade' => self::$renderer->format_grade($scheduler, $record->grade),
-                'appointmentnote' => self::format_note($record->appointmentnote, $record->appointmentnoteformat,
-                                         'appointmentnote', $record->appointmentid, $context, $wrc, $apparea),
-                'studentnote' => self::format_note($record->studentnote, $record->studentnoteformat,
-                                     '', 0, $context, $wrc, $apparea),
+                'appointmentnote' => self::format_note(
+                    $record->appointmentnote,
+                    $record->appointmentnoteformat,
+                    'appointmentnote',
+                    $record->appointmentid,
+                    $context,
+                    $wrc,
+                    $apparea
+                ),
+                'studentnote' => self::format_note(
+                    $record->studentnote,
+                    $record->studentnoteformat,
+                    '',
+                    0,
+                    $context,
+                    $wrc,
+                    $apparea
+                ),
         ];
         if ($revealteachernote) {
-            $data['teachernote'] = self::format_note($record->teachernote, $record->teachernoteformat,
-                                       'teachernote', $record->appointmentid, $context, $wrc, $apparea);
+            $data['teachernote'] = self::format_note(
+                $record->teachernote,
+                $record->teachernoteformat,
+                'teachernote',
+                $record->appointmentid,
+                $context,
+                $wrc,
+                $apparea
+            );
         }
 
         // Data about the appointment.
@@ -377,6 +415,7 @@ class provider implements
         if ($revealteachernote) {
             $wrc->export_area_files($apparea, 'mod_scheduler', 'teachernote', $record->appointmentid);
         }
+
         $wrc->export_area_files($apparea, 'mod_scheduler', 'studentfiles', $record->appointmentid);
     }
 
@@ -390,6 +429,7 @@ class provider implements
         if (!$context) {
             return;
         }
+
         $contextdata = helper::get_context_data($context, $user);
         helper::export_context_files($context, $user);
         writer::with_context($context)->export_data([], $contextdata);
@@ -426,7 +466,6 @@ class provider implements
         $user = $contextlist->get_user();
 
         foreach ($contextlist->get_contexts() as $context) {
-
             if ($scheduler = self::load_scheduler_for_context($context)) {
                 $apps = $scheduler->get_appointments_for_student($user->id);
                 foreach ($apps as $app) {
@@ -459,5 +498,4 @@ class provider implements
             }
         }
     }
-
 }

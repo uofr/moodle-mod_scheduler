@@ -37,7 +37,7 @@ export const init = (baseurl) => {
     let link = document.querySelector(SELECTORS.DELACTION);
     if (link !== null) {
         link.addEventListener('click', function() {
-            collect_selection(link, baseurl);
+            collectSelection(link, baseurl);
         });
     }
 };
@@ -48,7 +48,7 @@ export const init = (baseurl) => {
  * @param {String} link
  * @param {String} baseurl
  */
-export const collect_selection = (link, baseurl) => {
+export const collectSelection = (link, baseurl) => {
     let sellist = '';
     document.querySelectorAll(SELECTORS.SELECTBOX).forEach(function(box) {
         if (box.checked) {

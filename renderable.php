@@ -24,9 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-use \mod_scheduler\model\scheduler;
-use \mod_scheduler\model\slot;
-use \mod_scheduler\model\appointment;
+use mod_scheduler\model\scheduler;
+use mod_scheduler\model\slot;
+use mod_scheduler\model\appointment;
+
+// phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
 
 /**
  * This class represents a table of slots associated with one student
@@ -34,10 +36,10 @@ use \mod_scheduler\model\appointment;
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_slot_table implements renderable {
-
+class scheduler_slot_table implements renderable
+{
     /** @var array list of slots in this table */
-    public $slots = array();
+    public $slots = [];
 
     /** @var scheduler the scheduler that the slots are in */
     public $scheduler;
@@ -82,13 +84,20 @@ class scheduler_slot_table implements renderable {
      * @param bool $canedit whether the user can edit the slot/appointment
      * @param bool $canview whether the user can view the appointment
      */
-    public function add_slot(slot $slotmodel, appointment $appointmentmodel,
-                             $otherstudents, $cancancel = false, $canedit = false, $canview = false) {
+    public function add_slot(
+        slot $slotmodel,
+        appointment $appointmentmodel,
+        $otherstudents,
+        $cancancel = false,
+        $canedit = false,
+        $canview = false
+    ) {
         $slot = new stdClass();
         $slot->slotid = $slotmodel->id;
         if ($this->showstudent) {
             $slot->student = $appointmentmodel->student;
         }
+
         $slot->starttime = $slotmodel->starttime;
         $slot->endtime = $slotmodel->endtime;
         $slot->attended = $appointmentmodel->attended;
@@ -101,10 +110,12 @@ class scheduler_slot_table implements renderable {
             $slot->appointmentnote = $appointmentmodel->appointmentnote;
             $slot->appointmentnoteformat = $appointmentmodel->appointmentnoteformat;
         }
+
         if ($this->scheduler->uses_teachernotes() && $this->showteachernotes) {
             $slot->teachernote = $appointmentmodel->teachernote;
             $slot->teachernoteformat = $appointmentmodel->teachernoteformat;
         }
+
         $slot->otherstudents = $otherstudents;
         $slot->cancancel = $cancancel;
         $slot->canedit = $canedit;
@@ -112,6 +123,7 @@ class scheduler_slot_table implements renderable {
         if ($this->showgrades) {
             $slot->grade = $appointmentmodel->grade;
         }
+
         $this->showactions = $this->showactions || $cancancel;
         $this->hasotherstudents = $this->hasotherstudents || (bool) $otherstudents;
 
@@ -125,12 +137,11 @@ class scheduler_slot_table implements renderable {
      * @param bool $showgrades whether to show grades
      * @param moodle_url|null $actionurl action URL for buttons
      */
-    public function __construct(scheduler $scheduler, $showgrades=true, $actionurl = null) {
+    public function __construct(scheduler $scheduler, $showgrades = true, $actionurl = null) {
         $this->scheduler = $scheduler;
         $this->showgrades = $showgrades && $scheduler->uses_grades();
         $this->actionurl = $actionurl;
     }
-
 }
 
 
@@ -140,10 +151,10 @@ class scheduler_slot_table implements renderable {
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_student_list implements renderable {
-
+class scheduler_student_list implements renderable
+{
     /** @var array list of students to be displayed */
-    public $students = array();
+    public $students = [];
 
     /** @var scheduler the scheduler in whose context the list is */
     public $scheduler;
@@ -182,8 +193,14 @@ class scheduler_student_list implements renderable {
      * @param bool $showstudprovided whether to show an icon for student-provided files
      * @param bool $editattended whether to make the attended tickbox editable
      */
-    public function add_student(appointment $appointment, $highlight, $checked = false,
-                                $showgrade = true, $showstudprovided = false, $editattended = false) {
+    public function add_student(
+        appointment $appointment,
+        $highlight,
+        $checked = false,
+        $showgrade = true,
+        $showstudprovided = false,
+        $editattended = false
+    ) {
         $student = new stdClass();
         $student->user = $appointment->get_student();
         if ($this->showgrades && $showgrade) {
@@ -191,6 +208,7 @@ class scheduler_student_list implements renderable {
         } else {
             $student->grade = null;
         }
+
         $student->highlight = $highlight;
         $student->checked = $checked;
         $student->editattended = $editattended;
@@ -204,6 +222,7 @@ class scheduler_student_list implements renderable {
                 $student->filesprovided = $appointment->count_studentfiles();
             }
         }
+
         $this->students[] = $student;
     }
 
@@ -217,7 +236,6 @@ class scheduler_student_list implements renderable {
         $this->scheduler = $scheduler;
         $this->showgrades = $showgrades;
     }
-
 }
 
 
@@ -227,12 +245,12 @@ class scheduler_student_list implements renderable {
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_slot_booker implements renderable {
-
+class scheduler_slot_booker implements renderable
+{
     /**
      * @var array list of slots to be displayed
      */
-    public $slots = array();
+    public $slots = [];
 
     /**
      * @var scheduler scheduler in whose context the list is
@@ -288,7 +306,6 @@ class scheduler_slot_booker implements renderable {
         $this->studentid = $studentid;
         $this->actionurl = $actionurl;
     }
-
 }
 
 /**
@@ -297,17 +314,17 @@ class scheduler_slot_booker implements renderable {
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_command_bar implements renderable {
-
+class scheduler_command_bar implements renderable
+{
     /**
      * @var array list of drop-down menus in the command bar
      */
-    public $menus = array();
+    public $menus = [];
 
     /**
      * @var array list of action_link objects used in the menu
      */
-    public $linkactions = array();
+    public $linkactions = [];
 
     /**
      * @var string title of the menu
@@ -338,15 +355,17 @@ class scheduler_command_bar implements renderable {
      */
     public function action_link(moodle_url $url, $titlekey, $iconkey, $confirmkey = null, $id = null) {
         $title = get_string($titlekey, 'scheduler');
-        $pix = new pix_icon($iconkey, $title, 'moodle', array('class' => 'iconsmall', 'title' => ''));
-        $attributes = array();
+        $pix = new pix_icon($iconkey, $title, 'moodle', ['class' => 'iconsmall', 'title' => '']);
+        $attributes = [];
         if ($id) {
             $attributes['id'] = $id;
         }
+
         $confirmaction = null;
         if ($confirmkey) {
             $confirmaction = new confirm_action(get_string($confirmkey, 'scheduler'));
         }
+
         $act = new action_link($url, $title, $confirmaction, $attributes, $pix);
         return $act;
     }
@@ -363,15 +382,17 @@ class scheduler_command_bar implements renderable {
      */
     public function action_menu_link(moodle_url $url, $titlekey, $iconkey, $confirmkey = null, $id = null) {
         $title = get_string($titlekey, 'scheduler');
-        $pix = new pix_icon($iconkey, $title, 'moodle', array('class' => 'iconsmall', 'title' => ''));
-        $attributes = array();
+        $pix = new pix_icon($iconkey, $title, 'moodle', ['class' => 'iconsmall', 'title' => '']);
+        $attributes = [];
         if ($id) {
             $attributes['id'] = $id;
         }
+
         $act = new action_menu_link($url, $pix, $title, false, $attributes);
         if ($confirmkey) {
             $act->add_action(new confirm_action(get_string($confirmkey, 'scheduler')));
         }
+
         return $act;
     }
 
@@ -381,7 +402,6 @@ class scheduler_command_bar implements renderable {
     public function __construct() {
         // Nothing to add right now.
     }
-
 }
 
 /**
@@ -390,12 +410,12 @@ class scheduler_command_bar implements renderable {
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_slot_manager implements renderable {
-
+class scheduler_slot_manager implements renderable
+{
     /**
      * @var array list of slots
      */
-    public $slots = array();
+    public $slots = [];
 
     /**
      * @var scheduler scheduler in whose context the list is
@@ -445,7 +465,6 @@ class scheduler_slot_manager implements renderable {
         $this->scheduler = $scheduler;
         $this->actionurl = $actionurl;
     }
-
 }
 
 
@@ -455,12 +474,12 @@ class scheduler_slot_manager implements renderable {
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_scheduling_list implements renderable {
-
+class scheduler_scheduling_list implements renderable
+{
     /**
      * @var array lines in the list
      */
-    public $lines = array();
+    public $lines = [];
 
     /**
      * @var scheduler the scheduler in whose context the list is
@@ -505,7 +524,6 @@ class scheduler_scheduling_list implements renderable {
         $this->scheduler = $scheduler;
         $this->extraheaders = $extraheaders;
     }
-
 }
 
 /**
@@ -516,8 +534,8 @@ class scheduler_scheduling_list implements renderable {
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_totalgrade_info implements renderable {
-
+class scheduler_totalgrade_info implements renderable
+{
     /**
      * @var stdClass|null gradebook grade for the student
      */
@@ -552,7 +570,6 @@ class scheduler_totalgrade_info implements renderable {
         $this->showtotalgrade = $showtotalgrade;
         $this->totalgrade = $totalgrade;
     }
-
 }
 
 /**
@@ -561,12 +578,12 @@ class scheduler_totalgrade_info implements renderable {
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_conflict_list implements renderable {
-
+class scheduler_conflict_list implements renderable
+{
     /**
      * @var array list of conflicts
      */
-    public $conflicts = array();
+    public $conflicts = [];
 
     /**
      * Add a conflict to the list.
@@ -581,6 +598,7 @@ class scheduler_conflict_list implements renderable {
         } else {
             $c->userfullname = '';
         }
+
         $this->conflicts[] = $c;
     }
 
@@ -594,7 +612,6 @@ class scheduler_conflict_list implements renderable {
             $this->add_conflict($c);
         }
     }
-
 }
 
 /**
@@ -603,8 +620,8 @@ class scheduler_conflict_list implements renderable {
  * @copyright  2014 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_appointment_info implements renderable {
-
+class scheduler_appointment_info implements renderable
+{
     /**
      * @var scheduler scheduler in whose context the appointment is
      */
@@ -651,6 +668,11 @@ class scheduler_appointment_info implements renderable {
     public $showresult;
 
     /**
+     * @var bool whether to show booking info
+     */
+    public $showboookinginfo;
+
+    /**
      * Create appointment information for a new appointment in a slot.
      *
      * @param slot $slot the slot in question
@@ -659,8 +681,12 @@ class scheduler_appointment_info implements renderable {
      * @param string $groupinfo information about the group that the booking is for
      * @return scheduler_appointment_info
      */
-    public static function make_from_slot(slot $slot, $showbookinginstr = true, $onstudentside = true,
-                                          $groupinfo = null) {
+    public static function make_from_slot(
+        slot $slot,
+        $showbookinginstr = true,
+        $onstudentside = true,
+        $groupinfo = null
+    ) {
         $info = new scheduler_appointment_info();
         $info->slot = $slot;
         $info->scheduler = $slot->get_scheduler();
@@ -688,7 +714,7 @@ class scheduler_appointment_info implements renderable {
         $info->appointment = $appointment;
         $info->scheduler = $slot->get_scheduler();
         $info->showslotinfo = true;
-        $info->showboookinginfo = true;
+        $info->showbookinginfo = true;
         $info->showstudentdata = $info->scheduler->uses_studentdata();
         $info->showresult   = true;
         $info->onstudentside = $onstudentside;
@@ -711,7 +737,7 @@ class scheduler_appointment_info implements renderable {
         $info->appointment = $appointment;
         $info->scheduler = $slot->get_scheduler();
         $info->showslotinfo = true;
-        $info->showboookinginfo = false;
+        $info->showbookinginfo = false;
         $info->showstudentdata = $info->scheduler->uses_studentdata();
         $info->showresult   = false;
         $info->onstudentside = false;

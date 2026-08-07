@@ -24,14 +24,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir . '/tablelib.php');
 
 $PAGE->set_docs_path('mod/scheduler/datelist');
 
 $scope = optional_param('scope', 'activity', PARAM_TEXT);
-if (!in_array($scope, array('activity', 'course', 'site'))) {
+if (!in_array($scope, ['activity', 'course', 'site'])) {
     $scope = 'activity';
 }
+
 $teacherid = optional_param('teacherid', 0, PARAM_INT);
 
 if ($scope == 'site') {
@@ -45,13 +46,16 @@ if ($scope == 'site') {
 if (!has_capability('mod/scheduler:seeoverviewoutsideactivity', $context)) {
     $scope = 'activity';
 }
+
 if (!has_capability('mod/scheduler:canseeotherteachersbooking', $scopecontext)) {
     $teacherid = 0;
 }
 
-$taburl = new moodle_url('/mod/scheduler/view.php',
-                array('id' => $scheduler->cmid, 'what' => 'datelist', 'scope' => $scope, 'teacherid' => $teacherid));
-$returnurl = new moodle_url('/mod/scheduler/view.php', array('id' => $scheduler->cmid));
+$taburl = new moodle_url(
+    '/mod/scheduler/view.php',
+    ['id' => $scheduler->cmid, 'what' => 'datelist', 'scope' => $scope, 'teacherid' => $teacherid]
+);
+$returnurl = new moodle_url('/mod/scheduler/view.php', ['id' => $scheduler->cmid]);
 
 $PAGE->set_url($taburl);
 
@@ -76,26 +80,34 @@ if ($groupmode) {
 $scopemenukey = 'scopemenuself';
 if (has_capability('mod/scheduler:canseeotherteachersbooking', $scopecontext)) {
     $teachers = $scheduler->get_available_teachers($currentgroupid);
-    $teachermenu = array();
+    $teachermenu = [];
     foreach ($teachers as $teacher) {
         $teachermenu[$teacher->id] = fullname($teacher);
     }
-    $select = $output->single_select($taburl, 'teacherid', $teachermenu, $teacherid,
-                    array(0 => get_string('myself', 'scheduler')), 'teacheridform');
+
+    $select = $output->single_select(
+        $taburl,
+        'teacherid',
+        $teachermenu,
+        $teacherid,
+        [0 => get_string('myself', 'scheduler')],
+        'teacheridform'
+    );
     echo html_writer::div(get_string('teachersmenu', 'scheduler', $select), 'dropdownmenu');
     $scopemenukey = 'scopemenu';
 }
+
 if (has_capability('mod/scheduler:seeoverviewoutsideactivity', $context)) {
-    $scopemenu = array('activity' => get_string('thisscheduler', 'scheduler'),
+    $scopemenu = ['activity' => get_string('thisscheduler', 'scheduler'),
                     'course' => get_string('thiscourse', 'scheduler'),
-                    'site' => get_string('thissite', 'scheduler'));
+                    'site' => get_string('thissite', 'scheduler'), ];
     $select = $output->single_select($taburl, 'scope', $scopemenu, $scope, null, 'scopeform');
     echo html_writer::div(get_string($scopemenukey, 'scheduler', $select), 'dropdownmenu');
 }
 
 // Getting date list.
 
-$params = array();
+$params = [];
 $params['teacherid']   = $teacherid == 0 ? $USER->id : $teacherid;
 $params['courseid']    = $scheduler->courseid;
 $params['schedulerid'] = $scheduler->id;
@@ -113,7 +125,7 @@ $teacherselect = $ufields->get_sql('u2', true, '', 'teacherid', false)->selects;
 
 $sql = "SELECT a.id AS id,
                $studselect," .
-               $DB->sql_fullname('u1.firstname', 'u1.lastname')." AS studentfullname,
+               $DB->sql_fullname('u1.firstname', 'u1.lastname') . " AS studentfullname,
                a.appointmentnote,
                a.appointmentnoteformat,
                a.teachernote,
@@ -142,7 +154,7 @@ $sql = "SELECT a.id AS id,
                a.slotid = s.id AND
                u1.id = a.studentid AND
                u2.id = s.teacherid AND
-               s.teacherid = :teacherid ".
+               s.teacherid = :teacherid " .
                $scopecond;
 
 $sqlcount =
@@ -154,7 +166,7 @@ $sqlcount =
          WHERE c.id = sc.course AND
                sc.id = s.schedulerid AND
                a.slotid = s.id AND
-               s.teacherid = :teacherid ".
+               s.teacherid = :teacherid " .
                $scopecond;
 
 $numrecords = $DB->count_records_sql($sqlcount, $params);
@@ -163,7 +175,6 @@ $numrecords = $DB->count_records_sql($sqlcount, $params);
 $limit = 30;
 
 if ($numrecords) {
-
     // Make the table of results.
 
     $coursestr = get_string('course', 'scheduler');
@@ -176,10 +187,10 @@ if ($numrecords) {
     $whatresultedstr = get_string('whatresulted', 'scheduler');
     $whathappenedstr = get_string('whathappened', 'scheduler');
 
-    $tablecolumns = array('courseshort', 'schedulerid', 'starttime', 'appointmentlocation',
-                          'studentfullname', 'studentdepartment', 'notes', 'grade', 'appointmentnote');
-    $tableheaders = array($coursestr, $schedulerstr, $whenstr, $wherestr,
-                          $whostr, $wherefromstr, $whatstr, $whatresultedstr, $whathappenedstr);
+    $tablecolumns = ['courseshort', 'schedulerid', 'starttime', 'appointmentlocation',
+                          'studentfullname', 'studentdepartment', 'notes', 'grade', 'appointmentnote', ];
+    $tableheaders = [$coursestr, $schedulerstr, $whenstr, $wherestr,
+                          $whostr, $wherefromstr, $whatstr, $whatresultedstr, $whathappenedstr, ];
 
     $table = new flexible_table('mod-scheduler-datelist');
     $table->define_columns($tablecolumns);
@@ -217,19 +228,21 @@ if ($numrecords) {
     $results = $DB->get_records_sql($sql, $params);
 
     foreach ($results as $id => $row) {
-        $courseurl = new moodle_url('/course/view.php', array('id' => $row->courseid));
+        $courseurl = new moodle_url('/course/view.php', ['id' => $row->courseid]);
         $coursedata = html_writer::link($courseurl, format_string($row->courseshort));
-        $schedulerurl = new moodle_url('/mod/scheduler/view.php', array('a' => $row->schedulerid));
+        $schedulerurl = new moodle_url('/mod/scheduler/view.php', ['a' => $row->schedulerid]);
         $schedulerdata = html_writer::link($schedulerurl, format_string($row->name));
         $a = mod_scheduler_renderer::slotdatetime($row->starttime, $row->duration);
         $whendata = get_string('slotdatetime', 'scheduler', $a);
-        $whourl = new moodle_url('/mod/scheduler/view.php',
-                        array('what' => 'viewstudent', 'a' => $row->schedulerid, 'appointmentid' => $row->id));
+        $whourl = new moodle_url(
+            '/mod/scheduler/view.php',
+            ['what' => 'viewstudent', 'a' => $row->schedulerid, 'appointmentid' => $row->id]
+        );
         $whodata = html_writer::link($whourl, $row->studentfullname);
         $whatdata = $output->format_notes($row->notes, $row->notesformat, $context, 'slotnote', $row->sid);
         $gradedata = $row->scale == 0 ? '' : $output->format_grade($row->scale, $row->grade);
 
-        $dataset = array(
+        $dataset = [
                         $coursedata,
                         $schedulerdata,
                         $whendata,
@@ -238,9 +251,10 @@ if ($numrecords) {
                         $row->studentdepartment,
                         $whatdata,
                         $gradedata,
-                        $output->format_appointment_notes($scheduler, $row) );
+                        $output->format_appointment_notes($scheduler, $row), ];
         $table->add_data($dataset);
     }
+
     $table->print_html();
     echo $output->continue_button($returnurl);
 } else {

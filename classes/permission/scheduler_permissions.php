@@ -30,8 +30,8 @@ namespace mod_scheduler\permission;
  * @copyright  2019 Henning Bostelmann and others (see README.txt)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scheduler_permissions extends permissions_manager {
-
+class scheduler_permissions extends permissions_manager
+{
     /**
      * scheduler_permissions constructor.
      *
@@ -160,5 +160,4 @@ class scheduler_permissions extends permissions_manager {
             return $this->userid == $app->get_slot()->teacherid;
         }
     }
-
 }
