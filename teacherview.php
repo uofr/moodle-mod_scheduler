@@ -705,16 +705,17 @@ if ($students === 0) {
         $name = $output->user_profile_link($scheduler, $student);
         $actions = array();
         // MODIFIED: Removed ability for instructors to schedule in slot.
+        // MODIFIED (2026-08-19) Also remove ability to "mark as seen" since that creates a slot
         if ($unlimitedediting) {
             $actions[] = new action_menu_link_secondary(
                             new moodle_url($actionurl, array('what' => 'schedule', 'studentid' => $student->id)),
                             new pix_icon('e/insert_date', '', 'moodle'),
                             get_string('scheduleinslot', 'scheduler') );
+            $actions[] = new action_menu_link_secondary(
+                            new moodle_url($actionurl, array('what' => 'markasseennow', 'studentid' => $student->id)),
+                            new pix_icon('t/approve', '', 'moodle'),
+                            get_string('markasseennow', 'scheduler') );
         }
-        $actions[] = new action_menu_link_secondary(
-                        new moodle_url($actionurl, array('what' => 'markasseennow', 'studentid' => $student->id)),
-                        new pix_icon('t/approve', '', 'moodle'),
-                        get_string('markasseennow', 'scheduler') );
 
         $userfields = scheduler_get_user_fields($student, $context);
         $fieldvals = array();
