@@ -848,12 +848,14 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
 
             // Seen tickbox.
             // ADDED DATE CHECK
-            if (scheduler_is_lesson_editable($this->_customdata['timestamp'], $calendar)) {
-                $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'));
+            $checkboxparams = [];
+            if (!scheduler_is_lesson_editable($this->_customdata['timestamp'], $calendar)) {
+                $checkboxparams = ['disabled'];
             }
-            else {
-                $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'),'', array('disabled' => 'disabled'));
+            if ($app->studentattend || $app->attended || $app->absentschedule || $app->absentpaid) {
+                $checkboxparams = ['disabled'];
             }
+            $mform->addElement('checkbox', 'attended['.$i.']',get_string('seen', 'scheduler'),'', $checkboxparams);
 
 
             // Grade.
