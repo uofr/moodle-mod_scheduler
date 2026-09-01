@@ -607,12 +607,12 @@ if ($slots) {
         // Check if date can be selected.
         if (!$unlimitedediting) {
             // ADDDED
-            $isabsentpaid = $slot->is_absentpaid();
-            $isabsentschedule = $slot->is_absentschedule();
-            $isattended = $slot->is_attended();
-            $ismarked = $isabsentpaid || $isabsentschedule || $isattended;
-            $disablecheckbox = scheduler_is_lesson_editable($slot->starttime, $calendar) && !$ismarked;
-            $studlist->checkboxdisable = $disablecheckbox;
+            if (scheduler_is_lesson_editable($slot->starttime, $calendar)) {
+                $studlist->checkboxdisable = true;
+            }
+            else {
+                $studlist->checkboxdisable = false;
+            }
             // END OF ADDED
         }
         else {

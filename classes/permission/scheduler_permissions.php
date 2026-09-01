@@ -147,19 +147,6 @@ class scheduler_permissions extends permissions_manager {
         }
     }
 
-    public function can_mark_locked(\mod_scheduler\model\appointment $app) {
-        $isattended = $app->is_attended();
-        $isabsentpaid = $app->is_absentpaid();
-        $isabsentschedule = $app->is_absentschedule();
-        $ismarked = $isattended || $isabsentpaid || $isabsentschedule;
-
-        if (!$this->has_capability('unlimitedediting') && $ismarked) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * can_edit_notes
      *

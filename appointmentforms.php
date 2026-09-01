@@ -99,9 +99,6 @@ class scheduler_editappointment_form extends moodleform {
         if (!$this->permissions->can_edit_attended($this->appointment)) {
             $mform->freeze('attended');
         }
-        if (!$this->permissions->can_mark_locked($this->appointment)) {
-            $mform->freeze('attended');
-        }
 
         // Grade.
         if ($scheduler->uses_grades()) {
