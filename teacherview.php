@@ -204,7 +204,7 @@ if ($action == 'updateslot') {
         if ($mform->is_cancelled()) {
             redirect($viewurl);
         } else if ($formdata = $mform->get_data()) {
-            $formdata->duration = $slot->duration;
+            $formdata->starttime = $slot->starttime;
             $mform->save_slot($slotid, $formdata);
             redirect($viewurl,
                     get_string('slotupdated', 'scheduler'),

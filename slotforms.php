@@ -795,9 +795,10 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         }
 
         // Start date/time of the slot.
-        $mform->addElement('date_time_selector', 'starttime', get_string('date', 'scheduler'), $timeoptions);
-        $mform->setDefault('starttime', time());
-        $mform->addHelpButton('starttime', 'choosingslotstart', 'scheduler');
+        // MODIFIED: Removed ability for instructor to change the appointment date.
+        // $mform->addElement('date_time_selector', 'starttime', get_string('date', 'scheduler'), $timeoptions);
+        // $mform->setDefault('starttime', time());
+        // $mform->addHelpButton('starttime', 'choosingslotstart', 'scheduler');
 
         // Duration of the slot.
         //$this->add_duration_field();
@@ -895,9 +896,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
     }
 
     public function validation($data, $files) {
-        global $PAGE;
-
-        $output = $PAGE->get_renderer('mod_scheduler');
+        global $OUTPUT;
 
         $errors = parent::validation($data, $files);
 
@@ -915,28 +914,28 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
         }*/
 
         // Avoid empty slots starting in the past.
-        if ($numappointments == 0 && $data['starttime'] < time()) {
-            $errors['starttime'] = get_string('startpast', 'scheduler');
-        }
+        // if ($numappointments == 0 && $data['starttime'] < time()) {
+        //     $errors['starttime'] = get_string('startpast', 'scheduler');
+        // }
 
-        if (!isset($data['ignoreconflicts'])) {
-            /* Avoid overlapping slots by warning the user */
-            $conflicts = $this->scheduler->get_conflicts(
-                            $data['starttime'], $data['starttime'] + $data['duration'] * 60,
-                            $data['teacherid'], 0, SCHEDULER_ALL, $this->slotid);
+        // if (!isset($data['ignoreconflicts'])) {
+        //     /* Avoid overlapping slots by warning the user */
+        //     $conflicts = $this->scheduler->get_conflicts(
+        //                     $data['starttime'], $data['starttime'] + $data['duration'] * 60,
+        //                     $data['teacherid'], 0, SCHEDULER_ALL, $this->slotid);
 
-            if (count($conflicts) > 0) {
+        //     if (count($conflicts) > 0) {
 
-                $cl = new scheduler_conflict_list();
-                $cl->add_conflicts($conflicts);
+        //         $cl = new scheduler_conflict_list();
+        //         $cl->add_conflicts($conflicts);
 
-                $msg = get_string('slotwarning_limited', 'scheduler');
-                $msg .= $output->render($cl);
-                $msg .= $output->doc_link('mod/scheduler/conflict', '', true);
+        //         $msg = get_string('slotwarning', 'scheduler');
+        //         $msg .= $OUTPUT->render($cl);
+        //         $msg .= $OUTPUT->doc_link('mod/scheduler/conflict', '', true);
 
-                $errors['starttime'] = $msg;
-            }
-        }
+        //         $errors['starttime'] = $msg;
+        //     }
+        // }
         return $errors;
     }
 
@@ -1009,7 +1008,7 @@ class scheduler_limited_editslot_form extends scheduler_slotform_base {
 
         // Set data fields from input form.
         $slot->starttime = $data->starttime;
-        // $slot->duration = $data->duration;
+        //$slot->duration = $data->duration;
        // $slot->exclusivity = $data->exclusivityenable ? $data->exclusivity : 0;
         $slot->teacherid = $data->teacherid;
         $slot->emaildate = $data->emaildate;
